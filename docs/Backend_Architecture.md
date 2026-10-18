@@ -668,7 +668,7 @@ Dosyalar: `application.yml` (ortak), `application-dev.yml`, `application-prod.ym
   - Container belleğine uyum için `-XX:MaxRAMPercentage=75` verilir.
 - **Healthcheck:** Docker container'a belirli aralıklarla "hazır mısın?" diye sorar. Bunun için `/actuator/health/readiness` kullanılır. Bu endpoint, Hibernate şemayı oluşturup bütün migration'lar bittikten **sonra** "hazırım" der. Swarm rolling update'te yeni sürüm "hazırım" demeden eski sürümü kapatmaz ve yeni sürüme trafik göndermez; böylece güncelleme sırasında kullanıcılar hata görmez. Actuator'da sadece `health` dışarı açılır ve health probe'ları açık olur.
 - **Graceful shutdown:** Boot'ta varsayılan olarak açıktır. `spring.lifecycle.timeout-per-shutdown-phase=30s` ayarlanır; Swarm'daki `stop_grace_period` bundan uzun olmalıdır.
-- **Geliştirme ortamı:** `docker-compose.yml` PostgreSQL 18 ve uygulamayı çalıştırır. PostgreSQL 18'de volume `/var/lib/postgresql` yoluna bağlanır.
+- **Geliştirme ortamı:** Repo kökündeki `docker-compose.yml` PostgreSQL 18'i ve server'ı çalıştırır; Angular client da eklendiğinde aynı dosyaya bir servis olarak girer. PostgreSQL 18'de volume `/var/lib/postgresql` yoluna bağlanır.
 
 **Stateless kontrol listesi** (Swarm'da her replica eşit olmalı):
 

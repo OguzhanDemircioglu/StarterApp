@@ -41,7 +41,7 @@ ADMIN_PASSWORD=...
 
 - `DB_SCHEMA` **zorunludur** ve küçük harf olmalıdır. Uygulamanın bütün tabloları bu şemada durur; şema yoksa ilk
   açılışta oluşturulur. Başka projelerle paylaşılan bir veritabanında diğer şemalara (ör. `public`) dokunulmaz.
-- Docker ile yerel bir veritabanı için: `docker compose up -d` → PostgreSQL 18, `localhost:5433`
+- Docker ile yerel bir veritabanı için repo kökünde `docker compose up -d` → PostgreSQL 18, `localhost:5433`
   (`DB_URL=jdbc:postgresql://localhost:5433/starterapp`, kullanıcı/şifre `starterapp`).
 - `.env` yoksa dev profili `localhost:5432/starterapp` adresine `postgres/postgres` ile bağlanmayı dener.
 
@@ -72,14 +72,19 @@ IDE'den çalıştırırken environment variable olarak `SPRING_PROFILES_ACTIVE=d
 ```
 
 - Unit ve kontrat testleri her yerde çalışır.
-- `AuthFlowIntegrationTest` gerçek bir PostgreSQL 18'i Testcontainers ile açar; **Docker yoksa otomatik atlanır**.
+- `AuthFlowIntegrationTest` ve `SchemaIsolationIntegrationTest` gerçek bir PostgreSQL 18'i Testcontainers ile açar;
+  **Docker yoksa otomatik atlanır**.
 
 ## Docker
 
+Server ve (eklenince) client'ı birlikte çalıştıran [docker-compose.yml](../docker-compose.yml) repo kökündedir:
+
 ```bash
-docker build -t starterapp-server .
+# repo kökünde
 docker compose --profile app up -d
 ```
+
+Sadece server imajı için (`server/` klasöründe): `docker build -t starterapp-server .`
 
 Prod'da gereken değişkenlerin listesi [.env.example](.env.example) dosyasındadır.
 

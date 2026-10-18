@@ -1,6 +1,6 @@
-# Geliştirme ortamı.
-#   docker compose up -d                → sadece PostgreSQL 18 (uygulama IDE'den çalıştırılır)
-#   docker compose --profile app up -d  → PostgreSQL 18 + uygulama
+# StarterApp geliştirme ortamı (repo kökünden çalıştırılır). Angular client eklenince o da buraya bir servis olarak gelecek.
+#   docker compose up -d                → sadece PostgreSQL 18 (uygulamalar IDE'den çalıştırılır)
+#   docker compose --profile app up -d  → PostgreSQL 18 + server
 services:
   postgres:
     image: postgres:18
@@ -22,7 +22,7 @@ services:
 
   server:
     profiles: ["app"]
-    build: .
+    build: ./server
     depends_on:
       postgres:
         condition: service_healthy
@@ -35,7 +35,7 @@ services:
       JWT_PRIVATE_KEY_PATH: /app/keys/private.pem
       JWT_PUBLIC_KEY_PATH: /app/keys/public.pem
     volumes:
-      - ./keys:/app/keys:ro
+      - ./server/keys:/app/keys:ro
     ports:
       - "8080:8080"
 
