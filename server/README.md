@@ -43,7 +43,8 @@ ADMIN_PASSWORD=...
   açılışta oluşturulur. Başka projelerle paylaşılan bir veritabanında diğer şemalara (ör. `public`) dokunulmaz.
 - Docker ile yerel bir veritabanı için repo kökünde `docker compose up -d` → PostgreSQL 18, `localhost:5433`
   (`DB_URL=jdbc:postgresql://localhost:5433/starterapp`, kullanıcı/şifre `starterapp`).
-- `.env` yoksa dev profili `localhost:5432/starterapp` adresine `postgres/postgres` ile bağlanmayı dener.
+- `.env` yoksa dev profili `localhost:5432/starterapp` adresine `postgres/postgres` ile bağlanmayı dener;
+  `DB_SCHEMA` yine de (ortam değişkeni olarak) verilmelidir, aksi halde uygulama açılmaz.
 
 Tablolar ilk açılışta Hibernate tarafından (`ddl-auto=update`), başlangıç verileri migration class'larıyla oluşturulur.
 `ADMIN_EMAIL`/`ADMIN_PASSWORD` verilmezse dev profilinde `admin@starterapp.local` / `Admin12345` kullanılır.
@@ -56,7 +57,14 @@ Profil bilerek varsayılan verilmez; `dev` ya da `prod` açıkça seçilmelidir.
 ./mvnw spring-boot:run -Dspring-boot.run.profiles=dev
 ```
 
-IDE'den çalıştırırken environment variable olarak `SPRING_PROFILES_ACTIVE=dev` verin.
+Windows PowerShell'de parametre tırnak içinde yazılmalıdır (yoksa PowerShell onu noktadan böler):
+
+```powershell
+.\mvnw.cmd spring-boot:run "-Dspring-boot.run.profiles=dev"
+```
+
+IDE'den çalıştırırken environment variable olarak `SPRING_PROFILES_ACTIVE=dev` verin ve çalışma dizinini `server/`
+yapın (`.env` ve `keys/` bu dizine göre aranır).
 
 | | dev profili |
 |---|---|

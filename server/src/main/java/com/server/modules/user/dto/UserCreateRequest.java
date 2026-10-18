@@ -1,5 +1,6 @@
 package com.server.modules.user.dto;
 
+import com.server.common.validation.MaxBytes;
 import com.server.modules.user.Emails;
 import com.server.modules.user.UserMessages;
 import com.server.security.Role;
@@ -18,10 +19,10 @@ public record UserCreateRequest(
         @Size(max = 100, message = UserMessages.FULL_NAME_TOO_LONG)
         String fullName,
 
-        // bcrypt en fazla 72 byte'ı işler; daha uzun şifreler reddedilir.
+        // bcrypt en fazla 72 byte'ı işler; Türkçe harfler 2 byte olduğu için sınır byte olarak kontrol edilir.
         @NotBlank(message = UserMessages.PASSWORD_REQUIRED)
         @Size(min = 8, message = UserMessages.PASSWORD_TOO_SHORT)
-        @Size(max = 72, message = UserMessages.PASSWORD_TOO_LONG)
+        @MaxBytes(value = 72, message = UserMessages.PASSWORD_TOO_LONG)
         String password,
 
         @NotNull(message = UserMessages.ROLE_REQUIRED)

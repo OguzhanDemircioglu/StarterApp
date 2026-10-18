@@ -28,7 +28,7 @@
 | Kod azaltma | Lombok | |
 | API dokümanı | springdoc-openapi 3.x | Boot 4.1 uyumu ilk build'de doğrulanır |
 | JSON | Jackson 3 | Boot 4 ile gelir; paket adı `tools.jackson` |
-| Test | JUnit 5, Mockito, Testcontainers | |
+| Test | JUnit 6 (Jupiter), Mockito, Testcontainers 2 | Boot ile gelir |
 
 - Boot 4'te starter adları değişti (örneğin `spring-boot-starter-webmvc`). `pom.xml` start.spring.io'dan üretilir, elle yazılmaz.
 - Lombok, MapStruct ve springdoc'un Java 25 ve Boot 4.1 ile uyumu ilk build'de kontrol edilir. Sorun çıkarsa Java 21'e inmek tek satırlık bir değişikliktir.
@@ -45,15 +45,16 @@ com.server
 │  ├─ entity/      BaseEntity
 │  ├─ mapper/      BaseMapper, MapperSettings
 │  ├─ service/     BaseService, BaseServiceImpl
-│  ├─ response/    ApiResponse
-│  ├─ exception/   BaseException ve alt sınıfları, GlobalExceptionHandler, ApiErrorController
+│  ├─ response/    ApiResponse, ApiResponseWriter
+│  ├─ exception/   BaseException ve alt sınıfları, GlobalExceptionHandler, ApiErrorController, StatusMessages
 │  ├─ message/     GlobalMessages
+│  ├─ validation/  MaxBytes (UTF-8 byte uzunluğu sınırı, ör. bcrypt'in 72 byte'ı)
 │  └─ web/         TraceIdFilter
 ├─ config/         JpaAuditingConfig, OpenApiConfig, CorsConfig, SchedulingConfig
 ├─ security/       SecurityConfig, JwtKeyConfig, CurrentUser,
 │                  RestAuthenticationEntryPoint, RestAccessDeniedHandler
 ├─ migration/      DataMigration, DataMigrationRunner
-│  └─ versions/    V001_InitialMenus, V002_InitialAdmin, ...
+│  └─ versions/    V001_UniqueIndexes, V002_InitialAdmin, V003_InitialMenus, V004_CategoryModule
 └─ modules/
    ├─ auth/        login / refresh / logout / şifre değiştirme, UserSession, LoginAttempt, SessionInfo
    ├─ user/        kullanıcı yönetimi (sadece admin)
@@ -94,7 +95,9 @@ modules/category/
 | `version` | `Long` | `@Version`, optimistic lock (§4.4) |
 | `createdAt` / `updatedAt` | `Instant` | JPA Auditing doldurur |
 | `createdBy` / `updatedBy` | `Long` | Kullanıcı id'si; `CurrentUser`'dan gelir, sistem işlemlerinde `null` |
-| `deleted` | boolean kolon | Hibernate `@SoftDelete` yönetir (§10.4) |
+
+BaseEntity'de `deleted` alanı **yoktur**: soft delete için her entity sınıfına ayrıca `@SoftDelete` eklenir (§10.4).
+`deleted` kolonunu Hibernate oluşturur ve yönetir.
 
 **Entity kuralları:**
 - Entity'lerde `@Getter` ve `@Setter` kullanılır, **`@Data` kullanılmaz** (JPA ile `equals`, `hashCode` ve `toString` sorun çıkarır).
@@ -104,10 +107,22 @@ modules/category/
 ### 4.2 Mapper (MapStruct)
 
 ```java
-@MapperConfig(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.ERROR)
-public interface MapperSettings {}
+@MapperConfig(
+        componentModel = MappingConstants.ComponentModel.SPRING,
+        unmappedTargetPolicy = ReportingPolicy.ERROR,
+        mappingInheritanceStrategy = MappingInheritanceStrategy.AUTO_INHERIT_FROM_CONFIG)
+public interface MapperSettings {
+    // Prototip metot: request -> entity eşlemelerinde BaseEntity alanları otomatik yok sayılır.
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "version", ignore = true)
+    @Mapping(target = "createdAt", ignore = true)
+    @Mapping(target = "createdBy", ignore = true)
+    @Mapping(target = "updatedAt", ignore = true)
+    @Mapping(target = "updatedBy", ignore = true)
+    BaseEntity toBaseEntity(Object source);
+}
 
-public interface BaseMapper<E, CREATE, UPDATE, RESPONSE> {
+public interface BaseMapper<E extends BaseEntity, CREATE, UPDATE, RESPONSE> {
     E toEntity(CREATE request);
     RESPONSE toResponse(E entity);
     void update(UPDATE request, @MappingTarget E entity);
@@ -120,7 +135,8 @@ public interface CategoryMapper
 
 - Mapper'ın kodunu MapStruct derleme sırasında üretir. Mapper içinde repository ya da iş kuralı **olmaz**.
 - `unmappedTargetPolicy = ERROR` sayesinde eşlenmemiş bir alan kalırsa proje derlenmez.
-- BaseEntity alanları (`id`, `version`, audit alanları) request'ten entity'ye eşlenirken ortak config'te yok sayılır.
+- BaseEntity alanları (`id`, `version`, audit alanları) request'ten entity'ye eşlenirken `MapperSettings`'teki prototip metot sayesinde yok sayılır. Request'teki `version` entity'ye kopyalanmaz; karşılaştırmayı servis yapar (§4.4).
+- Bir modül ek alanları farklı eşlemek isterse ilgili metodu kendi mapper'ında yeniden tanımlar (ör. `UserMapper`: şifre eşlenmez, `active` varsayılan `true`); ortak yok saymalar yine geçerlidir.
 
 ### 4.3 BaseService (interface + impl)
 
@@ -308,7 +324,7 @@ BaseException (abstract: HttpStatus + mesaj anahtarı)
 - Validation mesajı bir anahtar formatında değilse (ör. `message` verilmesi unutulmuşsa ve Hibernate Validator'ın
   varsayılan metni geldiyse) frontend'e `invalid_request` gider; düz metin asla gitmez.
 - Stacktrace, SQL ve sınıf adları response'a **asla** çıkmaz.
-- 500 hataları traceId ile birlikte `ERROR` seviyesinde loglanır; 4xx hataları `WARN` ya da `INFO` seviyesinde.
+- 500 hataları stacktrace ile `ERROR` seviyesinde loglanır. Bütün 4xx cevapları status ve mesaj anahtarıyla `INFO` seviyesinde loglanır (`GlobalExceptionHandler`, 401/403 handler'ları); DB çakışmaları (`record_conflict`) ayrıca nedeniyle `WARN` seviyesinde. traceId her log satırında bulunur.
 - NPE ve ClassCastException gibi hatalar kodun hatasıdır, 500 döner.
 - İş kuralı ihlalinde her zaman `throw new BusinessException(XxxMessages.KEY)` kullanılır.
 
@@ -441,7 +457,7 @@ public class CurrentUser {
 - E-posta, silinmemiş kayıtlar arasında benzersizdir (§10.4).
 - E-posta adresinin gerçekten kullanıcıya ait olduğu şimdilik doğrulanmaz (§19).
 - Normalizasyon `Locale.ROOT` ile yapılır (Türkçe locale'de "I" → "ı" olurdu). Türkçe klavyelerin "i" harfini "İ" olarak büyütebilmesi nedeniyle (ör. telefonda otomatik büyük harf) "İ" de "i" sayılır.
-- Şifreler `DelegatingPasswordEncoder` (bcrypt) ile hash'lenir. Şifre uzunluğu en az 8, en fazla 72 karakterdir (bcrypt 72 byte'tan fazlasını işlemez).
+- Şifreler `DelegatingPasswordEncoder` (bcrypt) ile hash'lenir. Şifre en az 8 karakter, en fazla **72 byte** (UTF-8) olabilir: bcrypt 72 byte'tan uzun şifreyi hash'lemez ve Türkçe harfler 2 byte'tır. Bu sınır `@Size` ile değil `@MaxBytes(72)` ile kontrol edilir; aksi halde uzun bir şifre doğrulamadan geçip 500 hatasına dönerdi.
 - Sistemde kalan **son aktif admin** silinemez, pasife alınamaz ve rolü düşürülemez: 422 `user_last_admin`.
 
 ---
@@ -496,7 +512,7 @@ public class CurrentUser {
 
 ### 10.4 Soft delete
 
-- Hibernate `@SoftDelete` kullanılır. Silme işlemi `deleted = true` yapar ve silinmiş kayıtlar bütün sorgulardan otomatik olarak filtrelenir. BaseEntity üzerinden uygulanıp uygulanamadığı ilk build'de doğrulanır; uygulanamıyorsa her entity'ye ayrı ayrı eklenir.
+- Hibernate `@SoftDelete` kullanılır. Silme işlemi `deleted = true` yapar ve silinmiş kayıtlar bütün sorgulardan otomatik olarak filtrelenir. `@SoftDelete` BaseEntity'ye değil, **her entity sınıfına** eklenir (ör. `Category`, `User`, `Menu`). Entity'ye eklemeyi unutmak kaydın gerçekten silinmesine ve `deleted` kolonunun oluşmamasına yol açar.
 - **Unique alanlar:** Soft delete kullanılan entity'lerde `@Column(unique = true)` **kullanılmaz**. Aksi halde silinmiş bir kayıt aynı değerle yeni kayıt açılmasını engeller. Bunun yerine:
   - Serviste `existsBy...` kontrolü yapılır; sorun varsa 422 döner.
   - DB'de silinmemiş kayıtlara özel bir unique index, migration class'ı ile oluşturulur:
@@ -534,8 +550,8 @@ public interface DataMigration {
 }
 
 @Component
-public class V001_InitialMenus implements DataMigration {
-    public int version()         { return 1; }
+public class V003_InitialMenus implements DataMigration {
+    public int version()         { return 3; }
     public String description()  { return "Başlangıç menüleri"; }
 
     public void migrate(JdbcTemplate jdbc) {
@@ -603,7 +619,7 @@ Tablo: `login_attempts`
 | `updated_at` | Son deneme zamanı |
 
 **Kurallar:**
-- 5. yanlış denemede `blocked_until` şu andan 1 saat sonrasına ayarlanır. Engel süresince **doğru şifre girilse bile** 429 `login_blocked` döner.
+- 5. yanlış denemede `blocked_until` şu andan 1 saat sonrasına ayarlanır. Engel süresince **doğru şifre girilse bile** 429 `auth_login_blocked` döner.
 - Başarılı girişte kayıt silinir. Engel süresi dolduktan sonraki ilk yanlış denemede sayaç 1'den başlar.
 - Kayıtlı olmayan e-postalarla yapılan denemeler de sayılır.
 - Sayaç artırma atomik bir upsert ile yapılır (`INSERT ... ON CONFLICT DO UPDATE`). Aynı anda gelen denemeler birbirini ezmez.
@@ -704,7 +720,7 @@ Dosyalar: `application.yml` (ortak), `application-dev.yml`, `application-prod.ym
 ## 18. Yeni modül ekleme (özet; ayrıntılı rehber README'de)
 
 1. `modules/category` klasörü kopyalanır ve yeniden adlandırılır.
-2. Entity `BaseEntity`'den türetilir; DTO'lar record olarak yazılır. Update request `VersionedRequest` interface'ini uygular.
+2. Entity `BaseEntity`'den türetilir ve sınıfa `@SoftDelete` eklenir; DTO'lar record olarak yazılır. Update request `VersionedRequest` interface'ini uygular.
 3. Mapper interface'i `BaseMapper`'dan türetilir (gövdesi yoktur).
 4. `XxxService extends BaseService`, `XxxServiceImpl extends BaseServiceImpl` olarak yazılır. İş kuralları kancalarda (§4.3) uygulanır.
 5. `XxxMessages` sınıfına modülün anahtarları eklenir.

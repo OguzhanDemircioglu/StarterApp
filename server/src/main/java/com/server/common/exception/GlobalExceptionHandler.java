@@ -35,7 +35,6 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(BaseException.class)
     public ResponseEntity<ApiResponse<Void>> handleBase(BaseException ex) {
-        log.info("{} {}", ex.getStatus().value(), ex.getMessageKey());
         return respond(ex.getStatus(), ex.getMessageKey());
     }
 
@@ -96,7 +95,6 @@ public class GlobalExceptionHandler {
         // Spring MVC exception'ları (404 NoResourceFound, 405, 415 ...) kendi status'unu taşır.
         if (ex instanceof ErrorResponse errorResponse) {
             HttpStatusCode status = errorResponse.getStatusCode();
-            log.info("{} {}", status.value(), ex.getMessage());
             return respond(status, StatusMessages.forStatus(status));
         }
         log.error("Unexpected error", ex);
@@ -112,7 +110,11 @@ public class GlobalExceptionHandler {
                 .orElse(GlobalMessages.INVALID_REQUEST);
     }
 
+    /** Bütün 4xx cevapları status ve mesaj anahtarıyla INFO seviyesinde loglanır (traceId MDC'den log satırına girer). */
     private static ResponseEntity<ApiResponse<Void>> respond(HttpStatusCode status, String messageKey) {
+        if (status.is4xxClientError()) {
+            log.info("{} {}", status.value(), messageKey);
+        }
         return ResponseEntity.status(status).body(ApiResponse.error(messageKey));
     }
 }
