@@ -1,0 +1,55 @@
+# Ortak ayarlar. Profil bilerek varsayılan verilmez: SPRING_PROFILES_ACTIVE (dev | prod) açıkça seçilmelidir.
+spring:
+  application:
+    name: server
+  datasource:
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: update
+  lifecycle:
+    timeout-per-shutdown-phase: 30s
+
+server:
+  forward-headers-strategy: ${FORWARD_HEADERS_STRATEGY:none}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      probes:
+        enabled: true
+
+springdoc:
+  api-docs:
+    enabled: false
+  swagger-ui:
+    enabled: false
+
+app:
+  jwt:
+    issuer: starterapp
+    access-token-ttl: 15m
+    key-id: ${JWT_KEY_ID}
+    private-key-path: ${JWT_PRIVATE_KEY_PATH}
+    public-key-path: ${JWT_PUBLIC_KEY_PATH}
+    previous-key-id: ${JWT_PREVIOUS_KEY_ID:}
+    previous-public-key-path: ${JWT_PREVIOUS_PUBLIC_KEY_PATH:}
+  session:
+    refresh-token-ttl: 90d
+    reuse-grace-period: 30s
+    cookie-secure: ${COOKIE_SECURE:true}
+  login-protection:
+    max-attempts: 5
+    block-duration: 1h
+  cors:
+    allowed-origins: ${CORS_ALLOWED_ORIGINS:}
+  admin:
+    email: ${ADMIN_EMAIL:}
+    password: ${ADMIN_PASSWORD:}
