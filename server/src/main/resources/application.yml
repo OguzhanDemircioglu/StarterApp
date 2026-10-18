@@ -6,11 +6,18 @@ spring:
     url: ${DB_URL}
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
+    hikari:
+      # Bağlantının search_path'i: JdbcTemplate/native SQL'ler (migration'lar dahil) bu şemada çalışır.
+      schema: ${DB_SCHEMA}
   jpa:
     open-in-view: false
     hibernate:
       ddl-auto: update
     properties:
+      # Hibernate sadece bu şemadaki tablolara bakar ve onları günceller; şema yoksa oluşturur.
+      # DB_SCHEMA küçük harf olmalıdır (PostgreSQL tırnaksız adları küçük harfe çevirir).
+      hibernate.default_schema: ${DB_SCHEMA}
+      hibernate.hbm2ddl.create_namespaces: true
       # Varsayılan davranış unique constraint'leri her açılışta silip yeniden oluşturur; bunun yerine sadece eksikse oluştur.
       hibernate.schema_update.unique_constraint_strategy: RECREATE_QUIETLY
   lifecycle:

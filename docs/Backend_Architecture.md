@@ -94,7 +94,7 @@ modules/category/
 | `version` | `Long` | `@Version`, optimistic lock (§4.4) |
 | `createdAt` / `updatedAt` | `Instant` | JPA Auditing doldurur |
 | `createdBy` / `updatedBy` | `Long` | Kullanıcı id'si; `CurrentUser`'dan gelir, sistem işlemlerinde `null` |
-| `deleted` | boolean kolon | Hibernate `@SoftDelete` yönetir (§10.3) |
+| `deleted` | boolean kolon | Hibernate `@SoftDelete` yönetir (§10.4) |
 
 **Entity kuralları:**
 - Entity'lerde `@Getter` ve `@Setter` kullanılır, **`@Data` kullanılmaz** (JPA ile `equals`, `hashCode` ve `toString` sorun çıkarır).
@@ -438,7 +438,7 @@ public class CurrentUser {
 
 - Ayrı bir kullanıcı adı yoktur; **giriş e-posta adresiyle** yapılır (`users.email`). İleride şifre sıfırlama ve 2FA bu adres üzerinden kurulur.
 - E-posta `@Email` ile doğrulanır. **Küçük harfe çevrilip** (trim edilerek) saklanır ve karşılaştırılır. Aksi halde "Ali@firma.com" ile "ali@firma.com" iki ayrı kullanıcı sayılır ve brute-force anahtarı atlatılabilir.
-- E-posta, silinmemiş kayıtlar arasında benzersizdir (§10.3).
+- E-posta, silinmemiş kayıtlar arasında benzersizdir (§10.4).
 - E-posta adresinin gerçekten kullanıcıya ait olduğu şimdilik doğrulanmaz (§19).
 - Normalizasyon `Locale.ROOT` ile yapılır (Türkçe locale'de "I" → "ı" olurdu). Türkçe klavyelerin "i" harfini "İ" olarak büyütebilmesi nedeniyle (ör. telefonda otomatik büyük harf) "İ" de "i" sayılır.
 - Şifreler `DelegatingPasswordEncoder` (bcrypt) ile hash'lenir. Şifre uzunluğu en az 8, en fazla 72 karakterdir (bcrypt 72 byte'tan fazlasını işlemez).
@@ -478,12 +478,23 @@ public class CurrentUser {
 - `spring.jpa.open-in-view=false` olarak ayarlanır. Lazy alanlara controller'da erişilmez.
 - `show-sql` sadece dev profilinde açıktır.
 
-### 10.2 ID'ler
+### 10.2 Şema
+
+- Uygulamanın bütün tabloları `DB_SCHEMA` şemasında durur. Ayar iki yere birden uygulanır:
+  - `spring.datasource.hikari.schema`: bağlantının `search_path`'i; `JdbcTemplate`, native query ve migration'lar bu şemada çalışır.
+  - `hibernate.default_schema`: Hibernate sadece bu şemadaki tablolara bakar ve onları günceller.
+- Şema yoksa ilk açılışta Hibernate oluşturur (`hibernate.hbm2ddl.create_namespaces=true`).
+- `DB_SCHEMA` küçük harf olmalıdır. PostgreSQL tırnaksız adları küçük harfe çevirdiği için `starterApp` gibi bir ad
+  iki ayar arasında farklı şemalara işaret eder.
+- Paylaşılan bir veritabanında diğer şemalardaki aynı adlı tablolara (ör. başka bir projenin `public.categories`'i)
+  dokunulmaz. Bu güvence `SchemaIsolationIntegrationTest` ile test edilir.
+
+### 10.3 ID'ler
 
 - Her tabloda `Long` + `IDENTITY` kullanılır. PostgreSQL'de identity kolonu kendi sequence'ını kullanır; ayrıca `@SequenceGenerator` tanımlanmaz.
 - Tablo boşaltılırken her zaman `TRUNCATE tablo RESTART IDENTITY` kullanılır. Düz `TRUNCATE` sayacı sıfırlamaz.
 
-### 10.3 Soft delete
+### 10.4 Soft delete
 
 - Hibernate `@SoftDelete` kullanılır. Silme işlemi `deleted = true` yapar ve silinmiş kayıtlar bütün sorgulardan otomatik olarak filtrelenir. BaseEntity üzerinden uygulanıp uygulanamadığı ilk build'de doğrulanır; uygulanamıyorsa her entity'ye ayrı ayrı eklenir.
 - **Unique alanlar:** Soft delete kullanılan entity'lerde `@Column(unique = true)` **kullanılmaz**. Aksi halde silinmiş bir kayıt aynı değerle yeni kayıt açılmasını engeller. Bunun yerine:
@@ -492,7 +503,7 @@ public class CurrentUser {
     `CREATE UNIQUE INDEX IF NOT EXISTS ux_users_email ON users(email) WHERE deleted = false;`
 - **Kullanılan kayıtlar:** Başka bir kaydın referans verdiği bir kayıt silinmez. Bu kontrol modülün `validateDelete` metodunda yapılır ve 422 döner.
 
-### 10.4 Tarih ve saat
+### 10.5 Tarih ve saat
 
 - Java'da `Instant`, DB'de `timestamptz`, JSON'da ISO-8601 (UTC) kullanılır.
 - JVM saat dilimi uygulama açılışında (`ServerApplication.main`) `Europe/Istanbul` olarak ayarlanır; container'da ayrıca `TZ=Europe/Istanbul` verilir. Loglar Türkiye saatiyle yazılır.
@@ -509,7 +520,7 @@ Görev paylaşımı:
 | Tablo ya da kolon **eklemek** | Entity'de; `ddl-auto=update` DB'ye uygular |
 | Var olan kolonu **değiştirmek** (ad, tip, uzunluk, silme) | Migration class'ında `ALTER` ile (§10.1: `update` bunu yapmaz) |
 | Veri **eklemek / güncellemek** (menüler, ilk admin, sabit veriler) | Migration class'ında |
-| Index (ör. §10.3'teki partial unique index) | Migration class'ında |
+| Index (ör. §10.4'teki partial unique index) | Migration class'ında |
 
 Flyway kullanılmaz: Flyway Hibernate'ten önce çalıştığı için, ilk açılışta tablolar henüz oluşmamışken insert atmaya çalışırdı. Bunun yerine kendi küçük runner'ımız var.
 
@@ -632,6 +643,7 @@ Dosyalar: `application.yml` (ortak), `application-dev.yml`, `application-prod.ym
 |---|---|
 | `SPRING_PROFILES_ACTIVE` | `dev` ya da `prod`. **Varsayılan profil yoktur**: unutulursa uygulama dev ayarlarıyla (güvensiz cookie, bilinen admin şifresi) açılmaz, eksik değişkenler yüzünden hiç açılmaz |
 | `DB_URL`, `DB_USERNAME`, `DB_PASSWORD` | PostgreSQL bağlantısı |
+| `DB_SCHEMA` | **Zorunlu.** Uygulamanın şeması, küçük harf (§10.2) |
 | `JWT_PRIVATE_KEY_PATH`, `JWT_PUBLIC_KEY_PATH`, `JWT_KEY_ID` | Aktif RSA anahtarı |
 | `JWT_PREVIOUS_PUBLIC_KEY_PATH`, `JWT_PREVIOUS_KEY_ID` | İsteğe bağlı; anahtar değişimi sırasında bir önceki public key |
 | `ADMIN_EMAIL`, `ADMIN_PASSWORD` | Sadece ilk admin oluşturulurken kullanılır (`V002_InitialAdmin`) |
@@ -641,6 +653,9 @@ Dosyalar: `application.yml` (ortak), `application-dev.yml`, `application-prod.ym
 | `TZ` | `Europe/Istanbul` |
 
 - Kodda ve repoda secret **bulunmaz**. Repoda değişkenleri listeleyen bir `.env.example` dosyası durur.
+- Lokal geliştirmede değerler `server/.env` dosyasına yazılır (git'e girmez). Bu dosya **sadece dev profilinde** okunur
+  (`spring.config.import: optional:file:.env[.properties]`, `application-dev.yml`); testler ve prod onu kullanmaz.
+  Profil `.env`'den seçilemez; çalıştırma ayarından verilir.
 - `spring.main.allow-bean-definition-overriding` kullanılmaz.
 
 ---

@@ -1,5 +1,9 @@
-# Geliştirme ortamı. Değerler environment variable ile ezilebilir.
+# Geliştirme ortamı. Değerler server/.env dosyasından ya da environment variable'dan gelir.
 spring:
+  config:
+    # .env sadece dev profilinde okunur: testler ve prod gerçek DB bilgilerini yanlışlıkla kullanamaz.
+    # Ortam değişkenleri her zaman .env'den önceliklidir. (.env git'e girmez.)
+    import: optional:file:.env[.properties]
   datasource:
     url: ${DB_URL:jdbc:postgresql://localhost:5432/starterapp}
     username: ${DB_USERNAME:postgres}

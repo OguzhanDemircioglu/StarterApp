@@ -25,17 +25,28 @@ openssl rsa -in keys/private.pem -pubout -out keys/public.pem
 Windows'ta `openssl` Git Bash ile birlikte gelir. Docker'da `keys/` klasörü container'a bağlandığı için Linux'ta
 dosyaların okunabilir olması gerekir: `chmod 644 keys/*.pem`.
 
-### 2. Veritabanı
+### 2. Veritabanı ve `.env`
 
-Seçeneklerden biri:
+Bağlantı bilgileri `server/.env` dosyasına yazılır. Bu dosya git'e girmez ve **sadece dev profilinde** okunur;
+testler ve prod onu hiçbir zaman kullanmaz. Ortam değişkenleri her zaman `.env`'den önceliklidir.
 
-- **Docker ile:** `docker compose up -d` → PostgreSQL 18, `localhost:5433` portunda. Sonra şu değişkenleri verin:
-  `DB_URL=jdbc:postgresql://localhost:5433/starterapp`, `DB_USERNAME=starterapp`, `DB_PASSWORD=starterapp`.
-- **Yerel PostgreSQL ile:** `starterapp` adında bir veritabanı açın. dev profili varsayılan olarak
-  `localhost:5432/starterapp` adresine `postgres/postgres` ile bağlanır; farklıysa `DB_URL`, `DB_USERNAME`,
-  `DB_PASSWORD` ile değiştirin.
+```properties
+DB_URL=jdbc:postgresql://host:port/veritabani?ssl=require
+DB_USERNAME=...
+DB_PASSWORD=...
+DB_SCHEMA=starterapp
+ADMIN_EMAIL=admin@firma.com
+ADMIN_PASSWORD=...
+```
+
+- `DB_SCHEMA` **zorunludur** ve küçük harf olmalıdır. Uygulamanın bütün tabloları bu şemada durur; şema yoksa ilk
+  açılışta oluşturulur. Başka projelerle paylaşılan bir veritabanında diğer şemalara (ör. `public`) dokunulmaz.
+- Docker ile yerel bir veritabanı için: `docker compose up -d` → PostgreSQL 18, `localhost:5433`
+  (`DB_URL=jdbc:postgresql://localhost:5433/starterapp`, kullanıcı/şifre `starterapp`).
+- `.env` yoksa dev profili `localhost:5432/starterapp` adresine `postgres/postgres` ile bağlanmayı dener.
 
 Tablolar ilk açılışta Hibernate tarafından (`ddl-auto=update`), başlangıç verileri migration class'larıyla oluşturulur.
+`ADMIN_EMAIL`/`ADMIN_PASSWORD` verilmezse dev profilinde `admin@starterapp.local` / `Admin12345` kullanılır.
 
 ### 3. Çalıştırma
 
@@ -51,7 +62,7 @@ IDE'den çalıştırırken environment variable olarak `SPRING_PROFILES_ACTIVE=d
 |---|---|
 | API | http://localhost:8080 |
 | Swagger UI | http://localhost:8080/swagger-ui.html |
-| İlk admin | `admin@starterapp.local` / `Admin12345` |
+| İlk admin | `.env`'deki `ADMIN_EMAIL` / `ADMIN_PASSWORD` (yoksa `admin@starterapp.local` / `Admin12345`) |
 | CORS | `http://localhost:4200` |
 
 ## Testler

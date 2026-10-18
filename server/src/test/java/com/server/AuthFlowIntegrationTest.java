@@ -57,6 +57,7 @@ class AuthFlowIntegrationTest {
         registry.add("spring.datasource.url", POSTGRES::getJdbcUrl);
         registry.add("spring.datasource.username", POSTGRES::getUsername);
         registry.add("spring.datasource.password", POSTGRES::getPassword);
+        registry.add("DB_SCHEMA", () -> "starterapp");
         registry.add("app.admin.email", () -> ADMIN_EMAIL);
         registry.add("app.admin.password", () -> ADMIN_PASSWORD);
         registry.add("app.session.reuse-grace-period", () -> "2s");
