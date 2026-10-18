@@ -1,0 +1,42 @@
+# Geliştirme ortamı.
+#   docker compose up -d                → sadece PostgreSQL 18 (uygulama IDE'den çalıştırılır)
+#   docker compose --profile app up -d  → PostgreSQL 18 + uygulama
+services:
+  postgres:
+    image: postgres:18
+    environment:
+      POSTGRES_DB: starterapp
+      POSTGRES_USER: starterapp
+      POSTGRES_PASSWORD: starterapp
+    ports:
+      # Yerelde kurulu bir PostgreSQL 5432'yi kullanıyorsa çakışmasın diye 5433.
+      - "5433:5432"
+    volumes:
+      # PostgreSQL 18 ile volume yolu değişti: /var/lib/postgresql/data değil /var/lib/postgresql.
+      - pgdata:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U starterapp -d starterapp"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  server:
+    profiles: ["app"]
+    build: .
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+      DB_URL: jdbc:postgresql://postgres:5432/starterapp
+      DB_USERNAME: starterapp
+      DB_PASSWORD: starterapp
+      JWT_PRIVATE_KEY_PATH: /app/keys/private.pem
+      JWT_PUBLIC_KEY_PATH: /app/keys/public.pem
+    volumes:
+      - ./keys:/app/keys:ro
+    ports:
+      - "8080:8080"
+
+volumes:
+  pgdata:

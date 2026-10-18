@@ -21,7 +21,7 @@ import java.time.Instant;
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "user_sessions", indexes = {
-        @Index(name = "ux_user_sessions_current_token", columnList = "current_token_hash", unique = true),
+        @Index(name = "ix_user_sessions_current_token", columnList = "current_token_hash"),
         @Index(name = "ix_user_sessions_previous_token", columnList = "previous_token_hash"),
         @Index(name = "ix_user_sessions_user", columnList = "user_id")
 })

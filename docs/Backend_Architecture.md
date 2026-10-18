@@ -1,6 +1,6 @@
 # Backend Architecture — StarterApp
 
-> **Durum:** Taslak v2 — 2026-10-18
+> **Durum:** v3 — 2026-10-18 (server iskeletiyle senkron)
 > Bu doküman `server/` projesinin bağlayıcı kurallarıdır. Kod bu dokümana uyar; kural değişecekse önce bu doküman güncellenir.
 > Frontend (`client/`) ayrı bir dokümanda anlatılacak.
 
@@ -135,7 +135,12 @@ public interface BaseService<CREATE, UPDATE extends VersionedRequest, RESPONSE> 
 ```
 
 - `BaseServiceImpl` bu metotların genel davranışını tek bir yerde uygular. Transaction yönetimi (`@Transactional`) servis katmanındadır.
-- Modülün iş kuralları için boş varsayılanlı üç kanca (hook) vardır: `validateCreate(request)`, `validateUpdate(entity, request)`, `validateDelete(entity)`. Modül yalnızca ihtiyaç duyduğunu override eder.
+- Modülün iş kuralları için boş varsayılanlı dört kanca (hook) vardır. Modül yalnızca ihtiyaç duyduğunu override eder:
+  - `validateCreate(request)`: eklemeden önceki iş kuralları.
+  - `prepareCreate(entity, request)`: mapping'den sonra, kaydetmeden önce entity'yi tamamlamak için (ör. şifreyi hash'leyip atamak).
+  - `validateUpdate(entity, request)`: güncellemeden önceki iş kuralları; `entity` henüz eski değerlerini taşır.
+  - `validateDelete(entity)`: silmeden önceki iş kuralları (ör. kayıt başka kayıtlarca kullanılıyor mu).
+- Kanca yetmiyorsa modül `create`/`update`/`delete` metodunu override edip `super`'i çağırır (ör. `UserServiceImpl.update`, pasife alınan kullanıcının oturumlarını kapatır).
 - Modülün kendine özel metotları, kendi `XxxService` interface'ine eklenir.
 - Kayıt yoksa `getById`, `update` ve `delete` `NotFoundException` (404) fırlatır.
 
@@ -221,15 +226,15 @@ public class CategoryController {
 | HTTP | Ne zaman | Örnek `message` |
 |---|---|---|
 | 200 | Başarılı işlem | `success`, `record_created`, `record_updated`, `record_deleted` |
-| 400 | Validation hatası, bozuk JSON, yanlış parametre tipi, eksik parametre | Alanın anahtarı (`category_name_required`), `invalid_request`, `invalid_parameter` |
-| 401 | Token yok ya da geçersiz; login ya da refresh başarısız | `unauthorized`, `invalid_credentials`, `session_expired`, `user_inactive` |
+| 400 | Validation hatası, bozuk JSON, yanlış parametre tipi, eksik parametre | Alanın anahtarı (`category_name_required`, `version_required`), `invalid_request`, `invalid_parameter` |
+| 401 | Token yok ya da geçersiz; login ya da refresh başarısız | `unauthorized`, `auth_invalid_credentials`, `auth_session_expired`, `auth_user_inactive` |
 | 403 | Rolün yetkisi yok | `access_denied` |
 | 404 | Kayıt ya da URL bulunamadı | `record_not_found`, `url_not_found` |
 | 405 | Yanlış HTTP metodu | `method_not_allowed` |
 | 409 | Kayıt bu arada değişmiş; DB unique ya da FK ihlali | `record_modified`, `record_conflict` |
 | 415 | Desteklenmeyen içerik tipi | `unsupported_media_type` |
 | 422 | İş kuralı ihlali (`BusinessException`) | Modül anahtarı (`category_name_exists`) |
-| 429 | Login engellendi (brute force) | `login_blocked` |
+| 429 | Login engellendi (brute force) | `auth_login_blocked` |
 | 500 | Beklenmeyen hata | `unexpected_error` |
 
 ### 5.3 Formatın korunduğu yerler
@@ -280,6 +285,7 @@ Formatın korunduğu **kontrat testleriyle** garanti edilir: §5.2'deki her stat
 ```
 BaseException (abstract: HttpStatus + mesaj anahtarı)
 ├─ BusinessException      422   iş kuralı ihlali
+├─ UnauthorizedException  401   yanlış e-posta/şifre, süresi dolmuş oturum
 ├─ NotFoundException      404
 ├─ ConflictException      409
 └─ LoginBlockedException  429
@@ -287,20 +293,20 @@ BaseException (abstract: HttpStatus + mesaj anahtarı)
 
 | Kaynak | Status |
 |---|---|
-| `MethodArgumentNotValidException`, `ConstraintViolationException` | 400; ilk hatanın anahtarı döner |
+| `MethodArgumentNotValidException`, `HandlerMethodValidationException`, `ConstraintViolationException` | 400; ilk hatanın anahtarı döner |
 | `HttpMessageNotReadableException` (bozuk JSON) | 400, `invalid_request` |
-| `MethodArgumentTypeMismatchException`, `MissingServletRequestParameterException` | 400, `invalid_parameter` |
+| `TypeMismatchException`, `ServletRequestBindingException` (yanlış tip, eksik parametre) | 400, `invalid_parameter` |
 | `AuthenticationException` (security entry point) | 401 |
 | `AccessDeniedException` (handler + `@PreAuthorize`) | 403 |
-| `NoResourceFoundException` | 404, `url_not_found` |
-| `HttpRequestMethodNotSupportedException` | 405 |
-| `HttpMediaTypeNotSupportedException` | 415 |
 | `ObjectOptimisticLockingFailureException` | 409, `record_modified` |
 | `DataIntegrityViolationException` | 409, `record_conflict` |
 | `BaseException` alt sınıfları | Kendi status'u ve anahtarı |
+| Spring MVC'nin kendi exception'ları (`ErrorResponse`: 404 `NoResourceFound`, 405, 415 ...) | Kendi status'u; anahtar status'tan türetilir (`url_not_found`, `method_not_allowed`, `unsupported_media_type`) |
 | Diğer her şey (`Exception`) | 500, `unexpected_error` |
 
 **Kurallar:**
+- Validation mesajı bir anahtar formatında değilse (ör. `message` verilmesi unutulmuşsa ve Hibernate Validator'ın
+  varsayılan metni geldiyse) frontend'e `invalid_request` gider; düz metin asla gitmez.
 - Stacktrace, SQL ve sınıf adları response'a **asla** çıkmaz.
 - 500 hataları traceId ile birlikte `ERROR` seviyesinde loglanır; 4xx hataları `WARN` ya da `INFO` seviyesinde.
 - NPE ve ClassCastException gibi hatalar kodun hatasıdır, 500 döner.
@@ -365,8 +371,8 @@ Her satır bir oturumu temsil eder; bir tarayıcı, bir satır. Refresh token he
 
 **Login — `POST /api/auth/login` (herkese açık)**
 1. Brute-force kontrolü yapılır (§13). Engelliyse doğru şifre girilse bile 429 döner.
-2. E-posta ve şifre kontrol edilir. Yanlışsa 401 `invalid_credentials` döner; kullanıcının var olup olmadığı belli edilmez.
-3. Kullanıcı pasifse 401 `user_inactive` döner. Bu cevabı yalnızca doğru şifreyi bilen biri görür.
+2. E-posta ve şifre kontrol edilir. Yanlışsa 401 `auth_invalid_credentials` döner; kullanıcının var olup olmadığı belli edilmez. Kayıtlı olmayan e-postalarda da sahte bir hash ile şifre kontrolü yapılır, böylece cevap süresinden de anlaşılmaz.
+3. Kullanıcı pasifse 401 `auth_user_inactive` döner. Bu cevabı yalnızca doğru şifreyi bilen biri görür.
 4. Başarılıysa yeni bir `user_sessions` satırı açılır, refresh cookie yazılır ve `SessionInfo` döner.
 
 **Refresh — `POST /api/auth/refresh` (herkese açık; cookie ile çalışır)**
@@ -375,10 +381,12 @@ Her satır bir oturumu temsil eder; bir tarayıcı, bir satır. Refresh token he
 |---|---|
 | `current_token_hash` ile aynı | Token yenilenir (rotation): eski hash `previous`'a geçer, yeni token üretilir, süre 90 gün uzar. Yeni cookie ve `SessionInfo` döner |
 | `previous_token_hash` ile aynı ve `rotated_at` üzerinden **30 saniye** geçmemiş | Birden fazla sekme aynı anda yenileme yapmıştır. Sadece yeni bir access token ve `SessionInfo` döner; **cookie'ye dokunulmaz** |
-| `previous_token_hash` ile aynı ve 30 saniye geçmiş | Token çalınmış sayılır: oturum iptal edilir, 401 `session_expired` döner |
-| Hiçbiriyle eşleşmiyor, süresi dolmuş ya da iptal edilmiş | 401 `session_expired` |
+| `previous_token_hash` ile aynı ve 30 saniye geçmiş | Token çalınmış sayılır: oturum iptal edilir, 401 `auth_session_expired` döner |
+| Hiçbiriyle eşleşmiyor, süresi dolmuş ya da iptal edilmiş | 401 `auth_session_expired` |
 
 - Rotation, `UPDATE ... WHERE current_token_hash = ?` şeklinde atomik bir sorguyla yapılır. Aynı anda iki istek gelirse yalnızca biri yeniler; diğeri 30 saniyelik pencereye düşer.
+- Login, refresh ve logout isteklerinde `Authorization` başlığı yok sayılır. Frontend süresi dolmuş bir access token'ı yanlışlıkla gönderse bile refresh çalışır.
+- Login, refresh ve logout bilinçli olarak tek bir transaction içinde çalışmaz: yanlış deneme kaydı ve çalınma tespitindeki oturum iptali, hemen ardından fırlatılan 401 ile geri alınmamalıdır.
 - Kullanıcı pasif ya da silinmişse refresh 401 döner.
 
 **Logout — `POST /api/auth/logout` (herkese açık; cookie ile çalışır)**
@@ -405,7 +413,7 @@ Her satır bir oturumu temsil eder; bir tarayıcı, bir satır. Refresh token he
 }
 ```
 
-- Bu obje tek bir yerde, `SessionInfoService.build(user)` metodunda üretilir. Login ve refresh aynı metodu kullanır.
+- Bu obje tek bir yerde, `AuthServiceImpl.buildSessionInfo(user, sessionId)` metodunda üretilir. Login ve refresh aynı metodu kullanır.
 - Kullanıcıya bağlı yeni bir değer gerektiğinde DTO'ya bir alan, bu metoda bir satır eklenir. Login ve refresh ikisi birden yeni değeri döner.
 - **Frontend akışı:** Login'de, sayfa açılışında (F5 dahil) ve 15 dakikada bir yapılan refresh'te aynı `setSession(sessionInfo)` fonksiyonu çağrılır. Logout'ta store temizlenir. Login tekrar çağrılmaz.
 - Refresh token body'de **dönmez**, sadece cookie'dedir.
@@ -432,7 +440,8 @@ public class CurrentUser {
 - E-posta `@Email` ile doğrulanır. **Küçük harfe çevrilip** (trim edilerek) saklanır ve karşılaştırılır. Aksi halde "Ali@firma.com" ile "ali@firma.com" iki ayrı kullanıcı sayılır ve brute-force anahtarı atlatılabilir.
 - E-posta, silinmemiş kayıtlar arasında benzersizdir (§10.3).
 - E-posta adresinin gerçekten kullanıcıya ait olduğu şimdilik doğrulanmaz (§19).
-- Şifreler `DelegatingPasswordEncoder` (bcrypt) ile hash'lenir. Minimum şifre uzunluğu 8 karakterdir.
+- Normalizasyon `Locale.ROOT` ile yapılır (Türkçe locale'de "I" → "ı" olurdu). Türkçe klavyelerin "i" harfini "İ" olarak büyütebilmesi nedeniyle (ör. telefonda otomatik büyük harf) "İ" de "i" sayılır.
+- Şifreler `DelegatingPasswordEncoder` (bcrypt) ile hash'lenir. Şifre uzunluğu en az 8, en fazla 72 karakterdir (bcrypt 72 byte'tan fazlasını işlemez).
 - Sistemde kalan **son aktif admin** silinemez, pasife alınamaz ve rolü düşürülemez: 422 `user_last_admin`.
 
 ---
@@ -461,6 +470,9 @@ public class CurrentUser {
 | Alan adı değişti | Yeni kolon açılır, eski kolon ve verisi kalır | Migration class'ında veri taşınır, eski kolon silinir |
 | Tip veya uzunluk değişti | DB'ye yansımaz | Migration class'ında `ALTER` yapılır |
 | Alan silindi | Kolon DB'de kalır | Gerekirse migration class'ında silinir |
+| Enum'a yeni değer eklendi | Hibernate'in oluşturduğu `check (role in (...))` constraint'i güncellenmez; yeni değer insert edilemez | Migration class'ında constraint `ALTER` ile yenilenir |
+
+- Hibernate'in varsayılan davranışı unique constraint'leri her açılışta silip yeniden oluşturmaktır. Bu, `hibernate.schema_update.unique_constraint_strategy=RECREATE_QUIETLY` ile kapatılmıştır: sadece eksikse oluşturulur.
 
 - **Rolling update kuralı (Swarm):** Güncelleme sırasında eski ve yeni sürüm birkaç saniye aynı DB'de çalışır. Bu yüzden yeni eklenen kolonlar **nullable ya da default değerli** olmalıdır; yoksa eski sürümün insert'leri hata verir.
 - `spring.jpa.open-in-view=false` olarak ayarlanır. Lazy alanlara controller'da erişilmez.
@@ -483,7 +495,7 @@ public class CurrentUser {
 ### 10.4 Tarih ve saat
 
 - Java'da `Instant`, DB'de `timestamptz`, JSON'da ISO-8601 (UTC) kullanılır.
-- JVM ve container saat dilimi `Europe/Istanbul`'dur (`TZ`). Loglar Türkiye saatiyle yazılır.
+- JVM saat dilimi uygulama açılışında (`ServerApplication.main`) `Europe/Istanbul` olarak ayarlanır; container'da ayrıca `TZ=Europe/Istanbul` verilir. Loglar Türkiye saatiyle yazılır.
 - Kullanıcıya saat gösterilirken frontend değeri kullanıcının saat dilimine çevirir.
 
 ---
@@ -618,7 +630,7 @@ Dosyalar: `application.yml` (ortak), `application-dev.yml`, `application-prod.ym
 
 | Environment variable | Açıklama |
 |---|---|
-| `SPRING_PROFILES_ACTIVE` | `dev` ya da `prod` |
+| `SPRING_PROFILES_ACTIVE` | `dev` ya da `prod`. **Varsayılan profil yoktur**: unutulursa uygulama dev ayarlarıyla (güvensiz cookie, bilinen admin şifresi) açılmaz, eksik değişkenler yüzünden hiç açılmaz |
 | `DB_URL`, `DB_USERNAME`, `DB_PASSWORD` | PostgreSQL bağlantısı |
 | `JWT_PRIVATE_KEY_PATH`, `JWT_PUBLIC_KEY_PATH`, `JWT_KEY_ID` | Aktif RSA anahtarı |
 | `JWT_PREVIOUS_PUBLIC_KEY_PATH`, `JWT_PREVIOUS_KEY_ID` | İsteğe bağlı; anahtar değişimi sırasında bir önceki public key |
@@ -669,6 +681,9 @@ Dosyalar: `application.yml` (ortak), `application-dev.yml`, `application-prod.ym
 | Entegrasyon (Testcontainers + PostgreSQL 18) | Login, refresh rotation, 30 saniyelik pencere, çalınma tespiti, logout; brute-force; soft delete; version çakışması (409); data migration runner |
 | Kontrat | §5.2'deki her status için response'ta dört alanın bulunduğu ve tiplerinin doğru olduğu kontrol edilir. Formatı bozan bir değişiklik build'i kırar |
 
+- Entegrasyon testi Docker yoksa otomatik olarak atlanır (`@Testcontainers(disabledWithoutDocker = true)`).
+- Testler için RSA anahtarları çalışma anında üretilir (`TestJwtKeys`); repoda private key bulunmaz.
+
 ---
 
 ## 18. Yeni modül ekleme (özet; ayrıntılı rehber README'de)
@@ -676,7 +691,7 @@ Dosyalar: `application.yml` (ortak), `application-dev.yml`, `application-prod.ym
 1. `modules/category` klasörü kopyalanır ve yeniden adlandırılır.
 2. Entity `BaseEntity`'den türetilir; DTO'lar record olarak yazılır. Update request `VersionedRequest` interface'ini uygular.
 3. Mapper interface'i `BaseMapper`'dan türetilir (gövdesi yoktur).
-4. `XxxService extends BaseService`, `XxxServiceImpl extends BaseServiceImpl` olarak yazılır. İş kuralları hook'larda uygulanır.
+4. `XxxService extends BaseService`, `XxxServiceImpl extends BaseServiceImpl` olarak yazılır. İş kuralları kancalarda (§4.3) uygulanır.
 5. `XxxMessages` sınıfına modülün anahtarları eklenir.
 6. Controller yazılır; admin'e özelse `@PreAuthorize` eklenir.
 7. Menü gerekiyorsa `migration/versions` altına yeni bir `Vxxx_...` migration class'ı yazılır (id belirtilmeden).

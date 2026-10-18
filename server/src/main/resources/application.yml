@@ -10,6 +10,9 @@ spring:
     open-in-view: false
     hibernate:
       ddl-auto: update
+    properties:
+      # Varsayılan davranış unique constraint'leri her açılışta silip yeniden oluşturur; bunun yerine sadece eksikse oluştur.
+      hibernate.schema_update.unique_constraint_strategy: RECREATE_QUIETLY
   lifecycle:
     timeout-per-shutdown-phase: 30s
 
