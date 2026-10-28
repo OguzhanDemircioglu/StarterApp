@@ -54,11 +54,13 @@ com.server
 ├─ security/       SecurityConfig, JwtKeyConfig, CurrentUser,
 │                  RestAuthenticationEntryPoint, RestAccessDeniedHandler
 ├─ migration/      DataMigration, DataMigrationRunner
-│  └─ versions/    V001_UniqueIndexes, V002_InitialAdmin, V003_InitialMenus, V004_CategoryModule
+│  └─ versions/    V001_UniqueIndexes, V002_InitialAdmin, V003_InitialMenus, V004_CategoryModule,
+│                  V005_HierarchicalMenuRoutes
 └─ modules/
    ├─ auth/        login / refresh / logout / şifre değiştirme, UserSession, LoginAttempt, SessionInfo
    ├─ user/        kullanıcı yönetimi (sadece admin)
    ├─ menu/        menü ağacı
+   ├─ report/      grafikleri besleyen özet endpoint'ler (§5.5)
    └─ category/    referans CRUD modülü (yeni modül açarken kopyalanır)
 ```
 
@@ -607,7 +609,7 @@ Tablo: `menus` (BaseEntity alanları + aşağıdakiler)
 | `parent_id` | Üst menünün id'si; kök menülerde `null`. **Düz bir `Long` alandır**, JPA ilişkisi kurulmaz |
 | `title_key` | Çeviri anahtarı; benzersizdir (`menu_categories`) |
 | `route` | Frontend rotası; alt menüsü olan grup menülerinde `null` |
-| `icon` | İkon adı |
+| `icon` | PrimeIcons adı, `pi pi-` öneki olmadan (`cog`, `users`, `tag`); frontend `pi pi-{icon}` olarak kullanır |
 | `sort_order` | Aynı seviyedeki menüler arasındaki sıra |
 | `admin_only` | `true` ise sadece ADMIN görür |
 

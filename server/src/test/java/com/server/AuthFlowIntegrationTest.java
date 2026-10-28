@@ -74,7 +74,7 @@ class AuthFlowIntegrationTest {
     @Test
     void migrationsAreAppliedOnce() {
         List<Integer> versions = jdbc.queryForList("SELECT version FROM data_migration_history ORDER BY version", Integer.class);
-        assertThat(versions).containsExactly(1, 2, 3, 4);
+        assertThat(versions).containsExactly(1, 2, 3, 4, 5);
     }
 
     @Test
@@ -87,7 +87,13 @@ class AuthFlowIntegrationTest {
                 .andExpect(jsonPath("$.data.user.role").value("ADMIN"))
                 .andExpect(jsonPath("$.data.expiresIn").value(900))
                 .andExpect(jsonPath("$.data.menus[*].titleKey", hasItem("menu_administration")))
-                .andExpect(jsonPath("$.data.menus[0].children[0].titleKey").value("menu_categories"))
+                .andExpect(jsonPath("$.data.menus[0].titleKey").value("menu_home"))
+                .andExpect(jsonPath("$.data.menus[0].route").value("/"))
+                .andExpect(jsonPath("$.data.menus[1].titleKey").value("menu_definitions"))
+                .andExpect(jsonPath("$.data.menus[1].route").value("/definitions"))
+                .andExpect(jsonPath("$.data.menus[1].icon").value("cog"))
+                .andExpect(jsonPath("$.data.menus[1].children[0].titleKey").value("menu_categories"))
+                .andExpect(jsonPath("$.data.menus[1].children[0].route").value("/definitions/categories"))
                 .andReturn().getResponse();
 
         assertThat(response.getHeader(HttpHeaders.SET_COOKIE)).contains("HttpOnly", "SameSite=Strict", "Path=/api/auth");
@@ -154,6 +160,24 @@ class AuthFlowIntegrationTest {
     @Test
     void requestWithoutTokenReturns401InApiFormat() throws Exception {
         expectError(get("/api/categories"), 401, GlobalMessages.UNAUTHORIZED);
+    }
+
+    @Test
+    void categoriesCreatedReportReturnsEveryDayIncludingToday() throws Exception {
+        String token = accessToken(login(ADMIN_EMAIL, ADMIN_PASSWORD));
+        mockMvc.perform(withToken(post("/api/categories"), token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"name\":\"Rapor " + UUID.randomUUID() + "\"}"))
+                .andExpect(status().isOk());
+        String today = java.time.LocalDate.now(java.time.ZoneId.of("Europe/Istanbul")).toString();
+
+        mockMvc.perform(withToken(get("/api/reports/categories-created").param("days", "7"), token))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.length()").value(7))
+                .andExpect(jsonPath("$.data[6].period").value(today))
+                .andExpect(jsonPath("$.data[6].value").value(org.hamcrest.Matchers.greaterThanOrEqualTo(1)));
+
+        expectError(withToken(get("/api/reports/categories-created").param("days", "0"), token), 400, "report_days_invalid");
     }
 
     @Test
