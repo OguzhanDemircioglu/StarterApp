@@ -276,6 +276,19 @@ Formatın korunduğu **kontrat testleriyle** garanti edilir: §5.2'deki her stat
 - URL'lerde fiil kullanılmaz (`/add`, `/update` yok). Kaynak adları çoğul ve kebab-case yazılır.
 - **Sayfalama yok (v1).** Listeler düz dizi döner. Sayfalama ileride eklenirse mevcut endpoint'lerin dönüşü değiştirilmez, ayrı endpoint olarak eklenir.
 
+### 5.5 Rapor ve grafik endpoint'leri
+
+Frontend'de çok sayıda grafik olacak. Grafikler ham kayıtlarla değil, backend'in hazırladığı **özet verilerle** beslenir.
+
+- **Yol:** `GET /api/reports/{rapor-adi}`, filtreler query parametresiyle verilir. Örnek:
+  `GET /api/reports/categories-created?days=30` → `data: [ { "period": "2026-10-01", "value": 3 }, ... ]`
+- **Toplama SQL'de yapılır** (`GROUP BY`, `COUNT`, `SUM`). Ham satırlar frontend'e çekilip orada toplanmaz. Bu sayede rapor endpoint'leri az satır döner ve "sayfalama yok" kuralıyla çelişmez.
+- **Gün, hafta ve ay gruplaması Türkiye saatine göre yapılır.** Tarihler UTC saklandığı için düz `date_trunc('day', created_at)` gece 00:00–03:00 arasındaki kayıtları bir önceki güne yazar. Doğrusu:
+  `date_trunc('day', created_at AT TIME ZONE 'Europe/Istanbul')`
+- **Boş günler** de cevapta 0 değeriyle bulunur (SQL'de `generate_series` ile). Böylece grafiğin zaman ekseninde boşluk oluşmaz.
+- **Soft delete filtresi:** Rapor sorguları native SQL olduğunda `deleted = false` koşulu elle yazılır; Hibernate'in otomatik filtresi native SQL'de çalışmaz.
+- **Dönüş tipleri** her rapor için record olarak yazılır (`PeriodValue(String period, long value)` gibi); `ApiResponse` formatı aynen geçerlidir.
+
 ---
 
 ## 6. Mesajlar
