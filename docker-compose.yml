@@ -1,8 +1,10 @@
 # StarterApp geliştirme ortamı (repo kökünden çalıştırılır).
-#   docker compose up -d                → sadece PostgreSQL 18 (uygulamalar IDE'den / ng serve ile çalıştırılır)
-#   docker compose --profile app up -d  → PostgreSQL 18 + server + client → http://localhost:4200
+#   docker compose --profile app up -d  → server + client → http://localhost:4200
+#                                         Veritabanı ve admin bilgileri server/.env'den gelir (DB_URL, ADMIN_EMAIL...).
+#   docker compose --profile db up -d   → sadece yerel PostgreSQL 18 (localhost:5433); .env'deki DB_URL buna çevrilirse kullanılır
 services:
   postgres:
+    profiles: ["db"]
     image: postgres:18
     environment:
       POSTGRES_DB: starterapp
@@ -23,15 +25,11 @@ services:
   server:
     profiles: ["app"]
     build: ./server
-    depends_on:
-      postgres:
-        condition: service_healthy
+    # DB_URL, DB_USERNAME, DB_PASSWORD, DB_SCHEMA, ADMIN_EMAIL, ADMIN_PASSWORD: IDE'den çalıştırmayla aynı dosya.
+    # (.env imaja girmez; .dockerignore'da.)
+    env_file: ./server/.env
     environment:
       SPRING_PROFILES_ACTIVE: dev
-      DB_URL: jdbc:postgresql://postgres:5432/starterapp
-      DB_USERNAME: starterapp
-      DB_PASSWORD: starterapp
-      DB_SCHEMA: starterapp
       JWT_PRIVATE_KEY_PATH: /app/keys/private.pem
       JWT_PUBLIC_KEY_PATH: /app/keys/public.pem
       # Client aynı adresten (nginx) geldiği için CORS gerekmez; gerçek istemci IP'si nginx'in X-Forwarded-For'undan.

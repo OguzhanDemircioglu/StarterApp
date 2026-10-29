@@ -41,8 +41,11 @@ ADMIN_PASSWORD=...
 
 - `DB_SCHEMA` **zorunludur** ve küçük harf olmalıdır. Uygulamanın bütün tabloları bu şemada durur; şema yoksa ilk
   açılışta oluşturulur. Başka projelerle paylaşılan bir veritabanında diğer şemalara (ör. `public`) dokunulmaz.
-- Docker ile yerel bir veritabanı için repo kökünde `docker compose up -d` → PostgreSQL 18, `localhost:5433`
-  (`DB_URL=jdbc:postgresql://localhost:5433/starterapp`, kullanıcı/şifre `starterapp`).
+- Aynı `.env`'yi `docker compose --profile app` da kullanır (server container'ına `env_file` ile verilir); IDE'den ve
+  Docker'dan çalıştırınca aynı veritabanına, aynı admin hesabıyla bağlanılır.
+- Docker ile yerel bir veritabanı için repo kökünde `docker compose --profile db up -d` → PostgreSQL 18, `localhost:5433`
+  (`DB_URL=jdbc:postgresql://localhost:5433/starterapp`, kullanıcı/şifre `starterapp`). Bu adres sadece IDE'den
+  çalıştırırken geçerlidir; compose'daki server container'ı için `jdbc:postgresql://host.docker.internal:5433/starterapp` yazılır.
 - `.env` yoksa dev profili `localhost:5432/starterapp` adresine `postgres/postgres` ile bağlanmayı dener;
   `DB_SCHEMA` yine de (ortam değişkeni olarak) verilmelidir, aksi halde uygulama açılmaz.
 
@@ -85,12 +88,14 @@ yapın (`.env` ve `keys/` bu dizine göre aranır).
 
 ## Docker
 
-Server ve (eklenince) client'ı birlikte çalıştıran [docker-compose.yml](../docker-compose.yml) repo kökündedir:
+Server ve client'ı birlikte çalıştıran [docker-compose.yml](../docker-compose.yml) repo kökündedir:
 
 ```bash
-# repo kökünde
+# repo kökünde; server/.env ve server/keys/ hazır olmalı
 docker compose --profile app up -d
 ```
+
+Veritabanı ve admin bilgileri `server/.env`'den okunur (bkz. "İlk kurulum").
 
 Sadece server imajı için (`server/` klasöründe): `docker build -t starterapp-server .`
 

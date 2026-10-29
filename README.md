@@ -9,7 +9,7 @@ Yeni bir projeye bu repo kopyalanarak başlanır.
 | [client/](client/README.md) | Angular 22, NG-ZORRO, ECharts, NgRx. Kurulum ve çalıştırma: [client/README.md](client/README.md) |
 | [docs/Backend_Architecture.md](docs/Backend_Architecture.md) | Backend'in bağlayıcı kuralları ve tasarım kararları |
 | [docs/Frontend_Architecture.md](docs/Frontend_Architecture.md) | Frontend'in bağlayıcı kuralları ve tasarım kararları |
-| [docker-compose.yml](docker-compose.yml) | Geliştirme ortamı: PostgreSQL 18, server ve client |
+| [docker-compose.yml](docker-compose.yml) | Geliştirme ortamı: server ve client (`server/.env`'deki veritabanına bağlanır); isteğe bağlı yerel PostgreSQL 18 |
 
 ## Hızlı başlangıç
 
@@ -21,11 +21,12 @@ Yeni bir projeye bu repo kopyalanarak başlanır.
    - Docker ile, repo kökünde:
 
      ```bash
-     docker compose up -d                 # sadece PostgreSQL 18 (localhost:5433)
-     docker compose --profile app up -d   # PostgreSQL 18 + server + client → http://localhost:4200
+     docker compose --profile app up -d   # server + client → http://localhost:4200
+     docker compose --profile db up -d    # isteğe bağlı: sadece yerel PostgreSQL 18 (localhost:5433)
      ```
 
-     `--profile app` için JWT anahtarlarının `server/keys/` altında olması gerekir; compose onları container'a bağlar.
+     `--profile app` için `server/.env` ve `server/keys/` hazır olmalıdır. Server, veritabanı ve admin bilgilerini
+     `server/.env`'den alır; IDE'den çalıştırmayla aynı veritabanına bağlanır.
 
 ## Gereksinimler
 
