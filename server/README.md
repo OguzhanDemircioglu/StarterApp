@@ -80,8 +80,8 @@ yapın (`.env` ve `keys/` bu dizine göre aranır).
 ```
 
 - Unit ve kontrat testleri her yerde çalışır.
-- `AuthFlowIntegrationTest` ve `SchemaIsolationIntegrationTest` gerçek bir PostgreSQL 18'i Testcontainers ile açar;
-  **Docker yoksa otomatik atlanır**.
+- `AuthFlowIntegrationTest`, `SchemaIsolationIntegrationTest` ve `FirewallIntegrationTest` gerçek bir PostgreSQL 18'i
+  Testcontainers ile açar; **Docker yoksa otomatik atlanır**.
 
 ## Docker
 

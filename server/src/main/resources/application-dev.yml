@@ -11,6 +11,11 @@ spring:
   jpa:
     show-sql: true
 
+logging:
+  pattern:
+    # Her satıra isteğin traceId'si (TraceIdFilter → MDC) yazılır; istek dışındaki satırlarda boş kalır.
+    correlation: "%correlationId{traceId(16)}"
+
 springdoc:
   api-docs:
     enabled: true

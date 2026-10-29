@@ -261,7 +261,7 @@ Response formatını bozabilecek üç çıkış noktası vardır. Üçü de ayn�
 
 1. **Controller'dan çıkan hatalar:** `GlobalExceptionHandler` (`@RestControllerAdvice`) yakalar.
 2. **Spring Security hataları (401, 403):** Bunlar ControllerAdvice'a ulaşmaz. `RestAuthenticationEntryPoint` ve `RestAccessDeniedHandler` yakalar.
-3. **Filtre seviyesindeki diğer hatalar:** Spring'in `/error` endpoint'ine düşerler. Onun yerine `ApiErrorController` cevap verir.
+3. **Filtre seviyesindeki diğer hatalar:** Spring'in `/error` endpoint'ine düşerler. Onun yerine `ApiErrorController` cevap verir. Security firewall'unun reddettiği istekler de (ör. URL'de `;`) buraya düşer ve 400 `invalid_request` döner.
 
 Formatın korunduğu **kontrat testleriyle** garanti edilir: §5.2'deki her status için bir test, dört alanın varlığını ve tipini kontrol eder (§17).
 
@@ -659,7 +659,7 @@ Swarm'da bu iş her replica'da ayrı ayrı çalışır. Bu zararsızdır, çünk
 
 - **TraceId:** `TraceIdFilter`, Security filtrelerinden **önce** çalışır. Her istek için 16 karakterlik bir id üretir, bunu MDC'ye ve `X-Trace-Id` response başlığına yazar. Böylece 401 ve 403 cevaplarında da traceId bulunur.
 - `ApiResponse.traceId` değeri MDC'den okunur.
-- **dev profili:** Okunabilir düz metin, konsola.
+- **dev profili:** Okunabilir düz metin, konsola. Her satırda thread adından sonra `[traceId]` bulunur (`logging.pattern.correlation`); istek dışındaki satırlarda boş kalır.
 - **prod profili:** Boot'un yerleşik JSON (structured) log formatı, stdout'a. Log dosyası **yazılmaz**: Swarm'da birden fazla replica aynı dosyaya yazamaz. Loglar `docker service logs` ile okunur; Docker log driver'ında boyut ve rotasyon ayarı yapılır.
 - Log zamanları `Europe/Istanbul` saat dilimiyle yazılır.
 - Şifreler, token'lar ve cookie değerleri **loglanmaz**.

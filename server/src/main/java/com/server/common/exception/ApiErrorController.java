@@ -12,6 +12,15 @@ import org.springframework.web.bind.annotation.RestController;
 /**
  * Filtre seviyesinde oluşan ve Spring'in /error endpoint'ine düşen hataları da ApiResponse formatında döner.
  * Spring Boot'un varsayılan hata cevabının yerini alır.
+ * <p>
+ * Controller'a ulaşan istekler {@link GlobalExceptionHandler}'da cevaplanır; buraya sadece onun göremediği hatalar gelir:
+ * <ul>
+ *   <li>Security firewall'unun reddettiği istekler (ör. URL'de {@code ;}, {@code %2e}): {@code sendError(400)} → {@code invalid_request}</li>
+ *   <li>Filtrelerde fırlayan beklenmedik exception'lar → 500 {@code unexpected_error}</li>
+ *   <li>Container'ın kendi {@code sendError} çağrıları (status neyse o)</li>
+ * </ul>
+ * Status ile mesaj anahtarı eşlemesi {@link StatusMessages#forStatus} içindedir. Error dispatch'i de {@code TraceIdFilter}'dan
+ * geçtiği için cevaptaki traceId, ilk isteğinkiyle aynıdır.
  */
 @RestController
 public class ApiErrorController implements ErrorController {
