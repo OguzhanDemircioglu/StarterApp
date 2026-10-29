@@ -1,0 +1,17 @@
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 100%;
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+nz-tag {
+  margin-left: 8px;
+  margin-right: 0;
+}

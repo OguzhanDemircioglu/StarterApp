@@ -1,0 +1,16 @@
+/* Sadece genel ayarlar; component stilleri kendi .css dosyalarındadır. NG-ZORRO stilleri angular.json'dan gelir. */
+html,
+body {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  background: #f5f5f5;
+}
+
+/* app-section'ın sağ üstündeki düğme grubu (arama, yenile, ekle) */
+.section-actions {
+  display: flex;
+  gap: 8px;
+}

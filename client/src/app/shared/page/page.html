@@ -1,0 +1,15 @@
+<nz-breadcrumb>
+  @for (crumb of crumbs(); track crumb.url; let last = $last) {
+    <nz-breadcrumb-item>
+      @if (last) {
+        {{ crumb.titleKey | translate }}
+      } @else {
+        <a [routerLink]="crumb.url">{{ crumb.titleKey | translate }}</a>
+      }
+    </nz-breadcrumb-item>
+  }
+</nz-breadcrumb>
+
+<h2 class="page-title">{{ title() | translate }}</h2>
+
+<ng-content />

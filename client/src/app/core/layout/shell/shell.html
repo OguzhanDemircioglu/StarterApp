@@ -1,0 +1,23 @@
+<nz-layout class="shell">
+  <nz-sider
+    class="sider"
+    nzCollapsible
+    nzBreakpoint="lg"
+    nzWidth="240px"
+    [nzCollapsedWidth]="64"
+    [nzTrigger]="null"
+    [(nzCollapsed)]="collapsed"
+  >
+    <a class="brand" routerLink="/">{{ collapsed() ? 'SA' : 'StarterApp' }}</a>
+    <app-sidebar-menu [collapsed]="collapsed()" />
+  </nz-sider>
+
+  <nz-layout>
+    <nz-header class="header">
+      <app-topbar [collapsed]="collapsed()" (toggleSidebar)="collapsed.set(!collapsed())" />
+    </nz-header>
+    <nz-content class="content">
+      <router-outlet />
+    </nz-content>
+  </nz-layout>
+</nz-layout>

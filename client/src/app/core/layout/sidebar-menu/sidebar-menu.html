@@ -1,0 +1,26 @@
+<ul nz-menu nzTheme="dark" nzMode="inline" [nzInlineCollapsed]="collapsed()">
+  <ng-container *ngTemplateOutlet="menuItems; context: { $implicit: menus() }" />
+
+  <!--
+    Şablon nz-menu'nün İÇİNDE tanımlı olmalı: Angular bağımlılıkları şablonun tanımlandığı yerden çözer ve
+    menü öğeleri nz-menu'nün sağladığı MenuService'e ihtiyaç duyar.
+  -->
+  <ng-template #menuItems let-nodes>
+    @for (node of nodes; track node.id) {
+      @if (node.children.length > 0) {
+        <li nz-submenu [nzTitle]="node.titleKey | translate" [nzIcon]="node.icon" [nzOpen]="isInside(node.route)">
+          <ul>
+            <ng-container *ngTemplateOutlet="menuItems; context: { $implicit: node.children }" />
+          </ul>
+        </li>
+      } @else {
+        <li nz-menu-item nzMatchRouter [nzMatchRouterExact]="node.route === '/'" [routerLink]="node.route">
+          @if (node.icon) {
+            <nz-icon [nzType]="node.icon" />
+          }
+          <span>{{ node.titleKey | translate }}</span>
+        </li>
+      }
+    }
+  </ng-template>
+</ul>

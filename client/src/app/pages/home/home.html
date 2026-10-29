@@ -1,0 +1,9 @@
+<app-page>
+  <app-section title="home_welcome_title">
+    {{ 'home_welcome' | translate: { name: user()?.fullName } }}
+  </app-section>
+
+  <app-section title="home_chart_title">
+    <app-chart [options]="chartOptions()" [loading]="loading()" [empty]="empty()" />
+  </app-section>
+</app-page>

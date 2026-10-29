@@ -1,0 +1,35 @@
+.shell {
+  min-height: 100vh;
+}
+
+.sider {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow: auto;
+}
+
+.brand {
+  display: block;
+  height: 64px;
+  line-height: 64px;
+  padding: 0 24px;
+  color: #fff;
+  font-size: 18px;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  padding: 0 16px;
+  background: #fff;
+  box-shadow: 0 1px 4px rgba(0, 21, 41, 0.08);
+}
+
+.content {
+  padding: 16px 24px 24px;
+}

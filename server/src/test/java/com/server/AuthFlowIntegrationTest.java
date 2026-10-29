@@ -91,7 +91,7 @@ class AuthFlowIntegrationTest {
                 .andExpect(jsonPath("$.data.menus[0].route").value("/"))
                 .andExpect(jsonPath("$.data.menus[1].titleKey").value("menu_definitions"))
                 .andExpect(jsonPath("$.data.menus[1].route").value("/definitions"))
-                .andExpect(jsonPath("$.data.menus[1].icon").value("cog"))
+                .andExpect(jsonPath("$.data.menus[1].icon").value("setting"))
                 .andExpect(jsonPath("$.data.menus[1].children[0].titleKey").value("menu_categories"))
                 .andExpect(jsonPath("$.data.menus[1].children[0].route").value("/definitions/categories"))
                 .andReturn().getResponse();

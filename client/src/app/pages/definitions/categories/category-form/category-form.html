@@ -1,0 +1,31 @@
+<nz-modal
+  [nzVisible]="open()"
+  [nzTitle]="(isEdit() ? 'category_edit_title' : 'category_create_title') | translate"
+  [nzOkText]="'common_save' | translate"
+  [nzCancelText]="'common_cancel' | translate"
+  [nzOkLoading]="saving()"
+  (nzOnOk)="save()"
+  (nzOnCancel)="open.set(false)"
+>
+  <ng-container *nzModalContent>
+    <form nz-form nzLayout="vertical" [formGroup]="form" (ngSubmit)="save()">
+      <nz-form-item>
+        <nz-form-label nzRequired>{{ 'category_name' | translate }}</nz-form-label>
+        <nz-form-control [nzErrorTip]="nameErrors">
+          <input nz-input formControlName="name" />
+        </nz-form-control>
+        <ng-template #nameErrors let-control>
+          @if (control.errors?.['required']) { {{ 'category_name_required' | translate }} }
+          @if (control.errors?.['maxlength']) { {{ 'category_name_too_long' | translate }} }
+        </ng-template>
+      </nz-form-item>
+
+      <nz-form-item>
+        <nz-form-label>{{ 'category_description' | translate }}</nz-form-label>
+        <nz-form-control [nzErrorTip]="'category_description_too_long' | translate">
+          <textarea nz-input rows="4" formControlName="description"></textarea>
+        </nz-form-control>
+      </nz-form-item>
+    </form>
+  </ng-container>
+</nz-modal>

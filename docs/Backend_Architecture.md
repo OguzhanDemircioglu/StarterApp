@@ -609,7 +609,7 @@ Tablo: `menus` (BaseEntity alanları + aşağıdakiler)
 | `parent_id` | Üst menünün id'si; kök menülerde `null`. **Düz bir `Long` alandır**, JPA ilişkisi kurulmaz |
 | `title_key` | Çeviri anahtarı; benzersizdir (`menu_categories`) |
 | `route` | Frontend rotası; alt menüsü olan grup menülerinde `null` |
-| `icon` | PrimeIcons adı, `pi pi-` öneki olmadan (`cog`, `users`, `tag`); frontend `pi pi-{icon}` olarak kullanır |
+| `icon` | Ant Design ikon adı (`home`, `setting`, `tag`, `team`); frontend `nz-icon` ile çizer. Yeni bir ikon frontend'de de kayıt edilmelidir (Frontend_Architecture.md §11) |
 | `sort_order` | Aynı seviyedeki menüler arasındaki sıra |
 | `admin_only` | `true` ise sadece ADMIN görür |
 
@@ -715,7 +715,7 @@ Dosyalar: `application.yml` (ortak), `application-dev.yml`, `application-prod.ym
 **Docker aşamasına bırakılanlar:**
 - HTTPS (Swarm'da genelde önüne Traefik gibi bir reverse proxy konur).
 - Gerçek IP'nin korunması (`mode: host`, §13).
-- Angular'ın nasıl sunulacağı (client dokümanında kararlaştırılacak).
+- Angular client kendi container'ında nginx ile sunulur ve `/api` isteklerini server'a iletir (Frontend_Architecture.md §14). Bu yüzden compose'da server'a `FORWARD_HEADERS_STRATEGY=native` verilir ve CORS kapalıdır.
 
 ---
 

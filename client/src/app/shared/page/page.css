@@ -1,0 +1,9 @@
+:host {
+  display: block;
+}
+
+.page-title {
+  margin: 12px 0 16px;
+  font-size: 20px;
+  font-weight: 600;
+}

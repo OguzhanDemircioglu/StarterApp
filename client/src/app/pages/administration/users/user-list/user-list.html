@@ -1,0 +1,81 @@
+<app-page>
+  <app-section title="user_list_title">
+    <div sectionActions class="section-actions">
+      <nz-input-group nzPrefixIcon="search">
+        <input
+          nz-input
+          [placeholder]="'common_search' | translate"
+          [ngModel]="search()"
+          (ngModelChange)="search.set($event)"
+        />
+      </nz-input-group>
+      <button nz-button nz-tooltip [nzTooltipTitle]="'common_reload' | translate" (click)="load()">
+        <nz-icon nzType="reload" />
+      </button>
+      <button nz-button nzType="primary" (click)="openCreate()">
+        <nz-icon nzType="plus" /> {{ 'common_add' | translate }}
+      </button>
+    </div>
+
+    <nz-table #table [nzData]="filtered()" [nzLoading]="loading()" [nzPageSize]="20" nzSize="middle">
+      <thead>
+        <tr>
+          <th [nzSortFn]="sortByEmail">{{ 'user_email' | translate }}</th>
+          <th [nzSortFn]="sortByFullName">{{ 'user_full_name' | translate }}</th>
+          <th nzWidth="120px">{{ 'user_role' | translate }}</th>
+          <th nzWidth="120px">{{ 'user_active' | translate }}</th>
+          <th nzWidth="180px">{{ 'common_created_at' | translate }}</th>
+          <th nzWidth="160px" nzAlign="right">{{ 'common_actions' | translate }}</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (user of table.data; track user.id) {
+          <tr>
+            <td>{{ user.email }}</td>
+            <td>{{ user.fullName }}</td>
+            <td>
+              <nz-tag [nzColor]="user.role === 'ADMIN' ? 'gold' : 'blue'">
+                {{ (user.role === 'ADMIN' ? 'role_admin' : 'role_user') | translate }}
+              </nz-tag>
+            </td>
+            <td>
+              <nz-tag [nzColor]="user.active ? 'green' : 'default'">
+                {{ (user.active ? 'user_status_active' : 'user_status_inactive') | translate }}
+              </nz-tag>
+            </td>
+            <td>{{ user.createdAt | date: 'dd.MM.yyyy HH:mm' }}</td>
+            <td nzAlign="right">
+              <button nz-button nzType="text" nz-tooltip [nzTooltipTitle]="'common_edit' | translate" (click)="openEdit(user)">
+                <nz-icon nzType="edit" />
+              </button>
+              <button
+                nz-button
+                nzType="text"
+                nz-tooltip
+                [nzTooltipTitle]="'user_reset_password' | translate"
+                (click)="openPasswordReset(user)"
+              >
+                <nz-icon nzType="key" />
+              </button>
+              <button
+                nz-button
+                nzType="text"
+                nzDanger
+                nz-popconfirm
+                [nzPopconfirmTitle]="'user_delete_confirm' | translate"
+                [nzOkText]="'common_delete' | translate"
+                [nzCancelText]="'common_cancel' | translate"
+                (nzOnConfirm)="remove(user)"
+              >
+                <nz-icon nzType="delete" />
+              </button>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </nz-table>
+  </app-section>
+</app-page>
+
+<app-user-form [(open)]="formOpen" [user]="editing()" (saved)="load()" />
+<app-user-password-form [(open)]="passwordFormOpen" [user]="passwordUser()" />
