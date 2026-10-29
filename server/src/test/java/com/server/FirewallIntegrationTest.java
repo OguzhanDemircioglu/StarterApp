@@ -4,7 +4,10 @@ import com.server.common.message.GlobalMessages;
 import com.server.common.web.TraceIdFilter;
 import com.server.support.TestJwtKeys;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.system.CapturedOutput;
+import org.springframework.boot.test.system.OutputCaptureExtension;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
@@ -27,6 +30,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Testcontainers(disabledWithoutDocker = true)
+@ExtendWith(OutputCaptureExtension.class)
 class FirewallIntegrationTest {
 
     @Container
@@ -47,7 +51,7 @@ class FirewallIntegrationTest {
     private int port;
 
     @Test
-    void rejectedRequestReturns400InApiFormat() throws Exception {
+    void rejectedRequestReturns400InApiFormat(CapturedOutput output) throws Exception {
         HttpResponse<String> response;
         try (HttpClient client = HttpClient.newHttpClient()) {
             // StrictHttpFirewall URL'de ';' kabul etmez.
@@ -63,5 +67,6 @@ class FirewallIntegrationTest {
         assertThat(body.get("traceId").asString())
                 .isNotBlank()
                 .isEqualTo(response.headers().firstValue(TraceIdFilter.HEADER).orElseThrow());
+        assertThat(output).contains("400 " + GlobalMessages.INVALID_REQUEST + " GET /api/categories;x=y");
     }
 }

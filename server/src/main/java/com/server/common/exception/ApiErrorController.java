@@ -3,6 +3,7 @@ package com.server.common.exception;
 import com.server.common.response.ApiResponse;
 import jakarta.servlet.RequestDispatcher;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.webmvc.error.ErrorController;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -21,7 +22,10 @@ import org.springframework.web.bind.annotation.RestController;
  * </ul>
  * Status ile mesaj anahtarı eşlemesi {@link StatusMessages#forStatus} içindedir. Error dispatch'i de {@code TraceIdFilter}'dan
  * geçtiği için cevaptaki traceId, ilk isteğinkiyle aynıdır.
+ * <p>
+ * 4xx cevaplar {@code INFO}, 5xx cevaplar (varsa exception'ın stacktrace'iyle) {@code ERROR} seviyesinde loglanır.
  */
+@Slf4j
 @RestController
 public class ApiErrorController implements ErrorController {
 
@@ -33,6 +37,15 @@ public class ApiErrorController implements ErrorController {
         if (status == null || !status.isError()) {
             status = HttpStatus.INTERNAL_SERVER_ERROR;
         }
-        return ResponseEntity.status(status).body(ApiResponse.error(StatusMessages.forStatus(status)));
+        String messageKey = StatusMessages.forStatus(status);
+        // request.getRequestURI() burada "/error"dur; asıl adres error attribute'unda.
+        Object uri = request.getAttribute(RequestDispatcher.ERROR_REQUEST_URI);
+        if (status.is4xxClientError()) {
+            log.info("{} {} {} {}", status.value(), messageKey, request.getMethod(), uri);
+        } else {
+            log.error("{} {} {} {}", status.value(), messageKey, request.getMethod(), uri,
+                    request.getAttribute(RequestDispatcher.ERROR_EXCEPTION));
+        }
+        return ResponseEntity.status(status).body(ApiResponse.error(messageKey));
     }
 }

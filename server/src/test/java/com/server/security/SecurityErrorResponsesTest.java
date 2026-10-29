@@ -6,6 +6,9 @@ import com.server.common.response.ApiResponse;
 import com.server.common.response.ApiResponseWriter;
 import jakarta.servlet.RequestDispatcher;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.springframework.boot.test.system.CapturedOutput;
+import org.springframework.boot.test.system.OutputCaptureExtension;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
@@ -19,6 +22,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * Controller dışındaki çıkış noktaları (401/403 handler'ları ve /error) da aynı formatı dönmeli.
  */
+@ExtendWith(OutputCaptureExtension.class)
 class SecurityErrorResponsesTest {
 
     private final JsonMapper jsonMapper = JsonMapper.builder().build();
@@ -61,6 +65,21 @@ class SecurityErrorResponsesTest {
 
         assertThat(response.getStatusCode().value()).isEqualTo(500);
         assertThat(response.getBody().message()).isEqualTo(GlobalMessages.UNEXPECTED_ERROR);
+    }
+
+    @Test
+    void errorControllerLogs500WithStacktrace(CapturedOutput output) {
+        MockHttpServletRequest request = new MockHttpServletRequest("GET", "/error");
+        request.setAttribute(RequestDispatcher.ERROR_STATUS_CODE, 500);
+        request.setAttribute(RequestDispatcher.ERROR_REQUEST_URI, "/api/categories");
+        request.setAttribute(RequestDispatcher.ERROR_EXCEPTION, new IllegalStateException("filter failed"));
+
+        new ApiErrorController().error(request);
+
+        assertThat(output)
+                .contains("ERROR")
+                .contains("500 " + GlobalMessages.UNEXPECTED_ERROR + " GET /api/categories")
+                .contains("java.lang.IllegalStateException: filter failed");
     }
 
     private void assertApiError(MockHttpServletResponse response, int status, String message) throws Exception {

@@ -339,7 +339,7 @@ BaseException (abstract: HttpStatus + mesaj anahtarı)
 - Validation mesajı bir anahtar formatında değilse (ör. `message` verilmesi unutulmuşsa ve Hibernate Validator'ın
   varsayılan metni geldiyse) frontend'e `invalid_request` gider; düz metin asla gitmez.
 - Stacktrace, SQL ve sınıf adları response'a **asla** çıkmaz.
-- 500 hataları stacktrace ile `ERROR` seviyesinde loglanır. Bütün 4xx cevapları status ve mesaj anahtarıyla `INFO` seviyesinde loglanır (`GlobalExceptionHandler`, 401/403 handler'ları); DB çakışmaları (`record_conflict`) ayrıca nedeniyle `WARN` seviyesinde. traceId her log satırında bulunur.
+- 500 hataları stacktrace ile `ERROR` seviyesinde loglanır. Bütün 4xx cevapları status ve mesaj anahtarıyla `INFO` seviyesinde loglanır (`GlobalExceptionHandler`, 401/403 handler'ları, `/error`a düşenler için `ApiErrorController`); DB çakışmaları (`record_conflict`) ayrıca nedeniyle `WARN` seviyesinde. traceId her log satırında bulunur.
 - NPE ve ClassCastException gibi hatalar kodun hatasıdır, 500 döner.
 - İş kuralı ihlalinde her zaman `throw new BusinessException(XxxMessages.KEY)` kullanılır.
 
