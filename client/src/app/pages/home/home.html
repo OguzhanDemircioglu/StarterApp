@@ -16,7 +16,8 @@
     }
   </div>
 
-  <nz-tabs>
+  <!-- Görünmeyen sekme kaldırılır: tarayıcı aynı anda açık WebGL bağlamı sayısını sınırlar. -->
+  <nz-tabs [nzDestroyInactiveTabPane]="true">
     @for (tab of tabs; track tab.title) {
       <nz-tab [nzTitle]="tab.title | translate">
         <ng-template nz-tab>
@@ -27,6 +28,24 @@
     <nz-tab [nzTitle]="'dash_tab_extensions' | translate" (nzSelect)="loadExtensions()">
       <ng-template nz-tab>
         <ng-container [ngTemplateOutlet]="chartGrid" [ngTemplateOutletContext]="{ $implicit: extensionCards() }" />
+      </ng-template>
+    </nz-tab>
+    <nz-tab [nzTitle]="'dash_tab_maps' | translate" (nzSelect)="loadMaps()">
+      <ng-template nz-tab>
+        <div class="charts">
+          @for (card of mapCards(); track card.title) {
+            <app-section [title]="card.title">
+              <nz-tag sectionActions>{{ card.kind }}</nz-tag>
+              <p class="chart-note">{{ card.note | translate }}</p>
+              <app-deck-map
+                [view]="card.view"
+                [layers]="card.layers"
+                [animated]="card.animated ?? false"
+                [tooltip]="card.tooltip"
+              />
+            </app-section>
+          }
+        </div>
       </ng-template>
     </nz-tab>
     <nz-tab [nzTitle]="'dash_tab_live' | translate">

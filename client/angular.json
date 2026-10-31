@@ -16,6 +16,7 @@
         "build": {
           "builder": "@angular/build:application",
           "options": {
+            "allowedCommonJsDependencies": ["echarts/i18n/langTR-obj.js", "earcut"],
             "browser": "src/main.ts",
             "tsConfig": "tsconfig.app.json",
             "assets": [
@@ -36,6 +37,11 @@
               {
                 "glob": "echarts-wordcloud.min.js",
                 "input": "node_modules/echarts-wordcloud/dist",
+                "output": "vendor"
+              },
+              {
+                "glob": "maplibre-gl{.css,-worker.mjs,-shared.mjs}",
+                "input": "node_modules/maplibre-gl/dist",
                 "output": "vendor"
               }
             ],

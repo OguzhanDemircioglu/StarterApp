@@ -3,6 +3,7 @@ import { ChartBuilder, ChartCard, ChartContext } from './dashboard.model';
 import { extensionCharts } from './extensions.charts';
 import { financeCharts, waterfallSteps } from './finance.charts';
 import { galleryCharts } from './gallery.charts';
+import { MAP_CARDS } from './maps.charts';
 import { menuCharts } from './menu.charts';
 import { operationsCharts } from './operations.charts';
 import { overviewCharts, overviewKpis } from './overview.charts';
@@ -97,6 +98,12 @@ describe('restaurant dashboard', () => {
     expect(sum(MENU.flatMap((category) => category.children ?? []).map((dish) => dish.value ?? 0))).toBe(TOTAL_REVENUE);
     expect(sum(FLOOR_ZONES.map((zone) => zone.revenue))).toBe(CHANNELS[0].monthly.reduce((a, b) => a + b, 0));
     expect(sum(DAILY_REVENUE.map((day) => day.value))).toBeCloseTo(TOTAL_REVENUE, -1);
+  });
+
+  it('has a translation and working layers for every map', () => {
+    const texts = MAP_CARDS.flatMap((card) => [card.title, card.note]);
+    expect(texts.filter((key) => !(key in tr))).toEqual([]);
+    MAP_CARDS.forEach((card) => expect(card.layers(1).length).toBeGreaterThan(0));
   });
 
   it('has all 81 Turkish provinces on the map', () => {

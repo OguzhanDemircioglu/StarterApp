@@ -20,7 +20,7 @@ const TAX_RATE = 0.25;
 const RANDOM_SEED = 2026;
 
 /** Aynı seed aynı diziyi üretir: sayfa her açıldığında rakamlar değişmez. */
-function seededRandom(seed: number): () => number {
+export function seededRandom(seed: number): () => number {
   let state = seed;
   return () => {
     state = (state * 1664525 + 1013904223) % 4294967296;

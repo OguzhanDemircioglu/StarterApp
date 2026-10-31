@@ -7,6 +7,7 @@ import { NzTabsModule } from 'ng-zorro-antd/tabs';
 import { NzTagModule } from 'ng-zorro-antd/tag';
 import { sessionFeature } from '../../core/auth/session.state';
 import { Chart } from '../../shared/charts/chart';
+import { DeckMap } from '../../shared/charts/deck-map';
 import { formatDay, formatNumber } from '../../shared/charts/chart-format';
 import { Page } from '../../shared/page/page';
 import { Section } from '../../shared/page/section';
@@ -18,6 +19,7 @@ import { galleryCharts } from './dashboard/gallery.charts';
 import { menuCharts } from './dashboard/menu.charts';
 import { operationsCharts } from './dashboard/operations.charts';
 import { overviewCharts, overviewKpis } from './dashboard/overview.charts';
+import type { MapCard } from './dashboard/maps.charts';
 import { salesCharts } from './dashboard/sales.charts';
 import { HomeReportApi } from './home-report-api';
 import { PeriodValue } from './home-report.model';
@@ -38,7 +40,7 @@ const TABS: { title: string; build: ChartBuilder }[] = [
  * son sekmedeki "son 30 günde eklenen kategoriler" ise grafiğin backend'den beslendiği referans kalıptır.
  */
 @Component({
-  imports: [NgTemplateOutlet, TranslatePipe, NzTabsModule, NzTagModule, Page, Section, Chart],
+  imports: [NgTemplateOutlet, TranslatePipe, NzTabsModule, NzTagModule, Page, Section, Chart, DeckMap],
   templateUrl: './home.html',
   styleUrl: './home.css',
 })
@@ -79,6 +81,14 @@ export default class Home {
       },
     ],
   }));
+
+  /** Harita katmanları da büyük bir paket: sadece sekmesi açılınca indirilir. */
+  protected readonly mapCards = signal<MapCard[]>([]);
+
+  protected async loadMaps(): Promise<void> {
+    const { MAP_CARDS } = await import('./dashboard/maps.charts');
+    this.mapCards.set(MAP_CARDS);
+  }
 
   protected async loadExtensions(): Promise<void> {
     await loadEchartsExtensions();
