@@ -1,7 +1,6 @@
 import {
   DeleteOutline,
   EditOutline,
-  GlobalOutline,
   HomeOutline,
   KeyOutline,
   LockOutline,
@@ -33,7 +32,6 @@ export const APP_ICONS = [
   // Arayüz ikonları
   DeleteOutline,
   EditOutline,
-  GlobalOutline,
   KeyOutline,
   LockOutline,
   LogoutOutline,

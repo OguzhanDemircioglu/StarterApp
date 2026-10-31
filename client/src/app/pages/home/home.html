@@ -5,7 +5,7 @@
   </app-section>
 
   <div class="kpis">
-    @for (kpi of kpis(); track kpi.label) {
+    @for (kpi of kpis; track kpi.label) {
       <div class="kpi">
         <span class="kpi-label">{{ kpi.label | translate }}</span>
         <strong class="kpi-value">{{ kpi.value }}</strong>
@@ -17,7 +17,7 @@
   </div>
 
   <nz-tabs>
-    @for (tab of tabs(); track tab.title) {
+    @for (tab of tabs; track tab.title) {
       <nz-tab [nzTitle]="tab.title | translate">
         <ng-template nz-tab>
           <ng-container [ngTemplateOutlet]="chartGrid" [ngTemplateOutletContext]="{ $implicit: tab.cards }" />

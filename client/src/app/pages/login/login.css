@@ -19,12 +19,6 @@
   box-shadow: 0 0 20px #000;
 }
 
-.languages {
-  display: flex;
-  justify-content: center;
-  margin-top: 16px;
-}
-
 .form-box,
 .info-text {
   position: absolute;

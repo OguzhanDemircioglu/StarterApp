@@ -23,7 +23,7 @@
 | İkonlar | `@ant-design/icons-angular` (NG-ZORRO ile gelir) | Sadece kayıtlı ikonlar pakete girer (§11) |
 | Grafikler | Apache ECharts 6 + `ngx-echarts` 22 | Apache 2.0 / MIT, ücretsiz (§12) |
 | State | NgRx 22 (`store`, `effects`, `store-devtools`) | Sadece oturum (§8) |
-| Çeviri | ngx-translate 18 + http-loader | TR ve EN (§10) |
+| Metinler | ngx-translate 18 + http-loader | Sadece Türkçe (§10) |
 | Test | Vitest (Angular CLI'ın varsayılanı) | `npx ng test` |
 
 **Neden PrimeNG değil:** PrimeNG 2026'dan itibaren ticari lisansa geçti. Ücretsiz Community License yalnızca 5'ten az geliştiricili, 10'dan az çalışanlı ve 1 milyon dolardan az gelirli kuruluşlar için geçerli; diğerleri geliştirici başına ücret ödüyor ve paket bir lisans anahtarı istiyor. NG-ZORRO ve Angular Material MIT lisanslı; tablo ve form ağırlıklı ekranlara daha uygun olduğu için NG-ZORRO seçildi.
@@ -54,7 +54,7 @@ ErpStockTracer'dan **taşınmayanlar:** jQuery, AdminLTE, Bootstrap JS, SweetAle
 ```
 client/
 ├─ public/
-│  └─ i18n/                            tr.json, en.json (§10)
+│  └─ i18n/                            tr.json (§10)
 ├─ src/
 │  ├─ main.ts, index.html, styles.css
 │  └─ app/
@@ -68,7 +68,6 @@ client/
 │     │  │                             TokenRefresher (tek uçuş refresh), şifre değiştirme dialog'u
 │     │  ├─ layout/                    shell, sidebar-menu (DB'den), topbar
 │     │  ├─ notify/                    Notifier (bildirimler), errorInterceptor
-│     │  ├─ i18n/                      LanguageService (TR/EN)
 │     │  └─ icons.ts                   kayıtlı ikonlar (§11)
 │     │
 │     ├─ shared/                       sayfaların ortak kullandığı parçalar
@@ -271,7 +270,7 @@ Ekranlar sadece başarılı durumu yazar (`notifier.success('record_created')`).
 
 ## 10. Çeviri (i18n)
 
-- ngx-translate; dosyalar `public/i18n/tr.json` ve `en.json`. Varsayılan dil Türkçedir. Dil seçimi topbar'dan ve login ekranından değişir, tarayıcıda hatırlanır; NG-ZORRO'nun kendi metinleri (tablo, tarih seçici) de birlikte değişir.
+- Uygulama sadece Türkçedir, dil seçimi yoktur. Bütün metinler `public/i18n/tr.json`'dadır; ngx-translate bu dosyayı açılışta yükler. Backend mesajları anahtar olarak gönderdiği için anahtar yapısı korunur. NG-ZORRO `tr_TR`, ECharts `TR` yerel ayarıyla çalışır.
 - **Backend'in gönderdiği bütün anahtarlar** (`category_name_exists`, `auth_login_blocked`, menülerdeki `menu_categories`...) bu dosyalarda bulunmalıdır.
 - Arayüz metinleri de anahtarla yazılır; HTML'de sabit Türkçe metin bulunmaz. Yazım backend'le aynıdır: düz, snake_case, ekran adıyla başlayan anahtarlar (`category_list_title`, `common_save`).
 - Testle korunur: iki dosya aynı anahtarları içermeli ve her anahtar snake_case olmalı (`core/i18n/translations.spec.ts`).
@@ -296,7 +295,7 @@ Uygulamalarda çok sayıda grafik kullanılacak. Bu yüzden grafikler için tek 
 - **Kütüphane:** Apache ECharts (`ngx-echarts`). Projede ikinci bir grafik kütüphanesi bulunmaz.
 - **Ortak sarmalayıcı (`shared/charts/chart.ts`):** Sayfalar ECharts'ı doğrudan değil, `<app-chart>` üzerinden kullanır:
   - Ortak renk paleti (`chart-colors.ts`, renk körlüğü kontrolünden geçmiş sırayla) ve kenar boşlukları.
-  - Seçili dile göre sayı biçimi (tooltip ve sayısal eksenler).
+  - Türkçe sayı biçimi (tooltip ve sayısal eksenler).
   - Gösterge varsayılan olarak üsttedir; ECharts 6'nın alt varsayılanı eksen etiketleriyle çakışır.
   - "Yükleniyor" (`nz-spin`) ve "veri yok" (`nz-empty`) durumları.
   - Pencere boyutu değişince otomatik yeniden boyutlandırma.
@@ -304,9 +303,9 @@ Uygulamalarda çok sayıda grafik kullanılacak. Bu yüzden grafikler için tek 
 - **Paket boyutu:** `echarts-setup.ts` kullanılan grafik türlerini ve bileşenleri kaydeder. Anasayfa demosu ECharts'ın 23 türünün hepsini kullandığı için şu an hepsi kayıtlıdır; demo kaldırılınca kullanılmayanlar silinir. ECharts sadece grafiğin olduğu sayfa açılınca yüklenir.
 - **Eklentiler (`echarts-extensions.ts`):** `echarts-gl` (3B/WebGL), `echarts-wordcloud` ve `echarts-liquidfill` ana pakette değildir. npm üzerinden derlenemezler: kaynakları ECharts 6'nın iç dosyalarına ulaşamaz, `dist/` dosyaları paketlenince ECharts'ın ayrı bir kopyasına kayıt olur. Bu yüzden `angular.json` onları `/vendor` altına kopyalar, `loadEchartsExtensions()` script olarak yükler ve `window.echarts` üzerinden uygulamadaki ECharts'a bağlar. İlk yüklemeye girmezler, sadece çağıran ekran indirir. `wordcloud` ve `liquidfill` ECharts 5 ister; `package.json`'daki `overrides` bunu ECharts 6'ya bağlar (paketleri 2022'den beri güncellenmedi, ECharts yükseltilince tekrar denenmeli).
 - **Bilinen `echarts-gl` sınırları (ECharts 6):** `linesGL` haritada çizmiyor, kartezyen eksende `polyline: true` ve 1px genişlikle çalışıyor. `polygons3D` küre üzerinde çizilmiyor, `geo3D`'de kaydırma gerekiyor (`FLOOR_OFFSET`). WebGL serileri `zlevel` ile kendi katmanına alınır.
-- **Veri:** Grafikler backend'in özet döndüren rapor endpoint'leriyle beslenir (backend §5.5). Frontend'de toplama yapılmaz; günler `formatDay` ile seçili dilde gösterilir.
+- **Veri:** Grafikler backend'in özet döndüren rapor endpoint'leriyle beslenir (backend §5.5). Frontend'de toplama yapılmaz; günler `formatDay` ile Türkçe gösterilir.
 - **Canlı örnek:** Anasayfanın "Canlı veri" sekmesindeki "son 30 günde eklenen kategoriler" grafiği (`pages/home/home.ts`) backend'e bağlı grafik için referans kalıptır.
-- **Mock pano:** Anasayfanın diğer sekmeleri "Üç Zeytin" adlı hayali lokantanın panosudur, `pages/home/dashboard/` altındadır. Bütün rakamlar `restaurant.mock.ts`'tedir ve birbirinden hesaplanır; sekmeler `*.charts.ts` dosyalarında `ChartCard` listesi olarak tanımlanır. "Galeri" sekmesi görünüm çeşitlerini ve bileşenleri (timeline, toolbox, brush, matrix, thumbnail, aria, dataset transform), "3B ve eklentiler" sekmesi eklenti türlerini gösterir. Şube, ürün, kanal ve gider adları backend'den geleceği için veri olarak durur, ekran metinleri `dash_` önekiyle çevrilir. Gerçek projede `dashboard/` klasörü, `home.html`'deki sekmeler, `dash_` anahtarları ve kullanılmıyorsa eklenti paketleri silinir.
+- **Mock pano:** Anasayfanın diğer sekmeleri "Üç Zeytin" adlı hayali lokantanın panosudur, `pages/home/dashboard/` altındadır. Bütün rakamlar `restaurant.mock.ts`'tedir ve birbirinden hesaplanır; sekmeler `*.charts.ts` dosyalarında `ChartCard` listesi olarak tanımlanır. "Galeri" sekmesi görünüm çeşitlerini ve bileşenleri (timeline, toolbox, brush, matrix, thumbnail, aria, dataset transform), "3B ve eklentiler" sekmesi eklenti türlerini gösterir. ekran metinleri `dash_` önekiyle `tr.json`'dadır. Gerçek projede `dashboard/` klasörü, `home.html`'deki sekmeler, `dash_` anahtarları ve kullanılmıyorsa eklenti paketleri silinir.
 - **Türkiye haritası:** `dashboard/turkey-provinces.json` 81 ilin sınırlarını içerir. Kaynak Natural Earth (kamu malı), `datamaps` paketinden (MIT) çıkarıldı, il adları düzeltildi; sınırlar basitleştirilmiştir.
 
 ---
@@ -350,7 +349,7 @@ Uygulamalarda çok sayıda grafik kullanılacak. Bu yüzden grafikler için tek 
 2. **Route:** Üst seviyedeki `xxx.routes.ts` dosyasına yeni çocuk eklenir; `data.title` olarak menüdeki `title_key` verilir.
 3. **Model ve servis:** Backend DTO'larına göre güncellenir.
 4. **Form doğrulaması:** Backend'deki `@NotBlank`/`@Size` kurallarıyla aynı validator'lar ve aynı mesaj anahtarları kullanılır.
-5. **Çeviriler:** Yeni modülün mesaj anahtarları ve arayüz metinleri `tr.json` ve `en.json`'a eklenir (test eksikleri yakalar).
+5. **Çeviriler:** Yeni modülün mesaj anahtarları ve arayüz metinleri `tr.json`'a eklenir.
 6. **Menü:** Backend'de yeni bir migration class'ıyla menü kaydı eklenir; `route` değeri klasör yoluyla aynıdır. Yeni bir ikon kullanılıyorsa `core/icons.ts`'e de eklenir.
 
 ---

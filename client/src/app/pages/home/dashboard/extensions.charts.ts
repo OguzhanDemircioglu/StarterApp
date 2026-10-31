@@ -30,16 +30,16 @@ const GL_LAYER = 1;
 /** polygons3D haritanın merkezine değil köşesine oturur (echarts-gl + ECharts 6): kat planının yarısı kadar kaydırılır. */
 const FLOOR_OFFSET = [50, -40];
 
-export const extensionCharts: ChartBuilder = ({ t, language }) => {
-  const weekdays = [0, 1, 2, 3, 4, 5, 6].map((day) => formatWeekday(day, language));
-  const months = MONTHS.map((month) => formatMonth(month, language));
+export const extensionCharts: ChartBuilder = ({ t }) => {
+  const weekdays = [0, 1, 2, 3, 4, 5, 6].map((day) => formatWeekday(day));
+  const months = MONTHS.map((month) => formatMonth(month));
   const maxCovers = Math.max(...COVERS_BY_HOUR.map((cell) => cell[2]));
 
   return [
     {
       title: 'dash_liquid_title',
       note: 'dash_liquid_note',
-      kind: 'liquidFill',
+      kind: 'Sıvı dolum',
       options: {
         tooltip: { show: false },
         series: [
@@ -58,7 +58,7 @@ export const extensionCharts: ChartBuilder = ({ t, language }) => {
     {
       title: 'dash_words_title',
       note: 'dash_words_note',
-      kind: 'wordCloud',
+      kind: 'Kelime bulutu',
       options: {
         tooltip: {},
         series: [
@@ -85,7 +85,7 @@ export const extensionCharts: ChartBuilder = ({ t, language }) => {
     {
       title: 'dash_bar3d_title',
       note: 'dash_bar3d_note',
-      kind: 'bar3D',
+      kind: '3B sütun',
       height: '380px',
       options: {
         tooltip: {},
@@ -100,7 +100,7 @@ export const extensionCharts: ChartBuilder = ({ t, language }) => {
     {
       title: 'dash_line3d_title',
       note: 'dash_line3d_note',
-      kind: 'line3D',
+      kind: '3B çizgi',
       height: '380px',
       options: {
         tooltip: {},
@@ -120,7 +120,7 @@ export const extensionCharts: ChartBuilder = ({ t, language }) => {
     {
       title: 'dash_scatter3d_title',
       note: 'dash_scatter3d_note',
-      kind: 'scatter3D',
+      kind: '3B saçılım',
       height: '380px',
       options: {
         tooltip: {},
@@ -144,7 +144,7 @@ export const extensionCharts: ChartBuilder = ({ t, language }) => {
     {
       title: 'dash_surface_title',
       note: 'dash_surface_note',
-      kind: 'surface',
+      kind: '3B yüzey',
       height: '380px',
       options: {
         tooltip: { show: false },
@@ -170,7 +170,7 @@ export const extensionCharts: ChartBuilder = ({ t, language }) => {
     {
       title: 'dash_map3d_title',
       note: 'dash_map3d_note',
-      kind: 'map3D',
+      kind: '3B harita',
       height: '380px',
       options: {
         tooltip: {},
@@ -199,7 +199,7 @@ export const extensionCharts: ChartBuilder = ({ t, language }) => {
     {
       title: 'dash_polygons3d_title',
       note: 'dash_polygons3d_note',
-      kind: 'polygons3D',
+      kind: '3B çokgen',
       height: '380px',
       options: {
         tooltip: { show: false },
@@ -235,7 +235,7 @@ export const extensionCharts: ChartBuilder = ({ t, language }) => {
     {
       title: 'dash_globe_title',
       note: 'dash_globe_note',
-      kind: 'lines3D + globe',
+      kind: '3B akış + küre',
       height: '380px',
       options: {
         tooltip: { show: false },
@@ -258,7 +258,7 @@ export const extensionCharts: ChartBuilder = ({ t, language }) => {
     {
       title: 'dash_lines_gl_title',
       note: 'dash_lines_gl_note',
-      kind: 'linesGL',
+      kind: 'WebGL çizgi',
       height: '380px',
       options: {
         tooltip: { show: false },
@@ -280,7 +280,7 @@ export const extensionCharts: ChartBuilder = ({ t, language }) => {
     {
       title: 'dash_scatter_gl_title',
       note: 'dash_scatter_gl_note',
-      kind: 'scatterGL',
+      kind: 'WebGL saçılım',
       height: '380px',
       options: {
         tooltip: { show: false },
@@ -302,7 +302,7 @@ export const extensionCharts: ChartBuilder = ({ t, language }) => {
     {
       title: 'dash_graph_gl_title',
       note: 'dash_graph_gl_note',
-      kind: 'graphGL',
+      kind: 'WebGL ilişki ağı',
       height: '380px',
       options: {
         tooltip: { show: false },
@@ -324,7 +324,7 @@ export const extensionCharts: ChartBuilder = ({ t, language }) => {
     {
       title: 'dash_flow_gl_title',
       note: 'dash_flow_gl_note',
-      kind: 'flowGL',
+      kind: 'WebGL akış',
       wide: true,
       height: '340px',
       options: {

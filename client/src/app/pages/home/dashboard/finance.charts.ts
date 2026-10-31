@@ -39,7 +39,7 @@ export function waterfallSteps({ t }: ChartContext): WaterfallStep[] {
 }
 
 export const financeCharts: ChartBuilder = (context) => {
-  const { t, language } = context;
+  const { t } = context;
   const steps = waterfallSteps(context);
   const revenue = t('dash_finance_revenue');
   const tax = t('dash_finance_tax');
@@ -53,7 +53,7 @@ export const financeCharts: ChartBuilder = (context) => {
     {
       title: 'dash_flow_title',
       note: 'dash_flow_note',
-      kind: 'sankey',
+      kind: 'Sankey akışı',
       wide: true,
       height: '400px',
       options: {
@@ -99,7 +99,7 @@ export const financeCharts: ChartBuilder = (context) => {
     {
       title: 'dash_waterfall_title',
       note: 'dash_waterfall_note',
-      kind: 'bar (waterfall)',
+      kind: 'Şelale',
       options: {
         tooltip: { trigger: 'item' },
         xAxis: { type: 'category', data: steps.map((step) => step.name), axisLabel: { interval: 0 } },
@@ -122,7 +122,7 @@ export const financeCharts: ChartBuilder = (context) => {
               show: true,
               position: 'top',
               color: '#52514e',
-              formatter: ({ value }: { value: number }) => formatNumber(value, language),
+              formatter: ({ value }: { value: number }) => formatNumber(value),
             },
             data: steps.map((step) => ({
               value: step.value,
@@ -135,7 +135,7 @@ export const financeCharts: ChartBuilder = (context) => {
     {
       title: 'dash_expenses_title',
       note: 'dash_expenses_note',
-      kind: 'sunburst',
+      kind: 'Güneş patlaması',
       options: {
         tooltip: {},
         series: [
@@ -158,7 +158,7 @@ export const financeCharts: ChartBuilder = (context) => {
     {
       title: 'dash_budget_title',
       note: 'dash_budget_note',
-      kind: 'bar (diverging)',
+      kind: 'Sapma sütunu',
       height: '340px',
       options: {
         tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
@@ -192,12 +192,12 @@ export const financeCharts: ChartBuilder = (context) => {
     {
       title: 'dash_cash_title',
       note: 'dash_cash_note',
-      kind: 'line (forecast)',
+      kind: 'Tahmin çizgisi',
       height: '340px',
       options: {
         tooltip: { trigger: 'axis' },
         legend: {},
-        xAxis: { type: 'category', data: CASH_MONTHS.map((month) => formatMonth(month, language)), boundaryGap: false },
+        xAxis: { type: 'category', data: CASH_MONTHS.map((month) => formatMonth(month)), boundaryGap: false },
         yAxis: { type: 'value' },
         series: [
           {
@@ -221,13 +221,13 @@ export const financeCharts: ChartBuilder = (context) => {
     {
       title: 'dash_lamb_title',
       note: 'dash_lamb_note',
-      kind: 'candlestick',
+      kind: 'Mum grafiği',
       wide: true,
       height: '360px',
       options: {
         grid: { top: 16, bottom: 56 },
         tooltip: { trigger: 'axis', axisPointer: { type: 'cross' } },
-        xAxis: { type: 'category', data: LAMB_PRICES.map((row) => formatDay(row[0], language)) },
+        xAxis: { type: 'category', data: LAMB_PRICES.map((row) => formatDay(row[0])) },
         yAxis: { type: 'value', scale: true },
         dataZoom: [{ type: 'inside' }, { type: 'slider', bottom: 8, height: 20 }],
         series: [

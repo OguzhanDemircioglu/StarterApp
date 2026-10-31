@@ -1,5 +1,5 @@
 import { formatMonth, formatNumber } from '../../../shared/charts/chart-format';
-import { ChartBuilder, ChartContext, Kpi } from './dashboard.model';
+import { ChartBuilder, Kpi } from './dashboard.model';
 import {
   AVERAGE_TICKET,
   CHANNELS,
@@ -18,42 +18,42 @@ import {
 const LAST_YEAR_FOOD_COST_RATIO = 36;
 const LAST_YEAR_NET_PROFIT = 1980;
 
-export function overviewKpis({ language }: ChartContext): Kpi[] {
+export function overviewKpis(): Kpi[] {
   return [
     {
       label: 'dash_kpi_revenue',
-      value: `${formatNumber(TOTAL_REVENUE, language)} bin ₺`,
+      value: `${formatNumber(TOTAL_REVENUE)} bin ₺`,
       delta: REVENUE_GROWTH,
       higherIsBetter: true,
     },
     {
       label: 'dash_kpi_profit',
-      value: `${formatNumber(NET_PROFIT, language)} bin ₺`,
+      value: `${formatNumber(NET_PROFIT)} bin ₺`,
       delta: (NET_PROFIT / LAST_YEAR_NET_PROFIT - 1) * 100,
       higherIsBetter: true,
     },
     {
       label: 'dash_kpi_ticket',
-      value: `${formatNumber(AVERAGE_TICKET.current, language)} ₺`,
+      value: `${formatNumber(AVERAGE_TICKET.current)} ₺`,
       delta: (AVERAGE_TICKET.current / AVERAGE_TICKET.lastYear - 1) * 100,
       higherIsBetter: true,
     },
     {
       label: 'dash_kpi_food_cost',
-      value: `%${formatNumber(Math.round(FOOD_COST_RATIO * 10) / 10, language)}`,
+      value: `%${formatNumber(Math.round(FOOD_COST_RATIO * 10) / 10)}`,
       delta: (FOOD_COST_RATIO / LAST_YEAR_FOOD_COST_RATIO - 1) * 100,
       higherIsBetter: false,
     },
   ];
 }
 
-export const overviewCharts: ChartBuilder = ({ t, language }) => {
-  const months = MONTHS.map((month) => formatMonth(month, language));
+export const overviewCharts: ChartBuilder = ({ t }) => {
+  const months = MONTHS.map((month) => formatMonth(month));
   return [
     {
       title: 'dash_revenue_trend_title',
       note: 'dash_revenue_trend_note',
-      kind: 'line',
+      kind: 'Çizgi',
       wide: true,
       options: {
         tooltip: { trigger: 'axis' },
@@ -90,7 +90,7 @@ export const overviewCharts: ChartBuilder = ({ t, language }) => {
     {
       title: 'dash_channel_mix_title',
       note: 'dash_channel_mix_note',
-      kind: 'bar',
+      kind: 'Sütun',
       wide: true,
       options: {
         tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
@@ -110,7 +110,7 @@ export const overviewCharts: ChartBuilder = ({ t, language }) => {
     {
       title: 'dash_payments_title',
       note: 'dash_payments_note',
-      kind: 'pie',
+      kind: 'Pasta',
       options: {
         tooltip: { valueFormatter: (value: number) => `%${value}` },
         legend: {},
@@ -130,7 +130,7 @@ export const overviewCharts: ChartBuilder = ({ t, language }) => {
     {
       title: 'dash_occupancy_title',
       note: 'dash_occupancy_note',
-      kind: 'gauge',
+      kind: 'Gösterge',
       options: {
         tooltip: { show: false },
         series: [

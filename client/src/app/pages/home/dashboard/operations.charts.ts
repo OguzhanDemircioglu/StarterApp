@@ -59,7 +59,7 @@ const renderShift: CustomSeriesRenderItem = (_params, api) => {
   };
 };
 
-export const operationsCharts: ChartBuilder = ({ t, language }) => {
+export const operationsCharts: ChartBuilder = ({ t }) => {
   const dishes = RECIPES.map((recipe) => recipe.dish);
   const ingredients = [...new Set(RECIPES.flatMap((recipe) => recipe.ingredients))];
 
@@ -67,7 +67,7 @@ export const operationsCharts: ChartBuilder = ({ t, language }) => {
     {
       title: 'dash_floor_title',
       note: 'dash_floor_note',
-      kind: 'map + lines',
+      kind: 'Harita + akış çizgileri',
       height: '360px',
       options: {
         tooltip: {},
@@ -115,7 +115,7 @@ export const operationsCharts: ChartBuilder = ({ t, language }) => {
     {
       title: 'dash_prep_title',
       note: 'dash_prep_note',
-      kind: 'boxplot',
+      kind: 'Kutu grafiği',
       height: '360px',
       options: {
         tooltip: {
@@ -138,7 +138,7 @@ export const operationsCharts: ChartBuilder = ({ t, language }) => {
     {
       title: 'dash_shifts_title',
       note: 'dash_shifts_note',
-      kind: 'custom',
+      kind: 'Özel çizim',
       wide: true,
       height: '280px',
       options: {
@@ -167,7 +167,7 @@ export const operationsCharts: ChartBuilder = ({ t, language }) => {
     {
       title: 'dash_funnel_title',
       note: 'dash_funnel_note',
-      kind: 'funnel',
+      kind: 'Huni',
       options: {
         tooltip: {},
         color: ORDINAL_COLORS,
@@ -184,7 +184,7 @@ export const operationsCharts: ChartBuilder = ({ t, language }) => {
             label: {
               position: 'right',
               color: '#52514e',
-              formatter: ({ name, value }: { name: string; value: number }) => `${name}: ${formatNumber(value, language)}`,
+              formatter: ({ name, value }: { name: string; value: number }) => `${name}: ${formatNumber(value)}`,
             },
             data: ONLINE_FUNNEL,
           },
@@ -194,7 +194,7 @@ export const operationsCharts: ChartBuilder = ({ t, language }) => {
     {
       title: 'dash_scores_title',
       note: 'dash_scores_note',
-      kind: 'radar',
+      kind: 'Radar',
       options: {
         tooltip: {},
         legend: {},
@@ -218,7 +218,7 @@ export const operationsCharts: ChartBuilder = ({ t, language }) => {
     {
       title: 'dash_org_title',
       note: 'dash_org_note',
-      kind: 'tree',
+      kind: 'Ağaç',
       height: '380px',
       options: {
         tooltip: { show: false },
@@ -243,7 +243,7 @@ export const operationsCharts: ChartBuilder = ({ t, language }) => {
     {
       title: 'dash_recipes_title',
       note: 'dash_recipes_note',
-      kind: 'graph',
+      kind: 'İlişki ağı',
       height: '380px',
       options: {
         tooltip: { show: false },

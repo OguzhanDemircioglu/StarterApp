@@ -1,4 +1,4 @@
-/** Anasayfadaki bir grafik kartı. title ve note çeviri anahtarıdır; kind grafiğin ECharts türüdür. */
+/** Anasayfadaki bir grafik kartı. title ve note metin anahtarıdır; kind grafik türünün ekranda görünen adıdır. */
 export interface ChartCard {
   title: string;
   note: string;
@@ -8,10 +8,9 @@ export interface ChartCard {
   wide?: boolean;
 }
 
-/** Grafik ayarları üretilirken gereken dil bilgisi. */
+/** Grafik ayarları üretilirken metin anahtarlarını çözer. */
 export interface ChartContext {
   t: (key: string) => string;
-  language: string;
 }
 
 export type ChartBuilder = (context: ChartContext) => ChartCard[];

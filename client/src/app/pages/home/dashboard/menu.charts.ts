@@ -8,7 +8,7 @@ const TEA_GLASS = 'path://M3 0h18l-3 24H6z';
 const SOLD_THRESHOLD = 2000;
 const MARGIN_THRESHOLD = 55;
 
-export const menuCharts: ChartBuilder = ({ t, language }) => {
+export const menuCharts: ChartBuilder = ({ t }) => {
   const dishes = MENU.flatMap((category) => category.children ?? []);
   const topDishes = [...dishes].sort((a, b) => (a.value ?? 0) - (b.value ?? 0)).slice(-TOP_DISHES);
   const toPoint = (dish: (typeof DISH_PERFORMANCE)[number]) => ({ name: dish.name, value: [dish.sold, dish.margin] });
@@ -17,7 +17,7 @@ export const menuCharts: ChartBuilder = ({ t, language }) => {
     {
       title: 'dash_menu_tree_title',
       note: 'dash_menu_tree_note',
-      kind: 'treemap',
+      kind: 'Ağaç haritası',
       wide: true,
       height: '380px',
       options: {
@@ -36,7 +36,7 @@ export const menuCharts: ChartBuilder = ({ t, language }) => {
             breadcrumb: { show: false },
             upperLabel: { show: true, height: 26, color: '#fff', fontWeight: 600 },
             label: {
-              formatter: ({ name, value }: { name: string; value: number }) => `${name}\n${formatNumber(value, language)}`,
+              formatter: ({ name, value }: { name: string; value: number }) => `${name}\n${formatNumber(value)}`,
             },
             levels: [
               { itemStyle: { borderWidth: 0, gapWidth: 4 } },
@@ -50,7 +50,7 @@ export const menuCharts: ChartBuilder = ({ t, language }) => {
     {
       title: 'dash_top_dishes_title',
       note: 'dash_top_dishes_note',
-      kind: 'bar (horizontal)',
+      kind: 'Yatay sütun',
       height: '360px',
       options: {
         tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
@@ -67,7 +67,7 @@ export const menuCharts: ChartBuilder = ({ t, language }) => {
               show: true,
               position: 'right',
               color: '#52514e',
-              formatter: ({ value }: { value: number }) => formatNumber(value, language),
+              formatter: ({ value }: { value: number }) => formatNumber(value),
             },
           },
         ],
@@ -76,7 +76,7 @@ export const menuCharts: ChartBuilder = ({ t, language }) => {
     {
       title: 'dash_engineering_title',
       note: 'dash_engineering_note',
-      kind: 'scatter + effectScatter',
+      kind: 'Saçılım + efektli saçılım',
       height: '360px',
       options: {
         grid: { right: 32 },
@@ -116,7 +116,7 @@ export const menuCharts: ChartBuilder = ({ t, language }) => {
     {
       title: 'dash_profile_title',
       note: 'dash_profile_note',
-      kind: 'parallel',
+      kind: 'Paralel koordinatlar',
       options: {
         tooltip: { show: false },
         legend: {},
@@ -139,7 +139,7 @@ export const menuCharts: ChartBuilder = ({ t, language }) => {
     {
       title: 'dash_basket_title',
       note: 'dash_basket_note',
-      kind: 'chord',
+      kind: 'Kiriş',
       options: {
         tooltip: {},
         series: [
@@ -160,12 +160,12 @@ export const menuCharts: ChartBuilder = ({ t, language }) => {
     {
       title: 'dash_tea_title',
       note: 'dash_tea_note',
-      kind: 'pictorialBar',
+      kind: 'Resimli sütun',
       options: {
         tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
         xAxis: {
           type: 'category',
-          data: TEA_SALES.map((_, day) => formatWeekday(day, language)),
+          data: TEA_SALES.map((_, day) => formatWeekday(day)),
           axisTick: { show: false },
         },
         yAxis: { type: 'value', splitLine: { show: false } },

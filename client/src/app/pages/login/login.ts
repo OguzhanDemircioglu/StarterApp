@@ -7,7 +7,6 @@ import { NzFormModule } from 'ng-zorro-antd/form';
 import { NzIconModule } from 'ng-zorro-antd/icon';
 import { SessionActions } from '../../core/auth/session.actions';
 import { sessionFeature } from '../../core/auth/session.state';
-import { Language, LanguageService } from '../../core/i18n/language';
 import { maxBytes, validateForm } from '../../shared/forms/form-utils';
 
 /** /login — shell'in dışındadır. Hata mesajlarını (yanlış şifre, engellendi) errorInterceptor gösterir. */
@@ -19,13 +18,11 @@ import { maxBytes, validateForm } from '../../shared/forms/form-utils';
 export default class Login {
   private readonly store = inject(Store);
   private readonly formBuilder = inject(NonNullableFormBuilder);
-  private readonly languageService = inject(LanguageService);
 
   /** Giriş gerektiren bir sayfadan gelindiyse, girişten sonra oraya dönülür (authGuard ekler). */
   readonly returnUrl = input<string>();
 
   protected readonly pending = this.store.selectSignal(sessionFeature.selectLoginPending);
-  protected readonly language = this.languageService.current;
 
   /** true iken kayıt formu görünür; geçiş animasyonunun tamamı CSS'tedir (.wrapper.active). */
   protected readonly registerMode = signal(false);
@@ -61,9 +58,5 @@ export default class Login {
     this.registerMode.set(show);
     this.form.reset();
     this.registerForm.reset();
-  }
-
-  protected useLanguage(language: Language): void {
-    this.languageService.use(language);
   }
 }

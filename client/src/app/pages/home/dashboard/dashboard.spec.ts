@@ -10,7 +10,7 @@ import { salesCharts } from './sales.charts';
 import { DAILY_REVENUE, FLOOR_ZONES, CHANNELS, MENU, MONTHLY_REVENUE, SUPPLIERS, TOTAL_REVENUE } from './restaurant.mock';
 import turkeyProvinces from './turkey-provinces.json';
 
-const context: ChartContext = { t: (key) => key, language: 'tr' };
+const context: ChartContext = { t: (key) => key };
 const BUILDERS: ChartBuilder[] = [
   overviewCharts,
   salesCharts,
@@ -78,7 +78,6 @@ describe('restaurant dashboard', () => {
   it('has a translation for every title, note and label', () => {
     const missing = new Set<string>();
     const collecting: ChartContext = {
-      language: 'tr',
       t: (key) => {
         if (!(key in tr)) {
           missing.add(key);
@@ -87,7 +86,7 @@ describe('restaurant dashboard', () => {
       },
     };
     BUILDERS.forEach((build) => build(collecting));
-    overviewKpis(context).forEach((kpi) => collecting.t(kpi.label));
+    overviewKpis().forEach((kpi) => collecting.t(kpi.label));
     cards.forEach((card) => [card.title, card.note].forEach(collecting.t));
     expect([...missing]).toEqual([]);
   });

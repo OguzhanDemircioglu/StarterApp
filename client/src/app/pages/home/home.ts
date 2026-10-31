@@ -6,7 +6,6 @@ import type { EChartsCoreOption } from 'echarts/core';
 import { NzTabsModule } from 'ng-zorro-antd/tabs';
 import { NzTagModule } from 'ng-zorro-antd/tag';
 import { sessionFeature } from '../../core/auth/session.state';
-import { LanguageService } from '../../core/i18n/language';
 import { Chart } from '../../shared/charts/chart';
 import { formatDay, formatNumber } from '../../shared/charts/chart-format';
 import { Page } from '../../shared/page/page';
@@ -46,7 +45,6 @@ const TABS: { title: string; build: ChartBuilder }[] = [
 export default class Home {
   private readonly reportApi = inject(HomeReportApi);
   private readonly translate = inject(TranslateService);
-  private readonly language = inject(LanguageService).current;
 
   protected readonly user = inject(Store).selectSignal(sessionFeature.selectUser);
   protected readonly loading = signal(true);
@@ -54,43 +52,33 @@ export default class Home {
 
   protected readonly empty = computed(() => this.points().every((point) => point.value === 0));
 
-  private readonly context = computed<ChartContext>(() => ({
-    t: (key) => this.translate.instant(key),
-    language: this.language() ?? 'tr',
-  }));
+  private readonly context: ChartContext = { t: (key) => this.translate.instant(key) };
 
-  protected readonly tabs = computed(() =>
-    TABS.map((tab) => ({ title: tab.title, cards: tab.build(this.context()) })),
-  );
+  protected readonly tabs = TABS.map((tab) => ({ title: tab.title, cards: tab.build(this.context) }));
 
   /** 3B ve eklenti grafikleri büyük paketler kullanır: sadece sekmesi açılınca indirilir. */
   private readonly extensionsReady = signal(false);
-  protected readonly extensionCards = computed(() => (this.extensionsReady() ? extensionCharts(this.context()) : []));
+  protected readonly extensionCards = computed(() => (this.extensionsReady() ? extensionCharts(this.context) : []));
 
-  protected readonly kpis = computed(() =>
-    overviewKpis(this.context()).map((kpi) => ({
-      ...kpi,
-      deltaText: formatNumber(Math.round(Math.abs(kpi.delta) * 10) / 10, this.context().language),
-      good: kpi.delta >= 0 === kpi.higherIsBetter,
-      up: kpi.delta >= 0,
-    })),
-  );
+  protected readonly kpis = overviewKpis().map((kpi) => ({
+    ...kpi,
+    deltaText: formatNumber(Math.round(Math.abs(kpi.delta) * 10) / 10),
+    good: kpi.delta >= 0 === kpi.higherIsBetter,
+    up: kpi.delta >= 0,
+  }));
 
-  protected readonly chartOptions = computed<EChartsCoreOption>(() => {
-    const language = this.language() ?? 'tr';
-    return {
-      tooltip: { trigger: 'axis' },
-      xAxis: { type: 'category', data: this.points().map((point) => formatDay(point.period, language)) },
-      yAxis: { type: 'value', minInterval: 1 },
-      series: [
-        {
-          type: 'bar',
-          name: this.translate.instant('home_chart_series'),
-          data: this.points().map((point) => point.value),
-        },
-      ],
-    };
-  });
+  protected readonly chartOptions = computed<EChartsCoreOption>(() => ({
+    tooltip: { trigger: 'axis' },
+    xAxis: { type: 'category', data: this.points().map((point) => formatDay(point.period)) },
+    yAxis: { type: 'value', minInterval: 1 },
+    series: [
+      {
+        type: 'bar',
+        name: this.translate.instant('home_chart_series'),
+        data: this.points().map((point) => point.value),
+      },
+    ],
+  }));
 
   protected async loadExtensions(): Promise<void> {
     await loadEchartsExtensions();

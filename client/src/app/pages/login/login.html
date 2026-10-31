@@ -134,15 +134,6 @@
     </div>
   </div>
 
-  <div class="languages">
-    <button nz-button nzType="link" nzSize="small" [disabled]="language() === 'tr'" (click)="useLanguage('tr')">
-      {{ 'lang_tr' | translate }}
-    </button>
-    <button nz-button nzType="link" nzSize="small" [disabled]="language() === 'en'" (click)="useLanguage('en')">
-      {{ 'lang_en' | translate }}
-    </button>
-  </div>
-
   <ng-template #emailErrors let-control>
     @if (control.errors?.['required']) { {{ 'auth_email_required' | translate }} }
     @if (control.errors?.['email']) { {{ 'user_email_invalid' | translate }} }

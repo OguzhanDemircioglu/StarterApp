@@ -37,8 +37,8 @@ export const MONTHS = ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10
 export const CHANNELS = [
   { name: 'Salon', monthly: [1180, 1130, 1270, 1340, 1490, 1560, 1680, 1650, 1460, 1440] },
   { name: 'Paket', monthly: [330, 320, 350, 350, 370, 380, 390, 370, 360, 380] },
-  { name: 'Online', monthly: [420, 400, 440, 450, 490, 510, 540, 520, 490, 540] },
-  { name: 'Catering', monthly: [70, 30, 80, 140, 170, 170, 210, 260, 150, 120] },
+  { name: 'Çevrimiçi', monthly: [420, 400, 440, 450, 490, 510, 540, 520, 490, 540] },
+  { name: 'Toplu yemek', monthly: [70, 30, 80, 140, 170, 170, 210, 260, 150, 120] },
 ];
 
 export const MONTHLY_REVENUE = MONTHS.map((_, month) => sum(CHANNELS.map((channel) => channel.monthly[month])));
@@ -54,7 +54,7 @@ export const PAYMENT_METHODS = [
   { name: 'Kredi kartı', value: 58 },
   { name: 'Yemek kartı', value: 17 },
   { name: 'Nakit', value: 14 },
-  { name: 'Online ödeme', value: 11 },
+  { name: 'Çevrimiçi ödeme', value: 11 },
 ];
 
 export const BRANCHES = [
@@ -347,7 +347,7 @@ export const LAMB_PRICES: [string, number, number, number, number][] = (() => {
 /** Adana Kebap'ın ay ay menü fiyatı (₺): fiyat değişene kadar sabit kalır. */
 export const ADANA_PRICES = [480, 480, 480, 510, 510, 510, 545, 545, 560, 560];
 
-/** Şubelerin kanal payları (%): Salon, Paket, Online, Catering sırasıyla. */
+/** Şubelerin kanal payları (%): Salon, Paket, Çevrimiçi, Toplu yemek sırasıyla. */
 export const BRANCH_CHANNEL_SHARES = [
   { name: 'Kadıköy', shares: [54, 17, 25, 4] },
   { name: 'Beşiktaş', shares: [66, 12, 16, 6] },

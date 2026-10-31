@@ -10,16 +10,16 @@ import { provideRouter, withComponentInputBinding } from '@angular/router';
 import { provideEffects } from '@ngrx/effects';
 import { provideStore } from '@ngrx/store';
 import { provideStoreDevtools } from '@ngrx/store-devtools';
-import { provideTranslateService } from '@ngx-translate/core';
+import { provideTranslateService, TranslateService } from '@ngx-translate/core';
 import { provideTranslateHttpLoader } from '@ngx-translate/http-loader';
 import { provideNzI18n, tr_TR } from 'ng-zorro-antd/i18n';
 import { provideNzIcons } from 'ng-zorro-antd/icon';
+import { firstValueFrom } from 'rxjs';
 import { routes } from './app.routes';
 import { authInterceptor } from './core/auth/auth.interceptor';
 import { SessionEffects } from './core/auth/session.effects';
 import { sessionFeature } from './core/auth/session.state';
 import { TokenRefresher } from './core/auth/token-refresher';
-import { LanguageService } from './core/i18n/language';
 import { APP_ICONS } from './core/icons';
 import { errorInterceptor } from './core/notify/error.interceptor';
 
@@ -45,10 +45,10 @@ export const appConfig: ApplicationConfig = {
     provideNzI18n(tr_TR),
     provideNzIcons(APP_ICONS),
 
-    // Uygulama açılmadan önce: dil seçimi ve sessiz giriş (refresh cookie geçerliyse login ekranı görülmez).
+    // Uygulama açılmadan önce: metinler yüklenir, sessiz giriş yapılır (refresh cookie geçerliyse login ekranı görülmez).
     provideAppInitializer(() => {
-      inject(LanguageService).init();
-      return inject(TokenRefresher).restore();
+      const texts = firstValueFrom(inject(TranslateService).use('tr'));
+      return Promise.all([texts, inject(TokenRefresher).restore()]);
     }),
   ],
 };

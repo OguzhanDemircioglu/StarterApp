@@ -9,7 +9,7 @@ StarterApp'in Angular önyüzü. Bağlayıcı kurallar ve tasarım kararları:
 | UI | NG-ZORRO 22 (Ant Design, MIT) |
 | Grafikler | Apache ECharts 6 (`ngx-echarts`) |
 | State | NgRx 22 (sadece oturum) |
-| Çeviri | ngx-translate (TR / EN) |
+| Metinler | ngx-translate (sadece Türkçe) |
 | Node.js | 26 LTS (en az 22.22.3) |
 
 ## Çalıştırma
@@ -48,7 +48,7 @@ Referans modül `src/app/pages/definitions/categories`'dir. Örnek olarak `Ürü
 2. `pages/definitions/definitions.routes.ts`'e yeni çocuğu ekleyin: `{ path: 'products', data: { title: 'menu_products' }, loadChildren: ... }`.
 3. `product.model.ts`'i backend DTO'larına, `product-api.ts`'i backend endpoint'lerine göre güncelleyin.
 4. Form doğrulamasını backend'deki `@NotBlank`/`@Size` kurallarıyla aynı yapın; hata metinleri aynı anahtarları kullanır.
-5. Yeni anahtarları `public/i18n/tr.json` ve `en.json`'a ekleyin (`npx ng test` eksik anahtarı yakalar).
+5. Yeni anahtarları `public/i18n/tr.json`'a ekleyin.
 6. Backend'de menü kaydını yeni bir migration class'ıyla ekleyin (`route: '/definitions/products'`).
    Yeni bir ikon kullanıyorsanız `src/app/core/icons.ts`'e de ekleyin.
 

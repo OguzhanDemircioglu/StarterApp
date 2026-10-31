@@ -9,7 +9,6 @@ import { NzTagModule } from 'ng-zorro-antd/tag';
 import { ChangePassword } from '../../auth/change-password/change-password';
 import { SessionActions } from '../../auth/session.actions';
 import { sessionFeature } from '../../auth/session.state';
-import { Language, LanguageService } from '../../i18n/language';
 
 @Component({
   selector: 'app-topbar',
@@ -19,18 +18,12 @@ import { Language, LanguageService } from '../../i18n/language';
 })
 export class Topbar {
   private readonly store = inject(Store);
-  private readonly languageService = inject(LanguageService);
 
   readonly collapsed = input(false);
   readonly toggleSidebar = output<void>();
 
   protected readonly user = this.store.selectSignal(sessionFeature.selectUser);
-  protected readonly language = this.languageService.current;
   protected readonly changePasswordOpen = signal(false);
-
-  protected useLanguage(language: Language): void {
-    this.languageService.use(language);
-  }
 
   protected logout(): void {
     this.store.dispatch(SessionActions.logout());

@@ -27,8 +27,8 @@ echarts.registerMap(TURKEY_MAP, turkeyProvinces as never);
 const RACE_DISHES = 8;
 const SUMMER_MONTHS = ['2026-06', '2026-08'];
 
-export const galleryCharts: ChartBuilder = ({ t, language }) => {
-  const months = MONTHS.map((month) => formatMonth(month, language));
+export const galleryCharts: ChartBuilder = ({ t }) => {
+  const months = MONTHS.map((month) => formatMonth(month));
   const dishes = MENU.flatMap((category) => category.children ?? []);
   const raceDishes = [...dishes].sort((a, b) => (b.value ?? 0) - (a.value ?? 0)).slice(0, RACE_DISHES);
   const revenueOf = (name: string) => dishes.find((dish) => dish.name === name)?.value ?? 0;
@@ -43,7 +43,7 @@ export const galleryCharts: ChartBuilder = ({ t, language }) => {
     {
       title: 'dash_turkey_title',
       note: 'dash_turkey_note',
-      kind: 'map + lines + effectScatter',
+      kind: 'Harita + akış + efektli nokta',
       wide: true,
       height: '420px',
       options: {
@@ -104,7 +104,7 @@ export const galleryCharts: ChartBuilder = ({ t, language }) => {
     {
       title: 'dash_race_title',
       note: 'dash_race_note',
-      kind: 'bar race + timeline',
+      kind: 'Sıralama yarışı + zaman çizelgesi',
       wide: true,
       height: '400px',
       options: {
@@ -137,7 +137,7 @@ export const galleryCharts: ChartBuilder = ({ t, language }) => {
                 show: true,
                 position: 'right',
                 color: '#52514e',
-                formatter: ({ value }: { value: number }) => formatNumber(value, language),
+                formatter: ({ value }: { value: number }) => formatNumber(value),
               },
             },
           ],
@@ -158,7 +158,7 @@ export const galleryCharts: ChartBuilder = ({ t, language }) => {
     {
       title: 'dash_step_title',
       note: 'dash_step_note',
-      kind: 'line (step) + markPoint',
+      kind: 'Basamaklı çizgi + işaret noktası',
       options: {
         tooltip: { trigger: 'axis' },
         xAxis: { type: 'category', data: months },
@@ -183,7 +183,7 @@ export const galleryCharts: ChartBuilder = ({ t, language }) => {
     {
       title: 'dash_share_area_title',
       note: 'dash_share_area_note',
-      kind: 'line (%100 area) + markArea',
+      kind: '%100 alan + bölge vurgusu',
       options: {
         tooltip: { trigger: 'axis', valueFormatter: (value: number) => `%${value}` },
         legend: {},
@@ -203,7 +203,7 @@ export const galleryCharts: ChartBuilder = ({ t, language }) => {
                   silent: true,
                   itemStyle: { color: 'rgba(11, 11, 11, 0.06)' },
                   label: { formatter: t('dash_summer_label'), color: '#52514e', position: 'insideTop' },
-                  data: [SUMMER_MONTHS.map((month) => ({ xAxis: formatMonth(month, language) }))],
+                  data: [SUMMER_MONTHS.map((month) => ({ xAxis: formatMonth(month) }))],
                 },
               }
             : {}),
@@ -213,7 +213,7 @@ export const galleryCharts: ChartBuilder = ({ t, language }) => {
     {
       title: 'dash_share_bar_title',
       note: 'dash_share_bar_note',
-      kind: 'bar (%100)',
+      kind: '%100 sütun',
       options: {
         tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' }, valueFormatter: (value: number) => `%${value}` },
         legend: {},
@@ -232,7 +232,7 @@ export const galleryCharts: ChartBuilder = ({ t, language }) => {
     {
       title: 'dash_rose_title',
       note: 'dash_rose_note',
-      kind: 'pie (rose) + aria',
+      kind: 'Gül grafiği + erişilebilirlik deseni',
       options: {
         aria: { enabled: true, decal: { show: true } },
         tooltip: {},
@@ -243,7 +243,7 @@ export const galleryCharts: ChartBuilder = ({ t, language }) => {
             roseType: 'radius',
             radius: ['14%', '74%'],
             itemStyle: { borderRadius: 4 },
-            data: TEA_SALES.map((value, day) => ({ name: formatWeekday(day, language), value })),
+            data: TEA_SALES.map((value, day) => ({ name: formatWeekday(day), value })),
           },
         ],
       },
@@ -251,7 +251,7 @@ export const galleryCharts: ChartBuilder = ({ t, language }) => {
     {
       title: 'dash_nested_title',
       note: 'dash_nested_note',
-      kind: 'pie (nested) + legend scroll',
+      kind: 'İç içe pasta + kaydırmalı gösterge',
       options: {
         tooltip: {},
         legend: { type: 'scroll', left: 16, right: 16 },
@@ -290,13 +290,13 @@ export const galleryCharts: ChartBuilder = ({ t, language }) => {
     {
       title: 'dash_bubble_title',
       note: 'dash_bubble_note',
-      kind: 'scatter (bubble) + visualMap',
+      kind: 'Baloncuk + görsel eşleme',
       options: {
         grid: { right: 32, bottom: 40 },
         tooltip: {
           formatter: ({ name, value }: { name: string; value: number[] }) =>
-            `${name}<br>${formatNumber(value[0], language)} ${t('dash_unit_portions')} · %${value[1]}<br>` +
-            `${t('dash_series_revenue')}: ${formatNumber(value[2], language)}`,
+            `${name}<br>${formatNumber(value[0])} ${t('dash_unit_portions')} · %${value[1]}<br>` +
+            `${t('dash_series_revenue')}: ${formatNumber(value[2])}`,
         },
         xAxis: { type: 'value', name: t('dash_axis_sold'), nameLocation: 'middle', nameGap: 28, min: 0 },
         yAxis: { type: 'value', name: t('dash_axis_margin'), min: 30, max: 90 },
@@ -328,7 +328,7 @@ export const galleryCharts: ChartBuilder = ({ t, language }) => {
     {
       title: 'dash_force_title',
       note: 'dash_force_note',
-      kind: 'graph (force) + thumbnail',
+      kind: 'Kuvvet yerleşimli ağ + küçük harita',
       wide: true,
       height: '420px',
       options: {
@@ -359,7 +359,7 @@ export const galleryCharts: ChartBuilder = ({ t, language }) => {
     {
       title: 'dash_matrix_title',
       note: 'dash_matrix_note',
-      kind: 'heatmap + matrix',
+      kind: 'Matris ısı haritası',
       options: {
         tooltip: {
           formatter: ({ value }: { value: [string, string, number] }) => `${value[0]} · ${value[1]}: ${value[2]}`,
@@ -395,7 +395,7 @@ export const galleryCharts: ChartBuilder = ({ t, language }) => {
     {
       title: 'dash_brush_title',
       note: 'dash_brush_note',
-      kind: 'toolbox + brush',
+      kind: 'Araç kutusu + fırça',
       options: {
         grid: { right: 32, bottom: 40 },
         tooltip: {
@@ -432,7 +432,7 @@ export const galleryCharts: ChartBuilder = ({ t, language }) => {
     {
       title: 'dash_transform_title',
       note: 'dash_transform_note',
-      kind: 'dataset + transform + graphic',
+      kind: 'Veri seti dönüşümü + grafik öğesi',
       options: {
         tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
         graphic: {

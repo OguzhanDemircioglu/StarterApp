@@ -15,23 +15,23 @@ import {
 const LAST_DAYS = 30;
 const WEEK = [0, 1, 2, 3, 4, 5, 6];
 
-export const salesCharts: ChartBuilder = ({ t, language }) => {
+export const salesCharts: ChartBuilder = ({ t }) => {
   const lastDays = DAILY_REVENUE.slice(-LAST_DAYS);
-  const weekdays = WEEK.map((day) => formatWeekday(day, language));
+  const weekdays = WEEK.map((day) => formatWeekday(day));
   // Takvim bileşeni günleri Pazar'dan başlayarak ister.
-  const calendarDays = [6, 0, 1, 2, 3, 4, 5].map((day) => formatWeekday(day, language));
+  const calendarDays = [6, 0, 1, 2, 3, 4, 5].map((day) => formatWeekday(day));
   const dailyValues = DAILY_REVENUE.map((day) => day.value);
 
   return [
     {
       title: 'dash_daily_title',
       note: 'dash_daily_note',
-      kind: 'line (area)',
+      kind: 'Alan',
       wide: true,
       options: {
         tooltip: { trigger: 'axis' },
         legend: {},
-        xAxis: { type: 'category', boundaryGap: false, data: lastDays.map((day) => formatDay(day.day, language)) },
+        xAxis: { type: 'category', boundaryGap: false, data: lastDays.map((day) => formatDay(day.day)) },
         yAxis: { type: 'value' },
         series: CURRENT_MONTH_SHARES.map((channel) => ({
           type: 'line',
@@ -47,13 +47,13 @@ export const salesCharts: ChartBuilder = ({ t, language }) => {
     {
       title: 'dash_calendar_title',
       note: 'dash_calendar_note',
-      kind: 'heatmap (calendar)',
+      kind: 'Takvim ısı haritası',
       wide: true,
       height: '230px',
       options: {
         tooltip: {
           formatter: ({ value }: { value: [string, number] }) =>
-            `${formatDay(value[0], language)}: ${formatNumber(value[1], language)} bin ₺`,
+            `${formatDay(value[0])}: ${formatNumber(value[1])} bin ₺`,
         },
         visualMap: {
           min: Math.min(...dailyValues),
@@ -78,7 +78,7 @@ export const salesCharts: ChartBuilder = ({ t, language }) => {
           dayLabel: { firstDay: 1, nameMap: calendarDays, color: '#898781' },
           monthLabel: {
             nameMap: Array.from({ length: 12 }, (_, month) =>
-              formatMonth(`2026-${String(month + 1).padStart(2, '0')}`, language),
+              formatMonth(`2026-${String(month + 1).padStart(2, '0')}`),
             ),
             color: '#898781',
           },
@@ -95,7 +95,7 @@ export const salesCharts: ChartBuilder = ({ t, language }) => {
     {
       title: 'dash_peak_hours_title',
       note: 'dash_peak_hours_note',
-      kind: 'heatmap',
+      kind: 'Isı haritası',
       options: {
         grid: { top: 16, bottom: 56 },
         tooltip: {
@@ -126,7 +126,7 @@ export const salesCharts: ChartBuilder = ({ t, language }) => {
     {
       title: 'dash_hourly_title',
       note: 'dash_hourly_note',
-      kind: 'bar (polar)',
+      kind: 'Kutupsal sütun',
       options: {
         tooltip: {},
         polar: { radius: ['14%', '82%'] },
@@ -151,7 +151,7 @@ export const salesCharts: ChartBuilder = ({ t, language }) => {
     {
       title: 'dash_river_title',
       note: 'dash_river_note',
-      kind: 'themeRiver',
+      kind: 'Tema nehri',
       options: {
         tooltip: { trigger: 'axis', axisPointer: { type: 'line' } },
         legend: {},
@@ -162,7 +162,7 @@ export const salesCharts: ChartBuilder = ({ t, language }) => {
     {
       title: 'dash_branches_title',
       note: 'dash_branches_note',
-      kind: 'bar (grouped)',
+      kind: 'Gruplu sütun',
       options: {
         tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
         legend: {},

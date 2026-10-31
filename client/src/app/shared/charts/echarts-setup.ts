@@ -50,7 +50,12 @@ import {
   VisualMapComponent,
 } from 'echarts/components';
 import * as echarts from 'echarts/core';
+import langTR from 'echarts/i18n/langTR-obj.js';
 import { CanvasRenderer } from 'echarts/renderers';
+
+/** ECharts'ın kendi metinleri (ay adları, araç ipuçları) Türkçedir. */
+export const ECHARTS_LOCALE = 'TR';
+echarts.registerLocale(ECHARTS_LOCALE, langTR as never);
 
 /**
  * ECharts'ın sadece kullanılan parçaları pakete girer (tree-shaking).
