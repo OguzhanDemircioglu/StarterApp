@@ -1,26 +1,24 @@
 <div class="login">
-  <div class="wrapper">
+  <div class="wrapper" [class.active]="registerMode()">
     <span class="rotate-bg"></span>
+    <span class="rotate-bg2"></span>
 
-    <div class="form-box">
-      <h1 class="title animation" style="--i: 0">{{ 'app_name' | translate }}</h1>
+    <div class="form-box login-box" [inert]="registerMode()">
+      <h1 class="title animation" style="--i: 0; --j: 21">{{ 'login_submit' | translate }}</h1>
 
-      <form nz-form nzLayout="vertical" [formGroup]="form" (ngSubmit)="submit()">
-        <nz-form-item class="animation" style="--i: 1">
+      <!-- autocomplete kapalı: form açılışta boş gelsin, tarayıcı kayıtlı hesabı doldurmasın. -->
+      <form nz-form nzLayout="vertical" autocomplete="off" [formGroup]="form" (ngSubmit)="submit()">
+        <nz-form-item class="animation" style="--i: 1; --j: 22">
           <nz-form-control [nzErrorTip]="emailErrors">
             <div class="input-box">
-              <input id="login-email" type="email" placeholder=" " formControlName="email" autocomplete="username" />
+              <input id="login-email" type="email" placeholder=" " formControlName="email" autocomplete="off" />
               <label for="login-email">{{ 'login_email' | translate }}</label>
               <nz-icon nzType="mail" />
             </div>
           </nz-form-control>
-          <ng-template #emailErrors let-control>
-            @if (control.errors?.['required']) { {{ 'auth_email_required' | translate }} }
-            @if (control.errors?.['email']) { {{ 'user_email_invalid' | translate }} }
-          </ng-template>
         </nz-form-item>
 
-        <nz-form-item class="animation" style="--i: 2">
+        <nz-form-item class="animation" style="--i: 2; --j: 23">
           <nz-form-control [nzErrorTip]="'auth_password_required' | translate">
             <div class="input-box">
               <input
@@ -28,7 +26,7 @@
                 type="password"
                 placeholder=" "
                 formControlName="password"
-                autocomplete="current-password"
+                autocomplete="new-password"
               />
               <label for="login-password">{{ 'login_password' | translate }}</label>
               <nz-icon nzType="lock" />
@@ -38,7 +36,7 @@
 
         <button
           class="submit animation"
-          style="--i: 3"
+          style="--i: 3; --j: 24"
           nz-button
           nzType="primary"
           nzShape="round"
@@ -48,21 +46,105 @@
         >
           {{ 'login_submit' | translate }}
         </button>
-      </form>
 
-      <div class="languages animation" style="--i: 4">
-        <button nz-button nzType="link" nzSize="small" [disabled]="language() === 'tr'" (click)="useLanguage('tr')">
-          {{ 'lang_tr' | translate }}
-        </button>
-        <button nz-button nzType="link" nzSize="small" [disabled]="language() === 'en'" (click)="useLanguage('en')">
-          {{ 'lang_en' | translate }}
-        </button>
-      </div>
+        <p class="link-text animation" style="--i: 5; --j: 25">
+          {{ 'login_no_account' | translate }}
+          <button class="link" type="button" (click)="showRegister(true)">{{ 'register_submit' | translate }}</button>
+        </p>
+      </form>
     </div>
 
-    <div class="info-text">
-      <h2 class="animation" style="--i: 1">{{ 'login_welcome' | translate }}</h2>
-      <p class="animation" style="--i: 2">{{ 'login_subtitle' | translate }}</p>
+    <div class="info-text login-info">
+      <h2 class="animation" style="--i: 0; --j: 20">{{ 'login_welcome' | translate }}</h2>
+      <p class="animation" style="--i: 1; --j: 21">{{ 'login_subtitle' | translate }}</p>
+    </div>
+
+    <div class="form-box register-box" [inert]="!registerMode()">
+      <h1 class="title animation" style="--i: 17; --j: 0">{{ 'register_submit' | translate }}</h1>
+
+      <form nz-form nzLayout="vertical" autocomplete="off" [formGroup]="registerForm" (ngSubmit)="submitRegister()">
+        <nz-form-item class="animation" style="--i: 18; --j: 1">
+          <nz-form-control [nzErrorTip]="fullNameErrors">
+            <div class="input-box">
+              <input id="register-name" type="text" placeholder=" " formControlName="fullName" autocomplete="off" />
+              <label for="register-name">{{ 'user_full_name' | translate }}</label>
+              <nz-icon nzType="user" />
+            </div>
+          </nz-form-control>
+          <ng-template #fullNameErrors let-control>
+            @if (control.errors?.['required']) { {{ 'user_full_name_required' | translate }} }
+            @if (control.errors?.['maxlength']) { {{ 'user_full_name_too_long' | translate }} }
+          </ng-template>
+        </nz-form-item>
+
+        <nz-form-item class="animation" style="--i: 19; --j: 2">
+          <nz-form-control [nzErrorTip]="emailErrors">
+            <div class="input-box">
+              <input id="register-email" type="email" placeholder=" " formControlName="email" autocomplete="off" />
+              <label for="register-email">{{ 'login_email' | translate }}</label>
+              <nz-icon nzType="mail" />
+            </div>
+          </nz-form-control>
+        </nz-form-item>
+
+        <nz-form-item class="animation" style="--i: 20; --j: 3">
+          <nz-form-control [nzErrorTip]="passwordErrors">
+            <div class="input-box">
+              <input
+                id="register-password"
+                type="password"
+                placeholder=" "
+                formControlName="password"
+                autocomplete="new-password"
+              />
+              <label for="register-password">{{ 'login_password' | translate }}</label>
+              <nz-icon nzType="lock" />
+            </div>
+          </nz-form-control>
+          <ng-template #passwordErrors let-control>
+            @if (control.errors?.['required']) { {{ 'user_password_required' | translate }} }
+            @if (control.errors?.['minlength']) { {{ 'user_password_too_short' | translate }} }
+            @if (control.errors?.['maxBytes']) { {{ 'user_password_too_long' | translate }} }
+          </ng-template>
+        </nz-form-item>
+
+        <button
+          class="submit animation"
+          style="--i: 21; --j: 4"
+          nz-button
+          nzType="primary"
+          nzShape="round"
+          nzBlock
+          type="submit"
+          [nzLoading]="pending()"
+        >
+          {{ 'register_submit' | translate }}
+        </button>
+
+        <p class="link-text animation" style="--i: 22; --j: 5">
+          {{ 'register_have_account' | translate }}
+          <button class="link" type="button" (click)="showRegister(false)">{{ 'login_submit' | translate }}</button>
+        </p>
+      </form>
+    </div>
+
+    <div class="info-text register-info">
+      <h2 class="animation" style="--i: 17; --j: 0">{{ 'register_welcome' | translate }}</h2>
+      <p class="animation" style="--i: 18; --j: 1">{{ 'register_subtitle' | translate }}</p>
     </div>
   </div>
+
+  <div class="languages">
+    <button nz-button nzType="link" nzSize="small" [disabled]="language() === 'tr'" (click)="useLanguage('tr')">
+      {{ 'lang_tr' | translate }}
+    </button>
+    <button nz-button nzType="link" nzSize="small" [disabled]="language() === 'en'" (click)="useLanguage('en')">
+      {{ 'lang_en' | translate }}
+    </button>
+  </div>
+
+  <ng-template #emailErrors let-control>
+    @if (control.errors?.['required']) { {{ 'auth_email_required' | translate }} }
+    @if (control.errors?.['email']) { {{ 'user_email_invalid' | translate }} }
+  </ng-template>
 </div>

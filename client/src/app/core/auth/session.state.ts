@@ -13,7 +13,7 @@ export interface SessionState {
   expiresIn: number;
   user: SessionUser | null;
   menus: MenuNode[];
-  /** Login isteği sürüyor mu (düğmede yükleniyor göstergesi). */
+  /** Login ya da kayıt isteği sürüyor mu (düğmede yükleniyor göstergesi). */
   loginPending: boolean;
 }
 
@@ -30,7 +30,7 @@ export const sessionFeature = createFeature({
   name: 'session',
   reducer: createReducer(
     initialSessionState,
-    on(SessionActions.login, (state) => ({ ...state, loginPending: true })),
+    on(SessionActions.login, SessionActions.register, (state) => ({ ...state, loginPending: true })),
     on(SessionActions.loginFailed, (state) => ({ ...state, loginPending: false })),
     on(SessionActions.loginSucceeded, SessionActions.refreshed, (state, { info }) => ({
       ...state,

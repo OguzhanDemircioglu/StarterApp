@@ -2,7 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { API_URL, ApiResponse, unwrap } from '../api/api-response';
-import { ChangePasswordRequest, SessionInfo } from './session.model';
+import { ChangePasswordRequest, RegisterRequest, SessionInfo } from './session.model';
 
 /**
  * login, refresh ve logout cookie (refresh_token) ile çalışır; bu yüzden withCredentials ile çağrılır.
@@ -16,6 +16,10 @@ export class AuthApi {
     return this.http
       .post<ApiResponse<SessionInfo>>(`${API_URL}/auth/login`, { email, password }, { withCredentials: true })
       .pipe(unwrap());
+  }
+
+  register(request: RegisterRequest): Observable<null> {
+    return this.http.post<ApiResponse<null>>(`${API_URL}/auth/register`, request).pipe(unwrap());
   }
 
   refresh(): Observable<SessionInfo> {

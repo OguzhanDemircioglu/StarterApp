@@ -6,8 +6,13 @@ import { API_URL } from '../api/api-response';
 import { sessionFeature } from './session.state';
 import { TokenRefresher } from './token-refresher';
 
-/** Cookie ile çalışan auth istekleri: token eklenmez, 401'de refresh denenmez (sonsuz döngü olmasın). */
-const COOKIE_AUTH_URLS = [`${API_URL}/auth/login`, `${API_URL}/auth/refresh`, `${API_URL}/auth/logout`];
+/** Token gerektirmeyen auth istekleri: token eklenmez, 401'de refresh denenmez (sonsuz döngü olmasın). */
+const PUBLIC_AUTH_URLS = [
+  `${API_URL}/auth/login`,
+  `${API_URL}/auth/register`,
+  `${API_URL}/auth/refresh`,
+  `${API_URL}/auth/logout`,
+];
 
 /**
  * 1. Access token'ı Authorization başlığına ekler.
@@ -15,7 +20,7 @@ const COOKIE_AUTH_URLS = [`${API_URL}/auth/login`, `${API_URL}/auth/refresh`, `$
  *    (TokenRefresher) ve hata yukarı iletilir; errorInterceptor bu 401 için mesaj göstermez.
  */
 export const authInterceptor: HttpInterceptorFn = (request, next) => {
-  if (COOKIE_AUTH_URLS.includes(request.url)) {
+  if (PUBLIC_AUTH_URLS.includes(request.url)) {
     return next(request);
   }
 

@@ -219,6 +219,7 @@ interface SessionState {
 |---|---|
 | Uygulama açılışı (F5 dahil) | `provideAppInitializer` içinde `POST /api/auth/refresh` çağrılır. Başarılıysa store dolar, değilse `anonymous` olur. Uygulama bu bitmeden başlamaz. |
 | Login | `POST /api/auth/login`, store dolar, `returnUrl`'e (yoksa `/`) gidilir. Başka sitelere yönlendirme engellenir (`safeReturnUrl`). |
+| Kayıt | `POST /api/auth/register`, başarılıysa aynı bilgilerle Login akışına geçilir. |
 | Bir istek 401 alırsa | `authInterceptor` bir kez refresh dener ve isteği yeni token'la tekrarlar. Refresh de başarısızsa store temizlenir ve login'e gidilir. |
 | Access token süresi dolmadan 60 sn önce | Refresh ile store güncellenir; menüler ve kullanıcı bilgisi de tazelenir. |
 | Logout | `POST /api/auth/logout`, store temizlenir, login'e gidilir. |
@@ -280,7 +281,7 @@ Ekranlar sadece başarılı durumu yazar (`notifier.success('record_created')`).
 
 - NG-ZORRO'nun varsayılan Ant Design teması; stiller `angular.json`'dan yüklenir.
 - **Shell:** solda koyu sidebar (DB'den gelen menü ağacı, dar ekranda otomatik daralır), üstte topbar (menüyü daralt, dil, kullanıcı adı ve rolü, şifre değiştir, çıkış), ortada sayfa.
-- **Login:** Temanın tek istisnası. Eğik siyah panelli, açılışta animasyonlu kendi tasarımı `login.css`'tedir; dar ekranda sadece form kalır, `prefers-reduced-motion` açıksa animasyon çalışmaz. Doğrulama ve hata metinleri yine NG-ZORRO'nun form bileşenleridir. Kayıt olma ekranı yoktur: kullanıcıları admin oluşturur.
+- **Login:** Temanın tek istisnası. Giriş ve kayıt formu aynı sayfadadır (`/login`); aralarındaki eğik panel geçişi tamamen `login.css`'tedir (`.wrapper.active`), görünmeyen form `inert` ile devre dışıdır. Geçişte iki form da sıfırlanır; `autocomplete` kapalıdır, formlar açılışta boş gelir. Dar ekranda eğik paneller gizlenir, sadece seçili form görünür. Doğrulama ve hata metinleri yine NG-ZORRO'nun form bileşenleridir.
 - **İkonlar:** Sadece `core/icons.ts`'te listelenen ikonlar pakete girer. Backend'deki menüye (`menus.icon`) yeni bir ikon eklenirse buraya da eklenmelidir; ikon adları Ant Design adlarıdır (`home`, `setting`, `tag`, `team`).
 - `styles.css` sadece genel ayarları içerir; component stilleri kendi `.css` dosyasındadır.
 - **Paket boyutu:** İlk yükleme yaklaşık 1.4 MB ham, **~260 kB sıkıştırılmış**. Bunun büyük kısmı NG-ZORRO'nun CSS'idir. Bütçe `angular.json`'da 1.6 MB uyarı / 2 MB hata olarak ayarlıdır.

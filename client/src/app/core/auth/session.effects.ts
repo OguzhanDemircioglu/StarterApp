@@ -29,6 +29,19 @@ export class SessionEffects {
     ),
   );
 
+  readonly register$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(SessionActions.register),
+      exhaustMap(({ request, returnUrl }) =>
+        this.authApi.register(request).pipe(
+          map(() => SessionActions.login({ email: request.email, password: request.password, returnUrl })),
+          // Hata mesajını errorInterceptor gösterir.
+          catchError(() => of(SessionActions.loginFailed())),
+        ),
+      ),
+    ),
+  );
+
   readonly navigateAfterLogin$ = createEffect(
     () =>
       this.actions$.pipe(

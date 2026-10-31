@@ -26,8 +26,9 @@ import java.util.Set;
 @EnableMethodSecurity
 public class SecurityConfig {
 
-    /** Cookie ile çalışan, token gerektirmeyen auth endpoint'leri. */
-    private static final Set<String> PUBLIC_AUTH_PATHS = Set.of("/api/auth/login", "/api/auth/refresh", "/api/auth/logout");
+    /** Token gerektirmeyen auth endpoint'leri. */
+    private static final Set<String> PUBLIC_AUTH_PATHS = Set.of(
+            "/api/auth/login", "/api/auth/register", "/api/auth/refresh", "/api/auth/logout");
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http,

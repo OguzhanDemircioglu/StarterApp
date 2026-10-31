@@ -75,6 +75,11 @@
   "role_user": "Kullanıcı",
 
   "login_welcome": "Hoş geldiniz!",
+  "login_no_account": "Hesabınız yok mu?",
+  "register_submit": "Kayıt ol",
+  "register_have_account": "Zaten hesabınız var mı?",
+  "register_welcome": "Aramıza katılın!",
+  "register_subtitle": "Başlamak için hesabınızı oluşturun",
   "login_subtitle": "Devam etmek için giriş yapın",
   "login_email": "E-posta",
   "login_password": "Şifre",

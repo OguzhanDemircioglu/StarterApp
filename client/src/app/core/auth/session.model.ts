@@ -9,6 +9,12 @@ export interface SessionUser {
   role: Role;
 }
 
+export interface RegisterRequest {
+  fullName: string;
+  email: string;
+  password: string;
+}
+
 export interface MenuNode {
   id: number;
   titleKey: string;

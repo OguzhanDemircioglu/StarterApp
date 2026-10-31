@@ -5,6 +5,7 @@ import com.server.common.message.GlobalMessages;
 import com.server.modules.auth.AuthMessages;
 import com.server.modules.auth.RefreshCookies;
 import com.server.modules.category.CategoryMessages;
+import com.server.modules.user.UserMessages;
 import com.server.support.TestJwtKeys;
 import jakarta.servlet.http.Cookie;
 import org.junit.jupiter.api.Test;
@@ -103,6 +104,28 @@ class AuthFlowIntegrationTest {
     @Test
     void wrongPasswordReturns401() throws Exception {
         expectError(login(ADMIN_EMAIL, "wrong-password"), 401, AuthMessages.INVALID_CREDENTIALS);
+    }
+
+    @Test
+    void registerCreatesPlainUserAndIgnoresRoleInRequest() throws Exception {
+        String email = "new-" + UUID.randomUUID() + "@test.local";
+
+        register("{\"fullName\":\"New User\",\"email\":\"" + email + "\",\"password\":\"User12345\",\"role\":\"ADMIN\"}")
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.message").value(GlobalMessages.RECORD_CREATED));
+
+        login(email, "User12345")
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.user.fullName").value("New User"))
+                .andExpect(jsonPath("$.data.user.role").value("USER"));
+    }
+
+    @Test
+    void registerRejectsExistingEmailAndShortPassword() throws Exception {
+        expectError(register("{\"fullName\":\"X\",\"email\":\"" + ADMIN_EMAIL + "\",\"password\":\"User12345\"}"),
+                422, UserMessages.EMAIL_EXISTS);
+        expectError(register("{\"fullName\":\"X\",\"email\":\"short@test.local\",\"password\":\"short\"}"),
+                400, UserMessages.PASSWORD_TOO_SHORT);
     }
 
     @Test
@@ -224,6 +247,10 @@ class AuthFlowIntegrationTest {
         return mockMvc.perform(post("/api/auth/login")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("{\"email\":\"" + email + "\",\"password\":\"" + password + "\"}"));
+    }
+
+    private ResultActions register(String body) throws Exception {
+        return mockMvc.perform(post("/api/auth/register").contentType(MediaType.APPLICATION_JSON).content(body));
     }
 
     private ResultActions refresh(String refreshToken) throws Exception {

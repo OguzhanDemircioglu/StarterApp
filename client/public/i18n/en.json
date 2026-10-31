@@ -75,6 +75,11 @@
   "role_user": "User",
 
   "login_welcome": "Welcome back!",
+  "login_no_account": "Don't have an account?",
+  "register_submit": "Sign up",
+  "register_have_account": "Already have an account?",
+  "register_welcome": "Join us!",
+  "register_subtitle": "Create your account to get started",
   "login_subtitle": "Sign in to continue",
   "login_email": "Email",
   "login_password": "Password",

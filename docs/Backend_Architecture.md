@@ -406,6 +406,10 @@ Her satır bir oturumu temsil eder; bir tarayıcı, bir satır. Refresh token he
 3. Kullanıcı pasifse 401 `auth_user_inactive` döner. Bu cevabı yalnızca doğru şifreyi bilen biri görür.
 4. Başarılıysa yeni bir `user_sessions` satırı açılır, refresh cookie yazılır ve `SessionInfo` döner.
 
+**Kayıt — `POST /api/auth/register` (herkese açık)**
+- Ad soyad, e-posta ve şifre alınır; kurallar `UserCreateRequest` ile aynıdır. Rol alanı yoktur, kayıt olan herkes `USER` olur. Oturum açmaz; client ardından login çağırır.
+- Kayıtlı e-postada 422 `user_email_exists` döner. Brute-force korumasının kapsamında değildir, hız sınırı yoktur.
+
 **Refresh — `POST /api/auth/refresh` (herkese açık; cookie ile çalışır)**
 
 | Gelen token'ın hash'i | Sonuç |
@@ -484,7 +488,7 @@ public class CurrentUser {
 - **Admin'e özel endpoint'ler:** `@PreAuthorize("hasRole('ADMIN')")` ile işaretlenir.
   - Controller'ın tamamı admin'e özelse işaret sınıfın üstüne konur.
   - Herkes okuyabilip sadece admin değiştirebiliyorsa, işaret yalnızca create, update ve delete metotlarına konur.
-- **Herkese açık endpoint'ler** config'te beyaz listededir: `/api/auth/login`, `/api/auth/refresh`, `/api/auth/logout`, `/actuator/health/**`. Swagger sadece dev profilinde açılır.
+- **Herkese açık endpoint'ler** config'te beyaz listededir: `/api/auth/login`, `/api/auth/register`, `/api/auth/refresh`, `/api/auth/logout`, `/actuator/health/**`. Swagger sadece dev profilinde açılır.
 - DB'de endpoint ya da yetki tablosu **yoktur**.
 - **Menü görünürlüğü güvenlik değildir.** Bir menüyü gizlemek arkasındaki endpoint'i korumaz; asıl koruma `@PreAuthorize`'dır.
 

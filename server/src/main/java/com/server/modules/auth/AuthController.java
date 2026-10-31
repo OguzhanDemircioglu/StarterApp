@@ -4,8 +4,12 @@ import com.server.common.message.GlobalMessages;
 import com.server.common.response.ApiResponse;
 import com.server.modules.auth.dto.ChangePasswordRequest;
 import com.server.modules.auth.dto.LoginRequest;
+import com.server.modules.auth.dto.RegisterRequest;
 import com.server.modules.auth.dto.SessionInfo;
+import com.server.modules.user.UserService;
+import com.server.modules.user.dto.UserCreateRequest;
 import com.server.security.CurrentUser;
+import com.server.security.Role;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
@@ -19,7 +23,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * login, refresh ve logout herkese açıktır (cookie ile çalışır); password giriş yapmış kullanıcı içindir.
+ * login, register, refresh ve logout herkese açıktır; password giriş yapmış kullanıcı içindir.
  */
 @RestController
 @RequestMapping("/api/auth")
@@ -27,6 +31,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class AuthController {
 
     private final AuthService authService;
+    private final UserService userService;
     private final RefreshCookies refreshCookies;
     private final CurrentUser currentUser;
 
@@ -34,6 +39,12 @@ public class AuthController {
     public ApiResponse<SessionInfo> login(@Valid @RequestBody LoginRequest request,
                                           HttpServletRequest httpRequest, HttpServletResponse httpResponse) {
         return respond(authService.login(request, ClientInfo.from(httpRequest)), httpResponse);
+    }
+
+    @PostMapping("/register")
+    public ApiResponse<Void> register(@Valid @RequestBody RegisterRequest request) {
+        userService.create(new UserCreateRequest(request.email(), request.fullName(), request.password(), Role.USER));
+        return ApiResponse.success(GlobalMessages.RECORD_CREATED, null);
     }
 
     @PostMapping("/refresh")
