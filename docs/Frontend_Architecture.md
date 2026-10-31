@@ -280,6 +280,7 @@ Ekranlar sadece başarılı durumu yazar (`notifier.success('record_created')`).
 
 - NG-ZORRO'nun varsayılan Ant Design teması; stiller `angular.json`'dan yüklenir.
 - **Shell:** solda koyu sidebar (DB'den gelen menü ağacı, dar ekranda otomatik daralır), üstte topbar (menüyü daralt, dil, kullanıcı adı ve rolü, şifre değiştir, çıkış), ortada sayfa.
+- **Login:** Temanın tek istisnası. Eğik siyah panelli, açılışta animasyonlu kendi tasarımı `login.css`'tedir; dar ekranda sadece form kalır, `prefers-reduced-motion` açıksa animasyon çalışmaz. Doğrulama ve hata metinleri yine NG-ZORRO'nun form bileşenleridir. Kayıt olma ekranı yoktur: kullanıcıları admin oluşturur.
 - **İkonlar:** Sadece `core/icons.ts`'te listelenen ikonlar pakete girer. Backend'deki menüye (`menus.icon`) yeni bir ikon eklenirse buraya da eklenmelidir; ikon adları Ant Design adlarıdır (`home`, `setting`, `tag`, `team`).
 - `styles.css` sadece genel ayarları içerir; component stilleri kendi `.css` dosyasındadır.
 - **Paket boyutu:** İlk yükleme yaklaşık 1.4 MB ham, **~260 kB sıkıştırılmış**. Bunun büyük kısmı NG-ZORRO'nun CSS'idir. Bütçe `angular.json`'da 1.6 MB uyarı / 2 MB hata olarak ayarlıdır.

@@ -74,6 +74,7 @@
   "role_admin": "Yönetici",
   "role_user": "Kullanıcı",
 
+  "login_welcome": "Hoş geldiniz!",
   "login_subtitle": "Devam etmek için giriş yapın",
   "login_email": "E-posta",
   "login_password": "Şifre",

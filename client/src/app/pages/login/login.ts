@@ -3,10 +3,8 @@ import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angula
 import { Store } from '@ngrx/store';
 import { TranslatePipe } from '@ngx-translate/core';
 import { NzButtonModule } from 'ng-zorro-antd/button';
-import { NzCardModule } from 'ng-zorro-antd/card';
 import { NzFormModule } from 'ng-zorro-antd/form';
 import { NzIconModule } from 'ng-zorro-antd/icon';
-import { NzInputModule } from 'ng-zorro-antd/input';
 import { SessionActions } from '../../core/auth/session.actions';
 import { sessionFeature } from '../../core/auth/session.state';
 import { Language, LanguageService } from '../../core/i18n/language';
@@ -14,7 +12,7 @@ import { validateForm } from '../../shared/forms/form-utils';
 
 /** /login — shell'in dışındadır. Hata mesajlarını (yanlış şifre, engellendi) errorInterceptor gösterir. */
 @Component({
-  imports: [ReactiveFormsModule, TranslatePipe, NzCardModule, NzFormModule, NzInputModule, NzButtonModule, NzIconModule],
+  imports: [ReactiveFormsModule, TranslatePipe, NzFormModule, NzButtonModule, NzIconModule],
   templateUrl: './login.html',
   styleUrl: './login.css',
 })

@@ -74,6 +74,7 @@
   "role_admin": "Administrator",
   "role_user": "User",
 
+  "login_welcome": "Welcome back!",
   "login_subtitle": "Sign in to continue",
   "login_email": "Email",
   "login_password": "Password",
