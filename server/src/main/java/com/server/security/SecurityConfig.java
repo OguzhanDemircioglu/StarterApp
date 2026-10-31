@@ -28,7 +28,7 @@ public class SecurityConfig {
 
     /** Token gerektirmeyen auth endpoint'leri. */
     private static final Set<String> PUBLIC_AUTH_PATHS = Set.of(
-            "/api/auth/login", "/api/auth/register", "/api/auth/refresh", "/api/auth/logout");
+            "/api/auth/login", "/api/auth/register", "/api/auth/refresh", "/api/auth/logout", "/api/auth/dev-login");
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http,

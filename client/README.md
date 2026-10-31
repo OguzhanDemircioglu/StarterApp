@@ -58,3 +58,8 @@ Component'ler CLI ile üretilir: `npx ng generate component pages/definitions/pr
 
 `client/Dockerfile` uygulamayı build edip nginx ile sunar; nginx `/api` isteklerini server container'ına iletir.
 Repo kökünde: `docker compose --profile app up -d` → `http://localhost:4200`.
+
+## Yerel otomatik giriş
+
+`npm start` ile çalışırken login ekranı atlanır: server dev profilindeyse `ADMIN_EMAIL` kullanıcısıyla otomatik giriş yapılır.
+Login ekranını görmek için adresi `/login` yapın. Docker ile çalışan uygulamada ve prod'da bu özellik yoktur.

@@ -220,6 +220,7 @@ interface SessionState {
 | Uygulama açılışı (F5 dahil) | `provideAppInitializer` içinde `POST /api/auth/refresh` çağrılır. Başarılıysa store dolar, değilse `anonymous` olur. Uygulama bu bitmeden başlamaz. |
 | Login | `POST /api/auth/login`, store dolar, `returnUrl`'e (yoksa `/`) gidilir. Başka sitelere yönlendirme engellenir (`safeReturnUrl`). |
 | Kayıt | `POST /api/auth/register`, başarılıysa aynı bilgilerle Login akışına geçilir. |
+| Yerel otomatik giriş | Sadece `npm start` ile: açılışta refresh başarısızsa `POST /api/auth/dev-login` denenir, admin olarak girilir. Adres `/login` ise atlanır, ekran görülebilsin diye. Production build bu çağrıyı yapmaz (`isDevMode()`). |
 | Bir istek 401 alırsa | `authInterceptor` bir kez refresh dener ve isteği yeni token'la tekrarlar. Refresh de başarısızsa store temizlenir ve login'e gidilir. |
 | Access token süresi dolmadan 60 sn önce | Refresh ile store güncellenir; menüler ve kullanıcı bilgisi de tazelenir. |
 | Logout | `POST /api/auth/logout`, store temizlenir, login'e gidilir. |

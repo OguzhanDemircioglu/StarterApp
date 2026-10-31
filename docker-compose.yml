@@ -30,6 +30,7 @@ services:
     env_file: ./server/.env
     environment:
       SPRING_PROFILES_ACTIVE: dev
+      DEV_LOGIN_ENABLED: "false"
       JWT_PRIVATE_KEY_PATH: /app/keys/private.pem
       JWT_PUBLIC_KEY_PATH: /app/keys/public.pem
       # Client aynı adresten (nginx) geldiği için CORS gerekmez; gerçek istemci IP'si nginx'in X-Forwarded-For'undan.

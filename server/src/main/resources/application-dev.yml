@@ -23,6 +23,9 @@ springdoc:
     enabled: true
 
 app:
+  dev-login:
+    # Yerelde login ekranını atlar (DevLoginController). Compose bunu kapatır.
+    enabled: ${DEV_LOGIN_ENABLED:true}
   jwt:
     key-id: ${JWT_KEY_ID:dev-key}
     private-key-path: ${JWT_PRIVATE_KEY_PATH:keys/private.pem}

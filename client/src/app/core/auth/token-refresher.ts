@@ -1,4 +1,4 @@
-import { inject, Injectable } from '@angular/core';
+import { inject, Injectable, isDevMode } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { finalize, firstValueFrom, Observable, shareReplay, tap } from 'rxjs';
 import { AuthApi } from './auth-api';
@@ -38,7 +38,20 @@ export class TokenRefresher {
       const info = await firstValueFrom(this.authApi.refresh());
       this.store.dispatch(SessionActions.refreshed({ info }));
     } catch {
-      this.store.dispatch(SessionActions.restoreFailed());
+      const info = isDevMode() ? await this.devLogin() : null;
+      this.store.dispatch(info ? SessionActions.refreshed({ info }) : SessionActions.restoreFailed());
+    }
+  }
+
+  /** `npm start` ile çalışırken login ekranı atlanır; /login adresi açıkça istenirse ekran görünür. */
+  private async devLogin(): Promise<SessionInfo | null> {
+    if (location.pathname === '/login') {
+      return null;
+    }
+    try {
+      return await firstValueFrom(this.authApi.devLogin());
+    } catch {
+      return null;
     }
   }
 }

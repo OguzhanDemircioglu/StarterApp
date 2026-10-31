@@ -26,6 +26,10 @@ export const errorInterceptor: HttpInterceptorFn = (request, next) => {
 };
 
 function shouldNotify(error: HttpErrorResponse, url: string): boolean {
+  // Yerel otomatik giriş başarısızsa sessizce login ekranına düşülür.
+  if (url === `${API_URL}/auth/dev-login`) {
+    return false;
+  }
   return error.status !== 401 || url === `${API_URL}/auth/login`;
 }
 

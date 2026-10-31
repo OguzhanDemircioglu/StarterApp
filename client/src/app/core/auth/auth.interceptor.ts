@@ -10,6 +10,7 @@ import { TokenRefresher } from './token-refresher';
 const PUBLIC_AUTH_URLS = [
   `${API_URL}/auth/login`,
   `${API_URL}/auth/register`,
+  `${API_URL}/auth/dev-login`,
   `${API_URL}/auth/refresh`,
   `${API_URL}/auth/logout`,
 ];

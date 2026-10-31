@@ -411,6 +411,12 @@ Her satır bir oturumu temsil eder; bir tarayıcı, bir satır. Refresh token he
 - Kayıtlı e-postada 422 `user_email_exists` döner.
 - Aynı IP'den 10 denemeden sonra 1 saat boyunca 429 `auth_register_blocked` döner (§13.2).
 
+**Yerel otomatik giriş — `POST /api/auth/dev-login` (sadece geliştirme)**
+- `DevLoginController`, `ADMIN_EMAIL` kullanıcısıyla şifresiz oturum açar. Şifre koda ya da client'a girmez.
+- Sadece `app.dev-login.enabled=true` iken oluşur. Bu ayar yalnızca `application-dev.yml`'dedir; prod'da adres 404 döner. Compose `DEV_LOGIN_ENABLED=false` verir.
+- Dev profilli server ağa açık olabileceği için sadece bu makineden (loopback) gelen istekler kabul edilir, diğerleri 404 alır.
+- **Prod ortamı `dev` profiliyle çalıştırılmaz.**
+
 **Refresh — `POST /api/auth/refresh` (herkese açık; cookie ile çalışır)**
 
 | Gelen token'ın hash'i | Sonuç |
@@ -489,7 +495,7 @@ public class CurrentUser {
 - **Admin'e özel endpoint'ler:** `@PreAuthorize("hasRole('ADMIN')")` ile işaretlenir.
   - Controller'ın tamamı admin'e özelse işaret sınıfın üstüne konur.
   - Herkes okuyabilip sadece admin değiştirebiliyorsa, işaret yalnızca create, update ve delete metotlarına konur.
-- **Herkese açık endpoint'ler** config'te beyaz listededir: `/api/auth/login`, `/api/auth/register`, `/api/auth/refresh`, `/api/auth/logout`, `/actuator/health/**`. Swagger sadece dev profilinde açılır.
+- **Herkese açık endpoint'ler** config'te beyaz listededir: `/api/auth/login`, `/api/auth/register`, `/api/auth/dev-login` (sadece geliştirmede var), `/api/auth/refresh`, `/api/auth/logout`, `/actuator/health/**`. Swagger sadece dev profilinde açılır.
 - DB'de endpoint ya da yetki tablosu **yoktur**.
 - **Menü görünürlüğü güvenlik değildir.** Bir menüyü gizlemek arkasındaki endpoint'i korumaz; asıl koruma `@PreAuthorize`'dır.
 

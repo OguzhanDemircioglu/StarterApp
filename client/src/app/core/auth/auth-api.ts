@@ -18,6 +18,13 @@ export class AuthApi {
       .pipe(unwrap());
   }
 
+  /** Sadece yerel geliştirmede vardır (TokenRefresher.restore). */
+  devLogin(): Observable<SessionInfo> {
+    return this.http
+      .post<ApiResponse<SessionInfo>>(`${API_URL}/auth/dev-login`, null, { withCredentials: true })
+      .pipe(unwrap());
+  }
+
   register(request: RegisterRequest): Observable<null> {
     return this.http.post<ApiResponse<null>>(`${API_URL}/auth/register`, request).pipe(unwrap());
   }

@@ -66,12 +66,22 @@ public class AuthServiceImpl implements AuthService {
             throw new UnauthorizedException(AuthMessages.USER_INACTIVE);
         }
         loginAttemptService.clear(attemptKey);
+        return openSession(user.get(), client);
+    }
 
+    @Override
+    public AuthResult devLogin(String email, ClientInfo client) {
+        User user = userRepository.findByEmail(email).filter(User::isActive)
+                .orElseThrow(() -> new NotFoundException(GlobalMessages.RECORD_NOT_FOUND));
+        return openSession(user, client);
+    }
+
+    private AuthResult openSession(User user, ClientInfo client) {
         Instant now = Instant.now();
         String refreshToken = RefreshTokens.generate();
-        UserSession session = sessionRepository.save(UserSession.open(user.get().getId(),
+        UserSession session = sessionRepository.save(UserSession.open(user.getId(),
                 RefreshTokens.hash(refreshToken), client, now, now.plus(properties.refreshTokenTtl())));
-        return new AuthResult(buildSessionInfo(user.get(), session.getId()), refreshToken);
+        return new AuthResult(buildSessionInfo(user, session.getId()), refreshToken);
     }
 
     @Override
