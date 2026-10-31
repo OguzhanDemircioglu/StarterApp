@@ -24,6 +24,7 @@
   "auth_user_inactive": "Your account is inactive",
   "auth_session_expired": "Your session has ended, please sign in again",
   "auth_login_blocked": "Too many failed attempts. Try again in 1 hour.",
+  "auth_register_blocked": "Too many sign-up attempts. Try again in 1 hour.",
   "auth_current_password_incorrect": "The current password is incorrect",
 
   "user_email_required": "Email is required",

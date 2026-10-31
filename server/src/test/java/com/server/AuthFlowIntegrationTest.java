@@ -129,6 +129,17 @@ class AuthFlowIntegrationTest {
     }
 
     @Test
+    void eleventhRegisterFromSameIpIsBlockedButOtherIpsAreNot() throws Exception {
+        String body = "{\"fullName\":\"X\",\"email\":\"" + ADMIN_EMAIL + "\",\"password\":\"User12345\"}";
+        for (int i = 0; i < 10; i++) {
+            expectError(registerFrom("10.0.0.1", body), 422, UserMessages.EMAIL_EXISTS);
+        }
+
+        expectError(registerFrom("10.0.0.1", body), 429, AuthMessages.REGISTER_BLOCKED);
+        expectError(registerFrom("10.0.0.2", body), 422, UserMessages.EMAIL_EXISTS);
+    }
+
+    @Test
     void refreshRotatesTokenToleratesConcurrentReuseAndDetectsTheft() throws Exception {
         String first = refreshCookie(login(ADMIN_EMAIL, ADMIN_PASSWORD).andReturn().getResponse());
 
@@ -251,6 +262,16 @@ class AuthFlowIntegrationTest {
 
     private ResultActions register(String body) throws Exception {
         return mockMvc.perform(post("/api/auth/register").contentType(MediaType.APPLICATION_JSON).content(body));
+    }
+
+    private ResultActions registerFrom(String ip, String body) throws Exception {
+        return mockMvc.perform(post("/api/auth/register")
+                .with(request -> {
+                    request.setRemoteAddr(ip);
+                    return request;
+                })
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(body));
     }
 
     private ResultActions refresh(String refreshToken) throws Exception {

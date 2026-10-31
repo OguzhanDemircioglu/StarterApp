@@ -24,6 +24,7 @@
   "auth_user_inactive": "Hesabınız pasif durumda",
   "auth_session_expired": "Oturumunuz sona erdi, lütfen tekrar giriş yapın",
   "auth_login_blocked": "Çok fazla hatalı deneme yapıldı. 1 saat sonra tekrar deneyin.",
+  "auth_register_blocked": "Çok fazla kayıt denemesi yapıldı. 1 saat sonra tekrar deneyin.",
   "auth_current_password_incorrect": "Mevcut şifre hatalı",
 
   "user_email_required": "E-posta zorunludur",

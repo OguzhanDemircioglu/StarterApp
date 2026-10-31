@@ -32,6 +32,7 @@ public class AuthController {
 
     private final AuthService authService;
     private final UserService userService;
+    private final RegisterRateLimiter registerRateLimiter;
     private final RefreshCookies refreshCookies;
     private final CurrentUser currentUser;
 
@@ -42,7 +43,8 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public ApiResponse<Void> register(@Valid @RequestBody RegisterRequest request) {
+    public ApiResponse<Void> register(@Valid @RequestBody RegisterRequest request, HttpServletRequest httpRequest) {
+        registerRateLimiter.acquire(ClientInfo.from(httpRequest).ip());
         userService.create(new UserCreateRequest(request.email(), request.fullName(), request.password(), Role.USER));
         return ApiResponse.success(GlobalMessages.RECORD_CREATED, null);
     }

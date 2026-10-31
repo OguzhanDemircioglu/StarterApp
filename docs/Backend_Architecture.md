@@ -408,7 +408,8 @@ Her satır bir oturumu temsil eder; bir tarayıcı, bir satır. Refresh token he
 
 **Kayıt — `POST /api/auth/register` (herkese açık)**
 - Ad soyad, e-posta ve şifre alınır; kurallar `UserCreateRequest` ile aynıdır. Rol alanı yoktur, kayıt olan herkes `USER` olur. Oturum açmaz; client ardından login çağırır.
-- Kayıtlı e-postada 422 `user_email_exists` döner. Brute-force korumasının kapsamında değildir, hız sınırı yoktur.
+- Kayıtlı e-postada 422 `user_email_exists` döner.
+- Aynı IP'den 10 denemeden sonra 1 saat boyunca 429 `auth_register_blocked` döner (§13.2).
 
 **Refresh — `POST /api/auth/refresh` (herkese açık; cookie ile çalışır)**
 
@@ -648,6 +649,14 @@ Tablo: `login_attempts`
 - IP her zaman `request.getRemoteAddr()` ile okunur.
 - Uygulama bir reverse proxy arkasındaysa `FORWARD_HEADERS_STRATEGY=native` ayarlanır. Bu durumda Tomcat gerçek IP'yi `X-Forwarded-For` başlığından alır ve yalnızca iç ağdaki proxy'lere güvenir.
 - **Swarm uyarısı:** Swarm'ın ingress routing mesh'i kaynak IP'yi değiştirir. Gerçek IP'yi korumak için en öndeki servis `mode: host` ile yayınlanmalıdır. Aksi halde anahtar fiilen sadece e-posta olur ve bir kullanıcı başkası tarafından kilitlenebilir.
+
+### 13.2 Kayıt hız sınırı
+
+- `RegisterRateLimiter`, `login_attempts` tablosunu ve aynı atomik sayacı `register_IP` anahtarıyla kullanır; login engelinden bağımsızdır.
+- Başarılı ya da başarısız her kayıt denemesi sayılır, böylece kayıtlı e-posta taraması da sınırlanır. Sadece format doğrulamasını (`@Valid`) geçen istekler sayılır.
+- Ayarlar `app.register-protection` altındadır: 10 deneme, 1 saat engel.
+- Sayaç zaman penceresi kullanmaz: engel oluşmazsa temizlik işi silene kadar artar (§13.1). Aynı IP'yi paylaşan kurumlarda bu sınır yükseltilebilir.
+- Yukarıdaki "İstemci IP'si" kuralları burada da geçerlidir: gerçek IP gelmiyorsa bütün kullanıcılar aynı sayacı paylaşır.
 
 ### 13.1 Temizlik işi
 
