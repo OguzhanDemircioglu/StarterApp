@@ -20,18 +20,15 @@
     @for (tab of tabs(); track tab.title) {
       <nz-tab [nzTitle]="tab.title | translate">
         <ng-template nz-tab>
-          <div class="charts">
-            @for (card of tab.cards; track card.title) {
-              <app-section [title]="card.title" [class.wide]="card.wide">
-                <nz-tag sectionActions>{{ card.kind }}</nz-tag>
-                <p class="chart-note">{{ card.note | translate }}</p>
-                <app-chart [options]="card.options" [height]="card.height ?? '320px'" />
-              </app-section>
-            }
-          </div>
+          <ng-container [ngTemplateOutlet]="chartGrid" [ngTemplateOutletContext]="{ $implicit: tab.cards }" />
         </ng-template>
       </nz-tab>
     }
+    <nz-tab [nzTitle]="'dash_tab_extensions' | translate" (nzSelect)="loadExtensions()">
+      <ng-template nz-tab>
+        <ng-container [ngTemplateOutlet]="chartGrid" [ngTemplateOutletContext]="{ $implicit: extensionCards() }" />
+      </ng-template>
+    </nz-tab>
     <nz-tab [nzTitle]="'dash_tab_live' | translate">
       <ng-template nz-tab>
         <app-section title="home_chart_title">
@@ -41,3 +38,15 @@
     </nz-tab>
   </nz-tabs>
 </app-page>
+
+<ng-template #chartGrid let-cards>
+  <div class="charts">
+    @for (card of cards; track card.title) {
+      <app-section [title]="card.title" [class.wide]="card.wide">
+        <nz-tag sectionActions>{{ card.kind }}</nz-tag>
+        <p class="chart-note">{{ card.note | translate }}</p>
+        <app-chart [options]="card.options" [height]="card.height ?? '320px'" />
+      </app-section>
+    }
+  </div>
+</ng-template>

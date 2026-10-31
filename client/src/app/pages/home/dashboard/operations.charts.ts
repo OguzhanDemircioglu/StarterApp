@@ -15,7 +15,7 @@ import {
   SHIFTS,
 } from './restaurant.mock';
 
-const FLOOR_MAP = 'floor-plan';
+export const FLOOR_MAP = 'floor-plan';
 const SHIFT_NAMES = ['Sabah', 'Akşam'];
 /** Bölge rengi açıktan koyuya değiştiği için etiket kendi zemininde durur. */
 const ZONE_LABEL = {

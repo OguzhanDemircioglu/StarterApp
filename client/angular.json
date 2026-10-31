@@ -22,6 +22,21 @@
               {
                 "glob": "**/*",
                 "input": "public"
+              },
+              {
+                "glob": "echarts-gl.min.js",
+                "input": "node_modules/echarts-gl/dist",
+                "output": "vendor"
+              },
+              {
+                "glob": "echarts-liquidfill.min.js",
+                "input": "node_modules/echarts-liquidfill/dist",
+                "output": "vendor"
+              },
+              {
+                "glob": "echarts-wordcloud.min.js",
+                "input": "node_modules/echarts-wordcloud/dist",
+                "output": "vendor"
               }
             ],
             "styles": [

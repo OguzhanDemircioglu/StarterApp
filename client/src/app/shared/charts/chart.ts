@@ -8,6 +8,8 @@ import { CHART_COLORS } from './chart-colors';
 import { formatNumber } from './chart-format';
 import { echarts } from './echarts-setup';
 
+const AXES = ['xAxis', 'yAxis', 'xAxis3D', 'yAxis3D', 'zAxis3D'];
+
 /** Sayısal eksenin etiketleri de seçili dilde yazılır: 3.000 / 3,000. */
 function localizedAxis(axis: unknown, language: string): unknown {
   const { type, axisLabel } = axis as { type?: string; axisLabel?: object };
@@ -16,6 +18,32 @@ function localizedAxis(axis: unknown, language: string): unknown {
   }
   const formatter = (value: number) => formatNumber(value, language);
   return { ...(axis as object), axisLabel: { formatter, ...axisLabel } };
+}
+
+/** Sayfanın verdiği ayarlara ortak görünümü ekler. */
+function withDefaults(options: EChartsCoreOption, language: string): EChartsCoreOption {
+  return {
+    color: CHART_COLORS,
+    ...options,
+    // ECharts 6 göstergeyi alta koyar ve eksen etiketleriyle çakışır; varsayılanımız üsttür.
+    ...(options['legend'] ? { legend: { top: 0, ...(options['legend'] as object) } } : {}),
+    ...Object.fromEntries(
+      AXES.filter((axis) => options[axis]).map((axis) => [axis, localizedAxis(options[axis], language)]),
+    ),
+    // outerBoundsMode: eksen etiketleri ve adları grafiğin içinde kalır, kesilmez.
+    grid: {
+      left: 16,
+      right: 16,
+      top: 40,
+      bottom: 16,
+      outerBoundsMode: 'same',
+      ...(options['grid'] as object | undefined),
+    },
+    tooltip: {
+      valueFormatter: (value: unknown) => (typeof value === 'number' ? formatNumber(value, language) : String(value)),
+      ...(options['tooltip'] as object | undefined),
+    },
+  };
 }
 
 /**
@@ -57,26 +85,8 @@ export class Chart {
   protected readonly mergedOptions = computed<EChartsCoreOption>(() => {
     const options = this.options();
     const language = this.language() ?? 'tr';
-    return {
-      color: CHART_COLORS,
-      ...options,
-      // ECharts 6 göstergeyi alta koyar ve eksen etiketleriyle çakışır; varsayılanımız üsttür.
-      ...(options['legend'] ? { legend: { top: 0, ...(options['legend'] as object) } } : {}),
-      ...(options['xAxis'] ? { xAxis: localizedAxis(options['xAxis'], language) } : {}),
-      ...(options['yAxis'] ? { yAxis: localizedAxis(options['yAxis'], language) } : {}),
-      // outerBoundsMode: eksen etiketleri ve adları grafiğin içinde kalır, kesilmez.
-      grid: {
-        left: 16,
-        right: 16,
-        top: 40,
-        bottom: 16,
-        outerBoundsMode: 'same',
-        ...(options['grid'] as object | undefined),
-      },
-      tooltip: {
-        valueFormatter: (value: unknown) => (typeof value === 'number' ? formatNumber(value, language) : String(value)),
-        ...(options['tooltip'] as object | undefined),
-      },
-    };
+    // Zaman çizelgeli grafiklerde ayarlar baseOption içindedir; ECharts üst seviyedekileri yok sayar.
+    const baseOption = options['baseOption'] as EChartsCoreOption | undefined;
+    return baseOption ? { ...options, baseOption: withDefaults(baseOption, language) } : withDefaults(options, language);
   });
 }

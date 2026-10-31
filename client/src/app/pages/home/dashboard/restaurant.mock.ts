@@ -344,6 +344,127 @@ export const LAMB_PRICES: [string, number, number, number, number][] = (() => {
   });
 })();
 
+/** Adana Kebap'ın ay ay menü fiyatı (₺): fiyat değişene kadar sabit kalır. */
+export const ADANA_PRICES = [480, 480, 480, 510, 510, 510, 545, 545, 560, 560];
+
+/** Şubelerin kanal payları (%): Salon, Paket, Online, Catering sırasıyla. */
+export const BRANCH_CHANNEL_SHARES = [
+  { name: 'Kadıköy', shares: [54, 17, 25, 4] },
+  { name: 'Beşiktaş', shares: [66, 12, 16, 6] },
+  { name: 'Alsancak', shares: [61, 14, 13, 12] },
+];
+
+/** Şube ve kategori kırılımında memnuniyet puanı. */
+export const SATISFACTION_MATRIX: [string, string, number][] = BRANCHES.flatMap((branch, row) =>
+  MENU.map((category, column): [string, string, number] => [branch.name, category.name, 72 + ((row * 7 + column * 5) % 24)]),
+);
+
+/** Malzemenin geldiği iller (ton), [boylam, enlem] ve gittiği şube. */
+export const SUPPLIERS = [
+  { province: 'Kars', tons: 84, position: [43.1, 40.6], target: 'Kadıköy' },
+  { province: 'Gaziantep', tons: 52, position: [37.4, 37.1], target: 'Kadıköy' },
+  { province: 'Konya', tons: 66, position: [32.5, 37.9], target: 'Beşiktaş' },
+  { province: 'Hatay', tons: 38, position: [36.2, 36.2], target: 'Alsancak' },
+  { province: 'Aydın', tons: 47, position: [27.8, 37.85], target: 'Alsancak' },
+  { province: 'Balıkesir', tons: 31, position: [27.9, 39.65], target: 'Beşiktaş' },
+];
+
+export const BRANCH_POSITIONS: Record<string, number[]> = {
+  Kadıköy: [29.05, 40.98],
+  Beşiktaş: [29.0, 41.05],
+  Alsancak: [27.14, 38.43],
+};
+
+/** Yorumlarda en sık geçen kelimeler. */
+export const REVIEW_WORDS = [
+  { name: 'lezzetli', value: 96 },
+  { name: 'kuzu', value: 74 },
+  { name: 'servis', value: 68 },
+  { name: 'taze', value: 61 },
+  { name: 'künefe', value: 55 },
+  { name: 'sıcak', value: 49 },
+  { name: 'güler yüzlü', value: 46 },
+  { name: 'porsiyon', value: 42 },
+  { name: 'hızlı', value: 38 },
+  { name: 'kebap', value: 36 },
+  { name: 'atmosfer', value: 33 },
+  { name: 'fiyat', value: 31 },
+  { name: 'teras', value: 27 },
+  { name: 'humus', value: 24 },
+  { name: 'kahve', value: 22 },
+  { name: 'temiz', value: 20 },
+  { name: 'bekleme', value: 18 },
+  { name: 'rezervasyon', value: 15 },
+  { name: 'gürültü', value: 12 },
+  { name: 'otopark', value: 10 },
+];
+
+/** İthal ürünlerin geldiği yerler: [boylam, enlem]. */
+export const IMPORT_ROUTES = [
+  { name: 'Kahve', from: [-47.9, -15.8] },
+  { name: 'Kahve', from: [38.7, 9.0] },
+  { name: 'Çay', from: [80.7, 7.3] },
+  { name: 'Baharat', from: [77.2, 28.6] },
+  { name: 'Kakao', from: [-5.5, 7.5] },
+];
+
+const ORDER_POINTS = 20000;
+const COURIER_ROUTES = 1500;
+
+/** Büyük veri örneği: her nokta bir adisyon, [saat, tutar ₺]. */
+export const TICKET_POINTS: [number, number][] = (() => {
+  const random = seededRandom(RANDOM_SEED + 4);
+  return Array.from({ length: ORDER_POINTS }, () => {
+    const dinner = random() > 0.4;
+    const hour = (dinner ? 20 : 13) + (random() + random() + random() - 1.5) * 2;
+    const amount = (dinner ? 620 : 340) + (random() + random() - 1) * (dinner ? 420 : 200);
+    return [Math.round(hour * 100) / 100, Math.round(amount)];
+  });
+})();
+
+/** Şubeden çıkan kurye yolları: şube merkezdedir, teslimat noktası km cinsinden. */
+export const COURIER_LINES: number[][][] = (() => {
+  const random = seededRandom(RANDOM_SEED + 5);
+  return Array.from({ length: COURIER_ROUTES }, () => {
+    const angle = random() * Math.PI * 2;
+    const distance = 1 + random() * random() * 18;
+    return [
+      [0, 0],
+      [Math.cos(angle) * distance, Math.sin(angle) * distance],
+    ];
+  });
+})();
+
+/** Büyük ağ örneği: müşteriler ve sipariş ettikleri ürünler. */
+export const CUSTOMER_NETWORK = (() => {
+  const random = seededRandom(RANDOM_SEED + 6);
+  const dishes = DISH_PERFORMANCE.map((dish) => dish.name);
+  const customers = Array.from({ length: 400 }, (_, index) => `#${index + 1}`);
+  return {
+    nodes: [
+      ...dishes.map((name) => ({ name, value: 12, category: 0 })),
+      ...customers.map((name) => ({ name, value: 2, category: 1 })),
+    ],
+    edges: customers.flatMap((customer) =>
+      [0, 1].map(() => ({ source: customer, target: dishes[Math.floor(random() * dishes.length)] })),
+    ),
+  };
+})();
+
+/** Terastaki hava akışı: [x, y, yatay hız, dikey hız]. */
+export const VENT_FIELD: [number, number, number, number][] = (() => {
+  const field: [number, number, number, number][] = [];
+  for (let x = 0; x <= 40; x++) {
+    for (let y = 0; y <= 20; y++) {
+      const dx = x - 20;
+      const dy = y - 10;
+      const distance = Math.sqrt(dx * dx + dy * dy) + 1;
+      field.push([x, y, 1 - (dy * 12) / (distance * distance), (dx * 12) / (distance * distance)]);
+    }
+  }
+  return field;
+})();
+
 /** Ay sonu kasa bakiyesi; son iki ay tahmindir. */
 export const CASH_BALANCE = { actual: [640, 590, 710, 820, 980, 1120, 1340, 1520, 1460, 1610], forecast: [1610, 1540, 1720] };
 export const CASH_MONTHS = [...MONTHS, '2026-11', '2026-12'];

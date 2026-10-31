@@ -1,11 +1,9 @@
-import type { EChartsCoreOption } from 'echarts/core';
-
 /** Anasayfadaki bir grafik kartı. title ve note çeviri anahtarıdır; kind grafiğin ECharts türüdür. */
 export interface ChartCard {
   title: string;
   note: string;
   kind: string;
-  options: EChartsCoreOption;
+  options: Record<string, unknown>;
   height?: string;
   wide?: boolean;
 }

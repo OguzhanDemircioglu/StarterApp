@@ -1,6 +1,7 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
+import { NgTemplateOutlet } from '@angular/common';
 import type { EChartsCoreOption } from 'echarts/core';
 import { NzTabsModule } from 'ng-zorro-antd/tabs';
 import { NzTagModule } from 'ng-zorro-antd/tag';
@@ -10,8 +11,11 @@ import { Chart } from '../../shared/charts/chart';
 import { formatDay, formatNumber } from '../../shared/charts/chart-format';
 import { Page } from '../../shared/page/page';
 import { Section } from '../../shared/page/section';
+import { loadEchartsExtensions } from '../../shared/charts/echarts-extensions';
 import { ChartBuilder, ChartContext } from './dashboard/dashboard.model';
+import { extensionCharts } from './dashboard/extensions.charts';
 import { financeCharts } from './dashboard/finance.charts';
+import { galleryCharts } from './dashboard/gallery.charts';
 import { menuCharts } from './dashboard/menu.charts';
 import { operationsCharts } from './dashboard/operations.charts';
 import { overviewCharts, overviewKpis } from './dashboard/overview.charts';
@@ -27,6 +31,7 @@ const TABS: { title: string; build: ChartBuilder }[] = [
   { title: 'dash_tab_menu', build: menuCharts },
   { title: 'dash_tab_operations', build: operationsCharts },
   { title: 'dash_tab_finance', build: financeCharts },
+  { title: 'dash_tab_gallery', build: galleryCharts },
 ];
 
 /**
@@ -34,7 +39,7 @@ const TABS: { title: string; build: ChartBuilder }[] = [
  * son sekmedeki "son 30 günde eklenen kategoriler" ise grafiğin backend'den beslendiği referans kalıptır.
  */
 @Component({
-  imports: [TranslatePipe, NzTabsModule, NzTagModule, Page, Section, Chart],
+  imports: [NgTemplateOutlet, TranslatePipe, NzTabsModule, NzTagModule, Page, Section, Chart],
   templateUrl: './home.html',
   styleUrl: './home.css',
 })
@@ -57,6 +62,10 @@ export default class Home {
   protected readonly tabs = computed(() =>
     TABS.map((tab) => ({ title: tab.title, cards: tab.build(this.context()) })),
   );
+
+  /** 3B ve eklenti grafikleri büyük paketler kullanır: sadece sekmesi açılınca indirilir. */
+  private readonly extensionsReady = signal(false);
+  protected readonly extensionCards = computed(() => (this.extensionsReady() ? extensionCharts(this.context()) : []));
 
   protected readonly kpis = computed(() =>
     overviewKpis(this.context()).map((kpi) => ({
@@ -82,6 +91,11 @@ export default class Home {
       ],
     };
   });
+
+  protected async loadExtensions(): Promise<void> {
+    await loadEchartsExtensions();
+    this.extensionsReady.set(true);
+  }
 
   constructor() {
     this.reportApi.categoriesCreated(DAYS).subscribe({
