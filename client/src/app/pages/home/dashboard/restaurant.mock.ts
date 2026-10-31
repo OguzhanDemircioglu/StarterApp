@@ -422,6 +422,21 @@ export const TICKET_POINTS: [number, number][] = (() => {
   });
 })();
 
+/** Sevkiyat merkezi ve illere giden günlük ton: nokta nokta rota örnekleri. */
+export const ROUTE_HUB = { name: 'İstanbul', position: [29, 41] };
+export const DELIVERY_ROUTES = [
+  { name: 'Ankara', position: [32.85, 39.93], tons: 92 },
+  { name: 'İzmir', position: [27.14, 38.42], tons: 118 },
+  { name: 'Antalya', position: [30.71, 36.89], tons: 74 },
+  { name: 'Samsun', position: [36.33, 41.29], tons: 41 },
+  { name: 'Trabzon', position: [39.72, 41], tons: 33 },
+  { name: 'Erzurum', position: [41.27, 39.9], tons: 26 },
+  { name: 'Van', position: [43.38, 38.5], tons: 18 },
+  { name: 'Diyarbakır', position: [40.23, 37.92], tons: 37 },
+  { name: 'Gaziantep', position: [37.38, 37.07], tons: 58 },
+  { name: 'Adana', position: [35.32, 37], tons: 66 },
+];
+
 /** Şubeden çıkan kurye yolları: şube merkezdedir, teslimat noktası km cinsinden. */
 export const COURIER_LINES: number[][][] = (() => {
   const random = seededRandom(RANDOM_SEED + 5);

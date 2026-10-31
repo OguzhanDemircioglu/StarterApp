@@ -40,6 +40,7 @@ export const extensionCharts: ChartBuilder = ({ t }) => {
       title: 'dash_liquid_title',
       note: 'dash_liquid_note',
       kind: 'Sıvı dolum',
+      library: 'echarts-liquidfill',
       options: {
         tooltip: { show: false },
         series: [
@@ -59,6 +60,7 @@ export const extensionCharts: ChartBuilder = ({ t }) => {
       title: 'dash_words_title',
       note: 'dash_words_note',
       kind: 'Kelime bulutu',
+      library: 'echarts-wordcloud',
       options: {
         tooltip: {},
         series: [
@@ -86,6 +88,7 @@ export const extensionCharts: ChartBuilder = ({ t }) => {
       title: 'dash_bar3d_title',
       note: 'dash_bar3d_note',
       kind: '3B sütun',
+      library: 'ECharts GL',
       height: '380px',
       options: {
         tooltip: {},
@@ -101,6 +104,7 @@ export const extensionCharts: ChartBuilder = ({ t }) => {
       title: 'dash_line3d_title',
       note: 'dash_line3d_note',
       kind: '3B çizgi',
+      library: 'ECharts GL',
       height: '380px',
       options: {
         tooltip: {},
@@ -121,6 +125,7 @@ export const extensionCharts: ChartBuilder = ({ t }) => {
       title: 'dash_scatter3d_title',
       note: 'dash_scatter3d_note',
       kind: '3B saçılım',
+      library: 'ECharts GL',
       height: '380px',
       options: {
         tooltip: {},
@@ -145,6 +150,7 @@ export const extensionCharts: ChartBuilder = ({ t }) => {
       title: 'dash_surface_title',
       note: 'dash_surface_note',
       kind: '3B yüzey',
+      library: 'ECharts GL',
       height: '380px',
       options: {
         tooltip: { show: false },
@@ -171,6 +177,7 @@ export const extensionCharts: ChartBuilder = ({ t }) => {
       title: 'dash_map3d_title',
       note: 'dash_map3d_note',
       kind: '3B harita',
+      library: 'ECharts GL',
       height: '380px',
       options: {
         tooltip: {},
@@ -200,6 +207,7 @@ export const extensionCharts: ChartBuilder = ({ t }) => {
       title: 'dash_polygons3d_title',
       note: 'dash_polygons3d_note',
       kind: '3B çokgen',
+      library: 'ECharts GL',
       height: '380px',
       options: {
         tooltip: { show: false },
@@ -236,6 +244,7 @@ export const extensionCharts: ChartBuilder = ({ t }) => {
       title: 'dash_globe_title',
       note: 'dash_globe_note',
       kind: '3B akış + küre',
+      library: 'ECharts GL',
       height: '380px',
       options: {
         tooltip: { show: false },
@@ -259,6 +268,7 @@ export const extensionCharts: ChartBuilder = ({ t }) => {
       title: 'dash_lines_gl_title',
       note: 'dash_lines_gl_note',
       kind: 'WebGL çizgi',
+      library: 'ECharts GL',
       height: '380px',
       options: {
         tooltip: { show: false },
@@ -281,6 +291,7 @@ export const extensionCharts: ChartBuilder = ({ t }) => {
       title: 'dash_scatter_gl_title',
       note: 'dash_scatter_gl_note',
       kind: 'WebGL saçılım',
+      library: 'ECharts GL',
       height: '380px',
       options: {
         tooltip: { show: false },
@@ -303,6 +314,7 @@ export const extensionCharts: ChartBuilder = ({ t }) => {
       title: 'dash_graph_gl_title',
       note: 'dash_graph_gl_note',
       kind: 'WebGL ilişki ağı',
+      library: 'ECharts GL',
       height: '380px',
       options: {
         tooltip: { show: false },
@@ -325,6 +337,7 @@ export const extensionCharts: ChartBuilder = ({ t }) => {
       title: 'dash_flow_gl_title',
       note: 'dash_flow_gl_note',
       kind: 'WebGL akış',
+      library: 'ECharts GL',
       wide: true,
       height: '340px',
       options: {

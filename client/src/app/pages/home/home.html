@@ -32,25 +32,19 @@
     </nz-tab>
     <nz-tab [nzTitle]="'dash_tab_maps' | translate" (nzSelect)="loadMaps()">
       <ng-template nz-tab>
-        <div class="charts">
-          @for (card of mapCards(); track card.title) {
-            <app-section [title]="card.title">
-              <nz-tag sectionActions>{{ card.kind }}</nz-tag>
-              <p class="chart-note">{{ card.note | translate }}</p>
-              <app-deck-map
-                [view]="card.view"
-                [layers]="card.layers"
-                [animated]="card.animated ?? false"
-                [tooltip]="card.tooltip"
-              />
-            </app-section>
-          }
-        </div>
+        <ng-container [ngTemplateOutlet]="mapGrid" [ngTemplateOutletContext]="{ $implicit: mapCards() }" />
+      </ng-template>
+    </nz-tab>
+    <nz-tab [nzTitle]="'dash_tab_routes' | translate" (nzSelect)="loadRoutes()">
+      <ng-template nz-tab>
+        <ng-container [ngTemplateOutlet]="chartGrid" [ngTemplateOutletContext]="{ $implicit: routeCards() }" />
+        <ng-container [ngTemplateOutlet]="mapGrid" [ngTemplateOutletContext]="{ $implicit: routeMapCards() }" />
       </ng-template>
     </nz-tab>
     <nz-tab [nzTitle]="'dash_tab_live' | translate">
       <ng-template nz-tab>
         <app-section title="home_chart_title">
+          <nz-tag sectionActions nzColor="blue">ECharts</nz-tag>
           <app-chart [options]="chartOptions()" [loading]="loading()" [empty]="empty()" />
         </app-section>
       </ng-template>
@@ -62,9 +56,28 @@
   <div class="charts">
     @for (card of cards; track card.title) {
       <app-section [title]="card.title" [class.wide]="card.wide">
+        <nz-tag sectionActions nzColor="blue">{{ card.library ?? 'ECharts' }}</nz-tag>
         <nz-tag sectionActions>{{ card.kind }}</nz-tag>
         <p class="chart-note">{{ card.note | translate }}</p>
         <app-chart [options]="card.options" [height]="card.height ?? '320px'" />
+      </app-section>
+    }
+  </div>
+</ng-template>
+
+<ng-template #mapGrid let-cards>
+  <div class="charts">
+    @for (card of cards; track card.title) {
+      <app-section [title]="card.title">
+        <nz-tag sectionActions nzColor="green">deck.gl + MapLibre</nz-tag>
+        <nz-tag sectionActions>{{ card.kind }}</nz-tag>
+        <p class="chart-note">{{ card.note | translate }}</p>
+        <app-deck-map
+          [view]="card.view"
+          [layers]="card.layers"
+          [animated]="card.animated ?? false"
+          [tooltip]="card.tooltip"
+        />
       </app-section>
     }
   </div>

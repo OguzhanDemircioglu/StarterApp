@@ -16,7 +16,7 @@ export interface MapCard {
   tooltip?: MapTooltip;
 }
 
-type Position = [number, number];
+export type Position = [number, number];
 type Color = [number, number, number];
 
 const ORDER_COUNT = 8000;
@@ -29,7 +29,7 @@ const ISTANBUL_TILTED: MapView = { ...ISTANBUL, pitch: 50, bearing: -15 };
 const TURKEY: MapView = { center: [34.5, 38.6], zoom: 4 };
 const TURKEY_TILTED: MapView = { ...TURKEY, pitch: 40 };
 
-function rgb(hex: string): Color {
+export function rgb(hex: string): Color {
   const value = Number.parseInt(hex.slice(1), 16);
   return [(value >> 16) & 255, (value >> 8) & 255, value & 255];
 }
@@ -73,7 +73,7 @@ const COURIER_ROUTES: Position[][] = (() => {
   });
 })();
 
-function along(route: Position[], progress: number): Position {
+export function along(route: Position[], progress: number): Position {
   const position = progress * (route.length - 1);
   const index = Math.min(Math.floor(position), route.length - 2);
   const ratio = position - index;

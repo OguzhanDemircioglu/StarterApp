@@ -3,6 +3,8 @@ export interface ChartCard {
   title: string;
   note: string;
   kind: string;
+  /** Çizen kütüphane; verilmezse ECharts. */
+  library?: string;
   options: Record<string, unknown>;
   height?: string;
   wide?: boolean;

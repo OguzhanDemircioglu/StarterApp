@@ -7,6 +7,8 @@ import { MAP_CARDS } from './maps.charts';
 import { menuCharts } from './menu.charts';
 import { operationsCharts } from './operations.charts';
 import { overviewCharts, overviewKpis } from './overview.charts';
+import { routeChart3D, routeCharts } from './routes.charts';
+import { ROUTE_MAP_CARDS } from './routes.maps';
 import { salesCharts } from './sales.charts';
 import { DAILY_REVENUE, FLOOR_ZONES, CHANNELS, MENU, MONTHLY_REVENUE, SUPPLIERS, TOTAL_REVENUE } from './restaurant.mock';
 import turkeyProvinces from './turkey-provinces.json';
@@ -20,6 +22,7 @@ const BUILDERS: ChartBuilder[] = [
   financeCharts,
   galleryCharts,
   extensionCharts,
+  routeCharts,
 ];
 const cards: ChartCard[] = BUILDERS.flatMap((build) => build(context));
 
@@ -101,9 +104,9 @@ describe('restaurant dashboard', () => {
   });
 
   it('has a translation and working layers for every map', () => {
-    const texts = MAP_CARDS.flatMap((card) => [card.title, card.note]);
+    const texts = [...MAP_CARDS, ...ROUTE_MAP_CARDS, routeChart3D()].flatMap((card) => [card.title, card.note]);
     expect(texts.filter((key) => !(key in tr))).toEqual([]);
-    MAP_CARDS.forEach((card) => expect(card.layers(1).length).toBeGreaterThan(0));
+    [...MAP_CARDS, ...ROUTE_MAP_CARDS].forEach((card) => expect(card.layers(1).length).toBeGreaterThan(0));
   });
 
   it('has all 81 Turkish provinces on the map', () => {

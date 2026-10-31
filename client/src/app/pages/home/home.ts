@@ -20,6 +20,7 @@ import { menuCharts } from './dashboard/menu.charts';
 import { operationsCharts } from './dashboard/operations.charts';
 import { overviewCharts, overviewKpis } from './dashboard/overview.charts';
 import type { MapCard } from './dashboard/maps.charts';
+import { routeChart3D, routeCharts } from './dashboard/routes.charts';
 import { salesCharts } from './dashboard/sales.charts';
 import { HomeReportApi } from './home-report-api';
 import { PeriodValue } from './home-report.model';
@@ -88,6 +89,18 @@ export default class Home {
   protected async loadMaps(): Promise<void> {
     const { MAP_CARDS } = await import('./dashboard/maps.charts');
     this.mapCards.set(MAP_CARDS);
+  }
+
+  /** Rotalar sekmesi hem ECharts GL hem deck.gl kullanır; ikisi de sekme açılınca indirilir. */
+  protected readonly routeCards = computed(() => [
+    ...routeCharts(this.context),
+    ...(this.extensionsReady() ? [routeChart3D()] : []),
+  ]);
+  protected readonly routeMapCards = signal<MapCard[]>([]);
+
+  protected async loadRoutes(): Promise<void> {
+    const [{ ROUTE_MAP_CARDS }] = await Promise.all([import('./dashboard/routes.maps'), this.loadExtensions()]);
+    this.routeMapCards.set(ROUTE_MAP_CARDS);
   }
 
   protected async loadExtensions(): Promise<void> {
