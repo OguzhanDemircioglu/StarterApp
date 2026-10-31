@@ -4,11 +4,19 @@ import { NzEmptyModule } from 'ng-zorro-antd/empty';
 import { NzSpinModule } from 'ng-zorro-antd/spin';
 import { NgxEchartsDirective, provideEchartsCore } from 'ngx-echarts';
 import { LanguageService } from '../../core/i18n/language';
+import { CHART_COLORS } from './chart-colors';
 import { formatNumber } from './chart-format';
 import { echarts } from './echarts-setup';
 
-/** Ant Design paleti: bütün grafikler aynı renkleri kullanır. */
-const CHART_COLORS = ['#1677ff', '#52c41a', '#faad14', '#ff4d4f', '#13c2c2', '#722ed1', '#eb2f96', '#fa8c16'];
+/** Sayısal eksenin etiketleri de seçili dilde yazılır: 3.000 / 3,000. */
+function localizedAxis(axis: unknown, language: string): unknown {
+  const { type, axisLabel } = axis as { type?: string; axisLabel?: object };
+  if (type !== 'value') {
+    return axis;
+  }
+  const formatter = (value: number) => formatNumber(value, language);
+  return { ...(axis as object), axisLabel: { formatter, ...axisLabel } };
+}
 
 /**
  * Bütün grafikler bu bileşen üzerinden çizilir (Frontend_Architecture.md §12):
@@ -51,8 +59,20 @@ export class Chart {
     const language = this.language() ?? 'tr';
     return {
       color: CHART_COLORS,
-      grid: { left: 16, right: 16, top: 32, bottom: 16, containLabel: true },
       ...options,
+      // ECharts 6 göstergeyi alta koyar ve eksen etiketleriyle çakışır; varsayılanımız üsttür.
+      ...(options['legend'] ? { legend: { top: 0, ...(options['legend'] as object) } } : {}),
+      ...(options['xAxis'] ? { xAxis: localizedAxis(options['xAxis'], language) } : {}),
+      ...(options['yAxis'] ? { yAxis: localizedAxis(options['yAxis'], language) } : {}),
+      // outerBoundsMode: eksen etiketleri ve adları grafiğin içinde kalır, kesilmez.
+      grid: {
+        left: 16,
+        right: 16,
+        top: 40,
+        bottom: 16,
+        outerBoundsMode: 'same',
+        ...(options['grid'] as object | undefined),
+      },
       tooltip: {
         valueFormatter: (value: unknown) => (typeof value === 'number' ? formatNumber(value, language) : String(value)),
         ...(options['tooltip'] as object | undefined),

@@ -1,21 +1,89 @@
-import { BarChart, LineChart, PieChart } from 'echarts/charts';
-import { DatasetComponent, GridComponent, LegendComponent, TitleComponent, TooltipComponent } from 'echarts/components';
+import {
+  BarChart,
+  BoxplotChart,
+  CandlestickChart,
+  ChordChart,
+  CustomChart,
+  EffectScatterChart,
+  FunnelChart,
+  GaugeChart,
+  GraphChart,
+  HeatmapChart,
+  LineChart,
+  LinesChart,
+  MapChart,
+  ParallelChart,
+  PictorialBarChart,
+  PieChart,
+  RadarChart,
+  SankeyChart,
+  ScatterChart,
+  SunburstChart,
+  ThemeRiverChart,
+  TreeChart,
+  TreemapChart,
+} from 'echarts/charts';
+import {
+  CalendarComponent,
+  DatasetComponent,
+  DataZoomComponent,
+  GeoComponent,
+  GridComponent,
+  LegendComponent,
+  MarkLineComponent,
+  ParallelComponent,
+  PolarComponent,
+  RadarComponent,
+  SingleAxisComponent,
+  TitleComponent,
+  TooltipComponent,
+  VisualMapComponent,
+} from 'echarts/components';
 import * as echarts from 'echarts/core';
 import { CanvasRenderer } from 'echarts/renderers';
 
 /**
  * ECharts'ın sadece kullanılan parçaları pakete girer (tree-shaking).
- * Yeni bir grafik türü (ör. HeatmapChart) ya da bileşen gerekirse buraya eklenir.
+ * Yeni bir grafik türü ya da bileşen gerekirse buraya eklenir; anasayfa demosu kaldırılınca kullanılmayanlar silinir.
  */
 echarts.use([
   BarChart,
+  BoxplotChart,
+  CandlestickChart,
+  ChordChart,
+  CustomChart,
+  EffectScatterChart,
+  FunnelChart,
+  GaugeChart,
+  GraphChart,
+  HeatmapChart,
   LineChart,
+  LinesChart,
+  MapChart,
+  ParallelChart,
+  PictorialBarChart,
   PieChart,
+  RadarChart,
+  SankeyChart,
+  ScatterChart,
+  SunburstChart,
+  ThemeRiverChart,
+  TreeChart,
+  TreemapChart,
+  CalendarComponent,
   DatasetComponent,
+  DataZoomComponent,
+  GeoComponent,
   GridComponent,
   LegendComponent,
+  MarkLineComponent,
+  ParallelComponent,
+  PolarComponent,
+  RadarComponent,
+  SingleAxisComponent,
   TitleComponent,
   TooltipComponent,
+  VisualMapComponent,
   CanvasRenderer,
 ]);
 

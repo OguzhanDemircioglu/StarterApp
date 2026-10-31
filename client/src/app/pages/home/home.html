@@ -1,9 +1,43 @@
 <app-page>
   <app-section title="home_welcome_title">
-    {{ 'home_welcome' | translate: { name: user()?.fullName } }}
+    <p class="welcome">{{ 'home_welcome' | translate: { name: user()?.fullName } }}</p>
+    <p class="story">{{ 'dash_story' | translate }}</p>
   </app-section>
 
-  <app-section title="home_chart_title">
-    <app-chart [options]="chartOptions()" [loading]="loading()" [empty]="empty()" />
-  </app-section>
+  <div class="kpis">
+    @for (kpi of kpis(); track kpi.label) {
+      <div class="kpi">
+        <span class="kpi-label">{{ kpi.label | translate }}</span>
+        <strong class="kpi-value">{{ kpi.value }}</strong>
+        <span class="kpi-delta" [class.good]="kpi.good" [class.bad]="!kpi.good">
+          {{ kpi.up ? '▲' : '▼' }} %{{ kpi.deltaText }} {{ 'dash_kpi_vs_last_year' | translate }}
+        </span>
+      </div>
+    }
+  </div>
+
+  <nz-tabs>
+    @for (tab of tabs(); track tab.title) {
+      <nz-tab [nzTitle]="tab.title | translate">
+        <ng-template nz-tab>
+          <div class="charts">
+            @for (card of tab.cards; track card.title) {
+              <app-section [title]="card.title" [class.wide]="card.wide">
+                <nz-tag sectionActions>{{ card.kind }}</nz-tag>
+                <p class="chart-note">{{ card.note | translate }}</p>
+                <app-chart [options]="card.options" [height]="card.height ?? '320px'" />
+              </app-section>
+            }
+          </div>
+        </ng-template>
+      </nz-tab>
+    }
+    <nz-tab [nzTitle]="'dash_tab_live' | translate">
+      <ng-template nz-tab>
+        <app-section title="home_chart_title">
+          <app-chart [options]="chartOptions()" [loading]="loading()" [empty]="empty()" />
+        </app-section>
+      </ng-template>
+    </nz-tab>
+  </nz-tabs>
 </app-page>

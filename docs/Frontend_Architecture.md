@@ -295,14 +295,16 @@ Uygulamalarda çok sayıda grafik kullanılacak. Bu yüzden grafikler için tek 
 
 - **Kütüphane:** Apache ECharts (`ngx-echarts`). Projede ikinci bir grafik kütüphanesi bulunmaz.
 - **Ortak sarmalayıcı (`shared/charts/chart.ts`):** Sayfalar ECharts'ı doğrudan değil, `<app-chart>` üzerinden kullanır:
-  - Ortak renk paleti ve kenar boşlukları.
-  - Seçili dile göre sayı biçimi (tooltip).
+  - Ortak renk paleti (`chart-colors.ts`, renk körlüğü kontrolünden geçmiş sırayla) ve kenar boşlukları.
+  - Seçili dile göre sayı biçimi (tooltip ve sayısal eksenler).
+  - Gösterge varsayılan olarak üsttedir; ECharts 6'nın alt varsayılanı eksen etiketleriyle çakışır.
   - "Yükleniyor" (`nz-spin`) ve "veri yok" (`nz-empty`) durumları.
   - Pencere boyutu değişince otomatik yeniden boyutlandırma.
 - Sayfa sadece grafiğin kendi ayarlarını (seriler, eksenler) verir.
-- **Paket boyutu:** `echarts-setup.ts` sadece kullanılan grafik türlerini ve bileşenleri kaydeder (bar, line, pie). Yeni bir tür gerekirse oraya eklenir. ECharts sadece grafiğin olduğu sayfa açılınca yüklenir.
+- **Paket boyutu:** `echarts-setup.ts` kullanılan grafik türlerini ve bileşenleri kaydeder. Anasayfa demosu ECharts'ın 23 türünün hepsini kullandığı için şu an hepsi kayıtlıdır; demo kaldırılınca kullanılmayanlar silinir. ECharts sadece grafiğin olduğu sayfa açılınca yüklenir.
 - **Veri:** Grafikler backend'in özet döndüren rapor endpoint'leriyle beslenir (backend §5.5). Frontend'de toplama yapılmaz; günler `formatDay` ile seçili dilde gösterilir.
-- **Örnek:** Anasayfadaki "son 30 günde eklenen kategoriler" grafiği (`pages/home/`) referans kalıptır.
+- **Canlı örnek:** Anasayfanın "Canlı veri" sekmesindeki "son 30 günde eklenen kategoriler" grafiği (`pages/home/home.ts`) backend'e bağlı grafik için referans kalıptır.
+- **Mock pano:** Anasayfanın diğer sekmeleri "Üç Zeytin" adlı hayali lokantanın panosudur, `pages/home/dashboard/` altındadır. Bütün rakamlar `restaurant.mock.ts`'tedir ve birbirinden hesaplanır; sekmeler `*.charts.ts` dosyalarında `ChartCard` listesi olarak tanımlanır. Şube, ürün, kanal ve gider adları backend'den geleceği için veri olarak durur, ekran metinleri `dash_` önekiyle çevrilir. Gerçek projede `dashboard/` klasörü, `home.html`'deki sekmeler ve `dash_` anahtarları silinir.
 
 ---
 
@@ -311,7 +313,7 @@ Uygulamalarda çok sayıda grafik kullanılacak. Bu yüzden grafikler için tek 
 | Ekran | URL | Kimler |
 |---|---|---|
 | Login | `/login` | Herkes |
-| Anasayfa | `/` | Giriş yapmış herkes: karşılama ve örnek grafik |
+| Anasayfa | `/` | Giriş yapmış herkes: karşılama, mock restoran panosu (sekmeli), canlı örnek grafik |
 | Kategoriler (referans CRUD) | `/definitions/categories` | Giriş yapmış herkes |
 | Kullanıcılar | `/administration/users` | ADMIN: liste, ekleme, düzenleme (rol, aktif/pasif), şifre sıfırlama, silme |
 | Şifremi değiştir | topbar'dan dialog | Giriş yapmış herkes |

@@ -1,0 +1,71 @@
+.welcome {
+  margin: 0;
+}
+
+.story {
+  margin: 8px 0 0;
+  color: rgba(0, 0, 0, 0.55);
+}
+
+.kpis {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.kpi {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 16px;
+  background: #fff;
+  border: 1px solid #f0f0f0;
+  border-radius: 8px;
+}
+
+.kpi-label {
+  color: rgba(0, 0, 0, 0.55);
+}
+
+.kpi-value {
+  font-size: 24px;
+  font-weight: 600;
+}
+
+.kpi-delta {
+  font-size: 12px;
+}
+
+.kpi-delta.good {
+  color: #006300;
+}
+
+.kpi-delta.bad {
+  color: #d03b3b;
+}
+
+.charts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: 16px;
+}
+
+.charts .wide {
+  grid-column: 1 / -1;
+}
+
+.chart-note {
+  margin: 0 0 8px;
+  color: rgba(0, 0, 0, 0.55);
+}
+
+@media (max-width: 992px) {
+  .kpis {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .charts {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
