@@ -27,14 +27,16 @@ function withDefaults(options: EChartsCoreOption): EChartsCoreOption {
     ...(options['legend'] ? { legend: { top: 0, ...(options['legend'] as object) } } : {}),
     ...Object.fromEntries(AXES.filter((axis) => options[axis]).map((axis) => [axis, formattedAxis(options[axis])])),
     // outerBoundsMode: eksen etiketleri ve adları grafiğin içinde kalır, kesilmez.
-    grid: {
-      left: 16,
-      right: 16,
-      top: 40,
-      bottom: 16,
-      outerBoundsMode: 'same',
-      ...(options['grid'] as object | undefined),
-    },
+    grid: Array.isArray(options['grid'])
+      ? options['grid']
+      : {
+          left: 16,
+          right: 16,
+          top: 40,
+          bottom: 16,
+          outerBoundsMode: 'same',
+          ...(options['grid'] as object | undefined),
+        },
     tooltip: {
       valueFormatter: (value: unknown) => (typeof value === 'number' ? formatNumber(value) : String(value)),
       ...(options['tooltip'] as object | undefined),

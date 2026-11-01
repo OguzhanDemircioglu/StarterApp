@@ -1,14 +1,18 @@
+import type { CustomSeriesRenderItem } from 'echarts';
 import { CHART_COLORS, SEQUENTIAL_COLORS } from '../../../shared/charts/chart-colors';
 import { formatNumber } from '../../../shared/charts/chart-format';
 import { ChartBuilder, ChartCard } from './dashboard.model';
 import { TURKEY_MAP } from './gallery.charts';
-import { DELIVERY_ROUTES, ROUTE_HUB } from './restaurant.mock';
+import { DELIVERY_ROUTES, MASS_ROUTES, ROUTE_HUB } from './restaurant.mock';
 
 const ORANGE = CHART_COLORS[1];
 const BLUE = CHART_COLORS[0];
 /** Kuyruklu efekt önceki kareleri silmediği için harita çizilmesin diye ayrı katmanda durur. */
 const TRAIL_LAYER = 1;
 const VEHICLE = 'path://M2 0h6v4h2l2 3v5H0V7l2-3z';
+const REVEAL_MS = 5000;
+const REVEAL_STAGGER = 0.07;
+const REVEAL_CURVE_LENGTH = 1.1;
 const LINE = { color: ORANGE, width: 1.5, opacity: 0.8 };
 
 const GEO = {
@@ -34,6 +38,35 @@ const HUB_POINT = {
 const toCity = DELIVERY_ROUTES.map((route) => ({ coords: [ROUTE_HUB.position, route.position], value: route.tons }));
 const fromCity = DELIVERY_ROUTES.map((route) => ({ coords: [route.position, ROUTE_HUB.position], value: route.tons }));
 const maxTons = Math.max(...DELIVERY_ROUTES.map((route) => route.tons));
+
+/** Kesik çizgi hile: boşluk çizgi boyu kadardır, kaydırıldıkça çizgi uçtan uca belirir. */
+const renderReveal: CustomSeriesRenderItem = (params, api) => {
+  const [x1, y1] = api.coord(ROUTE_HUB.position);
+  const [x2, y2] = api.coord([api.value(0) as number, api.value(1) as number]);
+  const length = Math.hypot(x2 - x1, y2 - y1) * REVEAL_CURVE_LENGTH;
+  const start = ((params.dataIndex as number) * REVEAL_STAGGER) % 0.4;
+  return {
+    type: 'bezierCurve',
+    shape: {
+      x1,
+      y1,
+      x2,
+      y2,
+      cpx1: (x1 + x2) / 2 + (y2 - y1) * 0.2,
+      cpy1: (y1 + y2) / 2 - (x2 - x1) * 0.2,
+    },
+    style: { fill: 'none', stroke: ORANGE, lineWidth: 2, lineDash: [length, length], lineDashOffset: length },
+    keyframeAnimation: {
+      duration: REVEAL_MS,
+      loop: true,
+      keyframes: [
+        { percent: start, style: { lineDashOffset: length } },
+        { percent: Math.min(start + 0.45, 0.95), style: { lineDashOffset: 0 } },
+        { percent: 1, style: { lineDashOffset: 0 } },
+      ],
+    },
+  } as never;
+};
 
 function lines(options: Record<string, unknown>): Record<string, unknown> {
   return { type: 'lines', coordinateSystem: 'geo', data: toCity, lineStyle: LINE, tooltip: { show: false }, ...options };
@@ -147,6 +180,66 @@ export const routeCharts: ChartBuilder = ({ t }) => [
       data: DELIVERY_ROUTES.map((route) => ({ name: route.name, value: route.position })),
       tooltip: { show: false },
     },
+  ]),
+  card('gradient', 'Renk geçişli', [
+    lines({
+      data: DELIVERY_ROUTES.map((route) => {
+        const [x1, y1] = ROUTE_HUB.position;
+        const [x2, y2] = route.position;
+        return {
+          coords: [ROUTE_HUB.position, route.position],
+          lineStyle: {
+            width: 3,
+            curveness: 0.2,
+            opacity: 0.9,
+            color: {
+              type: 'linear',
+              x: x1 < x2 ? 0 : 1,
+              y: y1 > y2 ? 0 : 1,
+              x2: x1 < x2 ? 1 : 0,
+              y2: y1 > y2 ? 1 : 0,
+              colorStops: [
+                { offset: 0, color: BLUE },
+                { offset: 1, color: ORANGE },
+              ],
+            },
+          },
+        };
+      }),
+    }),
+  ]),
+  card('reveal', 'Çizilerek beliren', [
+    {
+      type: 'custom',
+      coordinateSystem: 'geo',
+      renderItem: renderReveal,
+      silent: true,
+      data: DELIVERY_ROUTES.map((route) => [...route.position, route.tons]),
+    },
+  ]),
+  card('mass', 'Binlerce hat', [
+    lines({
+      large: true,
+      largeThreshold: 100,
+      data: MASS_ROUTES.map((coords) => ({ coords })),
+      lineStyle: { color: ORANGE, width: 0.4, opacity: 0.12 },
+    }),
+  ]),
+  card('pies', 'Harita üstünde pasta', [
+    lines({ lineStyle: { ...LINE, opacity: 0.25 } }),
+    ...DELIVERY_ROUTES.map((route) => ({
+      type: 'pie',
+      coordinateSystem: 'geo',
+      center: route.position,
+      radius: 6 + route.tons / 7,
+      label: { show: false },
+      tooltip: { show: false },
+      data: [
+        { name: t('dash_route_food'), value: route.tons * 0.6, itemStyle: { color: BLUE } },
+        { name: t('dash_route_drink'), value: route.tons * 0.25, itemStyle: { color: ORANGE } },
+        { name: t('dash_route_other'), value: route.tons * 0.15, itemStyle: { color: CHART_COLORS[2] } },
+      ],
+    })),
   ]),
   card('network', 'Ağ (graph)', [
     {

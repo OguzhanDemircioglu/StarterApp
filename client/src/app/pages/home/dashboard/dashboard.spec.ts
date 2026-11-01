@@ -5,6 +5,7 @@ import { financeCharts, waterfallSteps } from './finance.charts';
 import { galleryCharts } from './gallery.charts';
 import { MAP_CARDS } from './maps.charts';
 import { menuCharts } from './menu.charts';
+import { moreCharts } from './more.charts';
 import { operationsCharts } from './operations.charts';
 import { overviewCharts, overviewKpis } from './overview.charts';
 import { routeChart3D, routeCharts } from './routes.charts';
@@ -23,6 +24,7 @@ const BUILDERS: ChartBuilder[] = [
   galleryCharts,
   extensionCharts,
   routeCharts,
+  moreCharts,
 ];
 const cards: ChartCard[] = BUILDERS.flatMap((build) => build(context));
 

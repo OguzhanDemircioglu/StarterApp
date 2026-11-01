@@ -17,6 +17,7 @@ import { extensionCharts } from './dashboard/extensions.charts';
 import { financeCharts } from './dashboard/finance.charts';
 import { galleryCharts } from './dashboard/gallery.charts';
 import { menuCharts } from './dashboard/menu.charts';
+import { moreCharts } from './dashboard/more.charts';
 import { operationsCharts } from './dashboard/operations.charts';
 import { overviewCharts, overviewKpis } from './dashboard/overview.charts';
 import type { MapCard } from './dashboard/maps.charts';
@@ -34,6 +35,7 @@ const TABS: { title: string; build: ChartBuilder }[] = [
   { title: 'dash_tab_operations', build: operationsCharts },
   { title: 'dash_tab_finance', build: financeCharts },
   { title: 'dash_tab_gallery', build: galleryCharts },
+  { title: 'dash_tab_more', build: moreCharts },
 ];
 
 /**

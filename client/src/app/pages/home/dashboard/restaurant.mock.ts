@@ -422,6 +422,55 @@ export const TICKET_POINTS: [number, number][] = (() => {
   });
 })();
 
+/** Şubelerin adisyon tutarı örnekleri (₺): dağılım grafikleri için. */
+export const TICKET_BY_BRANCH: number[][] = [510, 506, 459].map((center, index) => {
+  const random = seededRandom(RANDOM_SEED + 20 + index);
+  return Array.from({ length: 150 }, () => Math.round(center + (random() + random() + random() - 1.5) * 300));
+});
+
+/** Ürünlerin aylık ciro sırası: 1 en iyisi. */
+export const DISH_RANKS = [
+  { name: 'Kuzu Tandır', ranks: [1, 1, 2, 2, 1, 1, 1, 2, 1, 1] },
+  { name: 'Adana Kebap', ranks: [2, 3, 1, 1, 2, 3, 3, 1, 2, 2] },
+  { name: 'Hünkar Beğendi', ranks: [3, 2, 3, 4, 4, 4, 4, 4, 3, 3] },
+  { name: 'Levrek', ranks: [5, 5, 5, 3, 3, 2, 2, 3, 4, 5] },
+  { name: 'Mantı', ranks: [4, 4, 4, 5, 5, 5, 5, 5, 5, 4] },
+];
+
+/** Yeni şube açılış planı: başlangıç ve bitiş haftası, grup rengi. */
+export const OPENING_PROJECT = [
+  { name: 'Kira sözleşmesi', start: 0, end: 2, group: 0 },
+  { name: 'Ruhsat', start: 1, end: 7, group: 0 },
+  { name: 'Mutfak tadilatı', start: 3, end: 12, group: 1 },
+  { name: 'Salon dekorasyonu', start: 7, end: 15, group: 1 },
+  { name: 'Ekipman kurulumu', start: 12, end: 17, group: 1 },
+  { name: 'Personel alımı', start: 10, end: 20, group: 2 },
+  { name: 'Eğitim', start: 18, end: 22, group: 2 },
+  { name: 'Deneme servisi', start: 22, end: 24, group: 3 },
+  { name: 'Açılış', start: 24, end: 26, group: 3 },
+];
+
+/** Yılın önemli olayları. */
+export const SALES_EVENTS = [
+  { date: '2026-01-15', name: 'Kış menüsü' },
+  { date: '2026-02-20', name: 'Ramazan başlangıcı' },
+  { date: '2026-04-05', name: 'Fiyat güncellemesi' },
+  { date: '2026-05-01', name: 'Teras açıldı' },
+  { date: '2026-06-15', name: 'Düğün sezonu' },
+  { date: '2026-08-10', name: 'Paket uygulaması' },
+  { date: '2026-09-15', name: 'Sonbahar menüsü' },
+  { date: '2026-10-20', name: 'Alsancak yenilendi' },
+];
+
+/** Binlerce hat örneği: merkezden rastgele noktalara. */
+export const MASS_ROUTES: number[][][] = (() => {
+  const random = seededRandom(RANDOM_SEED + 30);
+  return Array.from({ length: 4000 }, () => [
+    [29, 41],
+    [27 + random() * 17, 36.5 + random() * 5],
+  ]);
+})();
+
 /** Sevkiyat merkezi ve illere giden günlük ton: nokta nokta rota örnekleri. */
 export const ROUTE_HUB = { name: 'İstanbul', position: [29, 41] };
 export const DELIVERY_ROUTES = [
