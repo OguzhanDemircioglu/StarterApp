@@ -5,11 +5,17 @@ spring:
     # Ortam değişkenleri her zaman .env'den önceliklidir. (.env git'e girmez.)
     import: optional:file:.env[.properties]
   datasource:
-    url: ${DB_URL:jdbc:postgresql://localhost:5432/starterapp}
-    username: ${DB_USERNAME:postgres}
-    password: ${DB_PASSWORD:postgres}
+    # Varsayılan: kurulum gerektirmeyen, dosyada kalıcı H2 (server/data/, git'e girmez).
+    # MODE=PostgreSQL prod ile aynı SQL'in çalışması içindir. PostgreSQL'e bağlanmak için .env'de DB_URL verilir.
+    url: ${DB_URL:jdbc:h2:file:./data/starterapp;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DEFAULT_NULL_ORDERING=HIGH;DB_CLOSE_ON_EXIT=FALSE;INIT=CREATE SCHEMA IF NOT EXISTS ${DB_SCHEMA:starterapp}}
+    username: ${DB_USERNAME:sa}
+    password: ${DB_PASSWORD:}
+    hikari:
+      schema: ${DB_SCHEMA:starterapp}
   jpa:
     show-sql: true
+    properties:
+      hibernate.default_schema: ${DB_SCHEMA:starterapp}
 
 logging:
   pattern:

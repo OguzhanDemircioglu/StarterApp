@@ -12,22 +12,34 @@ public interface LoginAttemptRepository extends JpaRepository<LoginAttempt, Stri
     /**
      * Yanlış denemeyi atomik olarak sayar. Engel süresi dolmuşsa sayaç 1'den başlar;
      * sayaç maxAttempts'e ulaşınca blocked_until yazılır.
+     * İki adımdır çünkü H2 "ON CONFLICT DO UPDATE" desteklemez; UPDATE satırı kilitlediği için sayım yine ezilmez.
      */
     @Transactional
+    default void recordFailure(String key, Instant now, Instant blockedUntil, int maxAttempts) {
+        insertIfMissing(key, now);
+        incrementFailure(key, now, blockedUntil, maxAttempts);
+    }
+
     @Modifying
     @Query(nativeQuery = true, value = """
             INSERT INTO login_attempts (attempt_key, fail_count, blocked_until, updated_at)
-            VALUES (:key, 1, NULL, :now)
-            ON CONFLICT (attempt_key) DO UPDATE SET
+            VALUES (:key, 0, NULL, :now)
+            ON CONFLICT DO NOTHING""")
+    void insertIfMissing(String key, Instant now);
+
+    @Modifying
+    @Query(nativeQuery = true, value = """
+            UPDATE login_attempts SET
                 fail_count = CASE
-                    WHEN login_attempts.blocked_until <= :now THEN 1
-                    ELSE login_attempts.fail_count + 1 END,
+                    WHEN blocked_until <= :now THEN 1
+                    ELSE fail_count + 1 END,
                 blocked_until = CASE
-                    WHEN login_attempts.blocked_until <= :now THEN NULL
-                    WHEN login_attempts.fail_count + 1 >= :maxAttempts THEN :blockedUntil
-                    ELSE login_attempts.blocked_until END,
-                updated_at = :now""")
-    void recordFailure(String key, Instant now, Instant blockedUntil, int maxAttempts);
+                    WHEN blocked_until <= :now THEN NULL
+                    WHEN fail_count + 1 >= :maxAttempts THEN :blockedUntil
+                    ELSE blocked_until END,
+                updated_at = :now
+             WHERE attempt_key = :key""")
+    void incrementFailure(String key, Instant now, Instant blockedUntil, int maxAttempts);
 
     @Transactional
     @Modifying

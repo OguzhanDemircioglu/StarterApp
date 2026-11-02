@@ -7,7 +7,7 @@ StarterApp'in Spring Boot backend'i. Bağlayıcı kurallar ve tasarım kararlar�
 |---|---|
 | Java | 25 |
 | Spring Boot | 4.1.x |
-| Veritabanı | PostgreSQL 18 |
+| Veritabanı | Prod: PostgreSQL 18, yerel geliştirme: H2 (dosyada kalıcı) |
 | Build | Maven (`./mvnw`, Windows PowerShell'de `.\mvnw.cmd`) |
 
 ## İlk kurulum
@@ -27,27 +27,32 @@ dosyaların okunabilir olması gerekir: `chmod 644 keys/*.pem`.
 
 ### 2. Veritabanı ve `.env`
 
-Bağlantı bilgileri `server/.env` dosyasına yazılır. Bu dosya git'e girmez ve **sadece dev profilinde** okunur;
-testler ve prod onu hiçbir zaman kullanmaz. Ortam değişkenleri her zaman `.env`'den önceliklidir.
+Dev profili kurulum gerektirmeyen **H2** ile açılır: veri `server/data/` klasöründe durur (git'e girmez) ve yeniden
+başlatmalarda korunur. Veritabanını sıfırlamak için server kapalıyken bu klasör silinir. Gömülü H2 dosyasını aynı anda tek
+süreç açabilir; ikinci bir server ya da harici bir DB aracı, ilk süreç kapanana kadar bağlanamaz.
+
+Ayarlar `server/.env` dosyasına yazılır. Bu dosya git'e girmez ve **sadece dev profilinde** okunur; testler ve prod onu
+hiçbir zaman kullanmaz. Ortam değişkenleri her zaman `.env`'den önceliklidir. Yerelde PostgreSQL kullanmak için üç
+`DB_` satırı daha yazılır; yazılmazsa H2 kullanılır:
 
 ```properties
-DB_URL=jdbc:postgresql://host:port/veritabani?ssl=require
-DB_USERNAME=...
-DB_PASSWORD=...
+# DB_URL=jdbc:postgresql://host:port/veritabani?ssl=require
+# DB_USERNAME=...
+# DB_PASSWORD=...
 DB_SCHEMA=starterapp
 ADMIN_EMAIL=admin@firma.com
 ADMIN_PASSWORD=...
 ```
 
-- `DB_SCHEMA` **zorunludur** ve küçük harf olmalıdır. Uygulamanın bütün tabloları bu şemada durur; şema yoksa ilk
-  açılışta oluşturulur. Başka projelerle paylaşılan bir veritabanında diğer şemalara (ör. `public`) dokunulmaz.
-- Aynı `.env`'yi `docker compose --profile app` da kullanır (server container'ına `env_file` ile verilir); IDE'den ve
-  Docker'dan çalıştırınca aynı veritabanına, aynı admin hesabıyla bağlanılır.
-- Docker ile yerel bir veritabanı için repo kökünde `docker compose --profile db up -d` → PostgreSQL 18, `localhost:5433`
+- `DB_SCHEMA` küçük harf olmalıdır. Uygulamanın bütün tabloları bu şemada durur; şema yoksa ilk açılışta oluşturulur.
+  Başka projelerle paylaşılan bir veritabanında diğer şemalara (ör. `public`) dokunulmaz. Dev profilinde varsayılanı
+  `starterapp`'tir; prod'da **zorunludur**.
+- Aynı `.env`'yi `docker compose --profile app` da kullanır (server container'ına `env_file` ile verilir). `DB_URL`
+  verilmişse IDE'den ve Docker'dan çalıştırınca aynı veritabanına bağlanılır; verilmemişse Docker'daki H2 `h2data`
+  volume'ünde, IDE'deki `server/data/` klasöründe durur ve bu iki veri birbirinden ayrıdır.
+- Docker ile yerel bir PostgreSQL için repo kökünde `docker compose --profile db up -d` → PostgreSQL 18, `localhost:5433`
   (`DB_URL=jdbc:postgresql://localhost:5433/starterapp`, kullanıcı/şifre `starterapp`). Bu adres sadece IDE'den
   çalıştırırken geçerlidir; compose'daki server container'ı için `jdbc:postgresql://host.docker.internal:5433/starterapp` yazılır.
-- `.env` yoksa dev profili `localhost:5432/starterapp` adresine `postgres/postgres` ile bağlanmayı dener;
-  `DB_SCHEMA` yine de (ortam değişkeni olarak) verilmelidir, aksi halde uygulama açılmaz.
 
 Tablolar ilk açılışta Hibernate tarafından (`ddl-auto=update`), başlangıç verileri migration class'larıyla oluşturulur.
 `ADMIN_EMAIL`/`ADMIN_PASSWORD` verilmezse dev profilinde `admin@starterapp.local` / `Admin12345` kullanılır.
@@ -83,6 +88,7 @@ yapın (`.env` ve `keys/` bu dizine göre aranır).
 ```
 
 - Unit ve kontrat testleri her yerde çalışır.
+- `H2IntegrationTest` uygulamayı bellekteki H2 ile açar; Docker gerektirmez.
 - `AuthFlowIntegrationTest`, `SchemaIsolationIntegrationTest` ve `FirewallIntegrationTest` gerçek bir PostgreSQL 18'i
   Testcontainers ile açar; **Docker yoksa otomatik atlanır**.
 
@@ -95,7 +101,7 @@ Server ve client'ı birlikte çalıştıran [docker-compose.yml](../docker-compo
 docker compose --profile app up -d
 ```
 
-Veritabanı ve admin bilgileri `server/.env`'den okunur (bkz. "İlk kurulum").
+Admin bilgileri ve varsa `DB_URL` `server/.env`'den okunur (bkz. "İlk kurulum").
 
 Sadece server imajı için (`server/` klasöründe): `docker build -t starterapp-server .`
 
@@ -126,8 +132,8 @@ Referans modül `modules/category`'dir. Örnek olarak `Product` modülü:
    create/update/delete metotlarına.
 8. **Migration:** `migration/versions` altına bir sonraki numarayla `V005_ProductModule` yazın
    (`V004_CategoryModule` örnek alınır):
-   - Benzersiz alanlar için silinmemiş kayıtlara özel index:
-     `CREATE UNIQUE INDEX IF NOT EXISTS ux_products_code ON products (code) WHERE deleted = false`
+   - Benzersiz alanlar için silinmemiş kayıtlara özel index (PostgreSQL ve H2'de çalışır):
+     `SoftDeleteUniqueIndex.create(jdbc, "ux_products_code", "products", "code")`
    - Menü kaydı: `id` yazmadan, üst menüye alt sorguyla referans vererek;
      `version = 0, deleted = false, created_at = now()` açıkça verilir.
 9. **Test:** `CategoryServiceImplTest` örnek alınarak iş kurallarının testleri.
@@ -135,6 +141,7 @@ Referans modül `modules/category`'dir. Örnek olarak `Product` modülü:
 ### Kurallar (özet)
 
 - Uygulanmış bir migration class'ı **değiştirilmez**; yeni sürüm yazılır.
+- SQL'ler dev'deki H2'de de çalışmalıdır: `generate_series`, `ON CONFLICT DO UPDATE` ve partial index H2'de yoktur.
 - Var olan kolonu değiştirmek (ad, tip, uzunluk) `ddl-auto` ile olmaz → migration class'ında `ALTER`.
 - Enum'a yeni değer eklendiğinde Hibernate'in oluşturduğu `check` constraint güncellenmez → migration class'ında `ALTER`.
 - Yeni kolonlar nullable ya da default değerli olmalıdır (Swarm'da rolling update sırasında eski sürüm de çalışır).

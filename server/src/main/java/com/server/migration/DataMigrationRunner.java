@@ -22,6 +22,7 @@ import java.util.Set;
  * - Her sürüm kendi transaction'ında çalışır; hata olursa geri alınır ve uygulama açılmaz.
  * - Uygulanan sürümler data_migration_history tablosuna yazılır ve bir daha çalışmaz.
  * - PostgreSQL advisory lock sayesinde aynı anda açılan iki replica aynı sürümü iki kez çalıştıramaz.
+ *   Gömülü H2'yi tek süreç kullandığı için orada kilit alınmaz.
  */
 @Slf4j
 @Component
@@ -44,6 +45,10 @@ public class DataMigrationRunner implements ApplicationRunner {
 
         // Kilit, ayrı tutulan tek bir bağlantı üzerinde alınır ve iş bitince bırakılır.
         jdbc.execute((ConnectionCallback<Void>) connection -> {
+            if (!"PostgreSQL".equals(connection.getMetaData().getDatabaseProductName())) {
+                applyPending(ordered);
+                return null;
+            }
             execute(connection, "SELECT pg_advisory_lock(" + LOCK_ID + ")");
             try {
                 applyPending(ordered);
@@ -59,7 +64,7 @@ public class DataMigrationRunner implements ApplicationRunner {
                 CREATE TABLE IF NOT EXISTS data_migration_history (
                     version     INTEGER PRIMARY KEY,
                     description VARCHAR(255) NOT NULL,
-                    applied_at  TIMESTAMPTZ NOT NULL DEFAULT now()
+                    applied_at  TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now()
                 )""");
         Set<Integer> applied = new HashSet<>(jdbc.queryForList("SELECT version FROM data_migration_history", Integer.class));
 

@@ -1,6 +1,7 @@
 package com.server.migration.versions;
 
 import com.server.migration.DataMigration;
+import com.server.migration.SoftDeleteUniqueIndex;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
@@ -22,7 +23,7 @@ public class V001_UniqueIndexes implements DataMigration {
 
     @Override
     public void migrate(JdbcTemplate jdbc) {
-        jdbc.execute("CREATE UNIQUE INDEX IF NOT EXISTS ux_users_email ON users (email) WHERE deleted = false");
-        jdbc.execute("CREATE UNIQUE INDEX IF NOT EXISTS ux_menus_title_key ON menus (title_key) WHERE deleted = false");
+        SoftDeleteUniqueIndex.create(jdbc, "ux_users_email", "users", "email");
+        SoftDeleteUniqueIndex.create(jdbc, "ux_menus_title_key", "menus", "title_key");
     }
 }

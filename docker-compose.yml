@@ -1,7 +1,8 @@
 # StarterApp geliştirme ortamı (repo kökünden çalıştırılır).
 #   docker compose --profile app up -d  → server + client → http://localhost:4200
-#                                         Veritabanı ve admin bilgileri server/.env'den gelir (DB_URL, ADMIN_EMAIL...).
-#   docker compose --profile db up -d   → sadece yerel PostgreSQL 18 (localhost:5433); .env'deki DB_URL buna çevrilirse kullanılır
+#                                         Ayarlar server/.env'den gelir (ADMIN_EMAIL...). .env'de DB_URL yoksa veritabanı
+#                                         h2data volume'ündeki H2'dir (IDE'den çalıştırmanın server/data/'sından ayrıdır).
+#   docker compose --profile db up -d   → sadece yerel PostgreSQL 18 (localhost:5433); .env'de DB_URL buna çevrilirse kullanılır
 services:
   postgres:
     profiles: ["db"]
@@ -38,6 +39,7 @@ services:
       FORWARD_HEADERS_STRATEGY: native
     volumes:
       - ./server/keys:/app/keys:ro
+      - h2data:/app/data
     ports:
       # Swagger ve doğrudan API denemeleri için; tarayıcı uygulaması API'ye client üzerinden ulaşır.
       - "8080:8080"
@@ -53,3 +55,4 @@ services:
 
 volumes:
   pgdata:
+  h2data:
