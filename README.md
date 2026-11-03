@@ -9,6 +9,7 @@ Yeni bir projeye bu repo kopyalanarak başlanır.
 | [client/](client/README.md) | Angular 22, NG-ZORRO, ECharts, NgRx. Kurulum ve çalıştırma: [client/README.md](client/README.md) |
 | [docs/Backend_Architecture.md](docs/Backend_Architecture.md) | Backend'in bağlayıcı kuralları ve tasarım kararları |
 | [docs/Frontend_Architecture.md](docs/Frontend_Architecture.md) | Frontend'in bağlayıcı kuralları ve tasarım kararları |
+| [docs/Security_Roadmap.md](docs/Security_Roadmap.md) | Taslak: süperadmin rolü, audit, 2FA ve güvenlik sertleştirme yol haritası (henüz uygulanmadı) |
 | [docker-compose.yml](docker-compose.yml) | Geliştirme ortamı: server ve client (varsayılan veritabanı H2; `server/.env`'de `DB_URL` verilirse oraya bağlanır); isteğe bağlı yerel PostgreSQL 18 |
 
 ## Hızlı başlangıç
