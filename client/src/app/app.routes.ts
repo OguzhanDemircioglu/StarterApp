@@ -1,5 +1,5 @@
 import { Routes } from '@angular/router';
-import { adminGuard, authGuard, guestGuard } from './core/auth/auth.guards';
+import { authGuard, guestGuard, roleGuard } from './core/auth/auth.guards';
 import { Shell } from './core/layout/shell/shell';
 
 /**
@@ -17,12 +17,13 @@ export const routes: Routes = [
       {
         path: 'definitions',
         data: { title: 'menu_definitions' },
+        canActivate: [roleGuard('USER')],
         loadChildren: () => import('./pages/definitions/definitions.routes'),
       },
       {
         path: 'administration',
         data: { title: 'menu_administration' },
-        canActivate: [adminGuard],
+        canActivate: [roleGuard('ADMIN')],
         loadChildren: () => import('./pages/administration/administration.routes'),
       },
       { path: 'forbidden', data: { title: 'page_forbidden_title' }, loadComponent: () => import('./shared/pages/forbidden') },

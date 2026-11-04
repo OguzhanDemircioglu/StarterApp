@@ -13,9 +13,7 @@
       <button nz-button nzType="text" nz-dropdown [nzDropdownMenu]="userMenu" nzTrigger="click">
         <nz-icon nzType="user" />
         {{ user.fullName }}
-        <nz-tag [nzColor]="user.role === 'ADMIN' ? 'gold' : 'blue'">
-          {{ (user.role === 'ADMIN' ? 'role_admin' : 'role_user') | translate }}
-        </nz-tag>
+        <app-role-tag [role]="user.role" />
       </button>
       <nz-dropdown-menu #userMenu="nzDropdownMenu">
         <ul nz-menu>

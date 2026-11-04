@@ -7,9 +7,7 @@ import com.server.modules.auth.dto.LoginRequest;
 import com.server.modules.auth.dto.RegisterRequest;
 import com.server.modules.auth.dto.SessionInfo;
 import com.server.modules.user.UserService;
-import com.server.modules.user.dto.UserCreateRequest;
 import com.server.security.CurrentUser;
-import com.server.security.Role;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
@@ -45,7 +43,7 @@ public class AuthController {
     @PostMapping("/register")
     public ApiResponse<Void> register(@Valid @RequestBody RegisterRequest request, HttpServletRequest httpRequest) {
         registerRateLimiter.acquire(ClientInfo.from(httpRequest).ip());
-        userService.create(new UserCreateRequest(request.email(), request.fullName(), request.password(), Role.USER));
+        userService.register(request.email(), request.fullName(), request.password());
         return ApiResponse.success(GlobalMessages.RECORD_CREATED, null);
     }
 

@@ -21,7 +21,8 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 /**
- * Kullanıcı yönetimi: controller'ın tamamı sadece ADMIN'e açık.
+ * Kullanıcı yönetimi: controller'ın tamamı ADMIN'e (hiyerarşiyle SUPERADMIN'e) açık.
+ * Kimin kimi yönetebileceği UserServiceImpl'deki yönetim kapsamı kurallarıyla belirlenir.
  */
 @RestController
 @RequestMapping("/api/users")

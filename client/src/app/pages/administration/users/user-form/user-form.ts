@@ -6,8 +6,11 @@ import { NzInputModule } from 'ng-zorro-antd/input';
 import { NzModalModule } from 'ng-zorro-antd/modal';
 import { NzSelectModule } from 'ng-zorro-antd/select';
 import { NzSwitchModule } from 'ng-zorro-antd/switch';
+import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
+import { assignableRoles, ROLE_LABEL_KEYS } from '../../../../core/auth/roles';
 import { Role } from '../../../../core/auth/session.model';
+import { sessionFeature } from '../../../../core/auth/session.state';
 import { Notifier } from '../../../../core/notify/notifier';
 import { maxBytes, validateForm } from '../../../../shared/forms/form-utils';
 import { UserApi } from '../user-api';
@@ -32,7 +35,17 @@ export class UserForm {
 
   protected readonly isEdit = computed(() => this.user() !== null);
   protected readonly saving = signal(false);
-  protected readonly roles: Role[] = ['USER', 'ADMIN'];
+  private readonly actorRole = inject(Store).selectSignal(sessionFeature.selectRole);
+  protected readonly roleLabelKeys = ROLE_LABEL_KEYS;
+  /**
+   * Seçilebilir roller: işlemi yapanın verebildikleri. Düzenlenen kullanıcının rolü bu listede yoksa (ör. SUPERADMIN)
+   * rol alanı kilitlenir ve sadece mevcut rol gösterilir.
+   */
+  protected readonly roles = computed<Role[]>(() => {
+    const assignable = assignableRoles(this.actorRole());
+    const current = this.user()?.role;
+    return current && !assignable.includes(current) ? [current] : assignable;
+  });
 
   protected readonly form = inject(NonNullableFormBuilder).group({
     email: ['', [Validators.required, Validators.email, Validators.maxLength(254)]],
@@ -61,6 +74,13 @@ export class UserForm {
         password.disable();
       } else {
         password.enable();
+      }
+      // Tek seçenek varsa (ADMIN için USER, ya da süperadminin kendi rolü) rol değiştirilemez.
+      const role = this.form.controls.role;
+      if (this.roles().length <= 1) {
+        role.disable();
+      } else {
+        role.enable();
       }
     });
   }

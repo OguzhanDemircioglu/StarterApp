@@ -5,14 +5,14 @@ import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzDropdownModule } from 'ng-zorro-antd/dropdown';
 import { NzIconModule } from 'ng-zorro-antd/icon';
 import { NzMenuModule } from 'ng-zorro-antd/menu';
-import { NzTagModule } from 'ng-zorro-antd/tag';
 import { ChangePassword } from '../../auth/change-password/change-password';
+import { RoleTag } from '../../auth/role-tag';
 import { SessionActions } from '../../auth/session.actions';
 import { sessionFeature } from '../../auth/session.state';
 
 @Component({
   selector: 'app-topbar',
-  imports: [TranslatePipe, NzButtonModule, NzDropdownModule, NzIconModule, NzMenuModule, NzTagModule, ChangePassword],
+  imports: [TranslatePipe, NzButtonModule, NzDropdownModule, NzIconModule, NzMenuModule, ChangePassword, RoleTag],
   templateUrl: './topbar.html',
   styleUrl: './topbar.css',
 })

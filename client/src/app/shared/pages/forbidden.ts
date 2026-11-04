@@ -4,7 +4,7 @@ import { TranslatePipe } from '@ngx-translate/core';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzResultModule } from 'ng-zorro-antd/result';
 
-/** Rolün yetkisi olmayan sayfaya girilmeye çalışıldığında (adminGuard). */
+/** Rolün yetkisi olmayan sayfaya girilmeye çalışıldığında (roleGuard). */
 @Component({
   imports: [RouterLink, TranslatePipe, NzResultModule, NzButtonModule],
   template: `

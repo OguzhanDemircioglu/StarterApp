@@ -1,6 +1,8 @@
 # Güvenlik ve Süperadmin Yol Haritası
 
-> **Durum (2026-11-04):** Bütün kararlar verildi (§6), uygulama Faz 1 ile başlıyor. Henüz hiçbir madde uygulanmadı.
+> **Durum (2026-11-04):** Bütün kararlar verildi (§6). Faz 1'de §4.1 (roller, hiyerarşi, yönetim kapsamı, menü rol
+> kümeleri) uygulandı ve Backend_Architecture §9, §11, §12 / Frontend_Architecture §5'e taşındı; diğer maddeler bekliyor.
+> §4.1'in testleri henüz çalıştırılmadı. Devam etmeden önce §8'e bak.
 > Kararlar verildikçe bu dosya güncellenir; uygulanan maddeler `Backend_Architecture.md` ve `Frontend_Architecture.md`'ye taşınır.
 
 ## 1. Amaç
@@ -44,11 +46,13 @@ istatistikleri (§4.11, §4.12) PetStockPro'da yoktur, bu projeye özgüdür.
     çıkarsa eklenir).
 - Yönetim kapsamı: admin yalnızca `USER`'ları yönetir; başka admini, sahibi ve süperadmini yönetemez, kimsenin rolünü
   değiştiremez. Backend kuralı: hedef kullanıcının rolü işlemi yapanınkinden düşük olmalı.
-- Süperadmin yalnızca migration ile oluşur (ilk admin gibi, `V002_InitialAdmin` örneği; env'den `SUPERADMIN_EMAIL`).
-  Kayıt formundan ya da ekrandan oluşturulamaz, kimse rolünü `SUPERADMIN`'e yükseltemez.
-- Son süperadmin silinemez, pasife alınamaz, rolü düşürülemez (bugünkü `user_last_admin` kuralının benzeri).
+- Süperadmin yalnızca migration ile oluşur: `V006` ilk hesabı (`ADMIN_EMAIL`) `SUPERADMIN` yapar; ayrı bir
+  `SUPERADMIN_EMAIL` değişkeni eklenmedi. Kayıt formundan ya da ekrandan oluşturulamaz, kimse rolünü `SUPERADMIN`'e
+  yükseltemez.
+- Son süperadmin silinemez, pasife alınamaz, rolü düşürülemez (`user_last_superadmin`; eski "son admin" kuralının yerini aldı).
 - Menüler DB'den geliyor; `menus.admin_only` doğrusal bir `min_role` ile değiştirilemez, çünkü `OWNER` zincirin dışında.
-  Bunun yerine menüyü görebilen rollerin kümesi tutulur (`menu_roles` tablosu ya da rol listesi kolonu, yeni migration ile).
+  Bunun yerine menüyü görebilen en düşük rollerin kümesi `menus.roles` kolonunda (`"OWNER,USER"` gibi) tutulur ve
+  hiyerarşi uygulanarak süzülür (Backend_Architecture §12).
   Süperadmin hiyerarşi sayesinde hepsini görür.
 - Süperadmin sayfaları ayrı uygulama/subdomain değil, aynı uygulamada ayrı menü grubu: frontend'de klasör = URL kuralıyla
   örneğin `/system/...`. Backend'de `/api/system/**` için `SecurityConfig`'te yol kuralı **ve** `@PreAuthorize` (çift katman).
@@ -234,3 +238,47 @@ Kullanım olaylarının toplanması Faz 1'e alındı: sahip paneli Faz 3'te geld
 
 Her fazda: yeni SQL hem H2'de hem PostgreSQL'de çalışmalı (§10.6), PostgreSQL davranışı Testcontainers testleriyle,
 H2 davranışı `H2IntegrationTest` ile doğrulanır.
+
+## 8. Kaldığımız yer (2026-11-04)
+
+§4.1 kodu ve dokümanı yazıldı, commit'lendi. Ancak yazıldığı makinede JDK 25 ve Node 22 olmadığı için **testler
+çalıştırılmadı**; yalnızca istemcide `tsc` tip kontrolü geçti.
+
+### 8.1 İlk iş: testleri çalıştır
+
+Gerekenler: JDK 25 (`JAVA_HOME` ona işaret etmeli), Node 22+, Testcontainers için çalışan Docker.
+Windows PowerShell 5.1'de `&&` yoktur; `;` kullan. Repo kökünden:
+
+```powershell
+cd server; .\mvnw.cmd test
+```
+
+```powershell
+cd ..\client; npm test
+```
+
+Özellikle doğrulanacaklar:
+
+- **`EnumCheckConstraint`** (`server/.../migration/EnumCheckConstraint.java`): `information_schema` sorgusu eski
+  `users.role` check constraint'ini hem PostgreSQL 18'de (`AuthFlowIntegrationTest`) hem H2'de (`H2IntegrationTest`)
+  bulup silebiliyor mu. Bulamazsa `OWNER`/`SUPERADMIN` yazarken constraint hatası alınır.
+- **`V006_SuperadminAndOwnerRoles`**: mevcut bir veritabanında `ADMIN_EMAIL` adminini süperadmine yükseltiyor,
+  `menus.roles`'u `admin_only`'den dolduruyor mu; boş veritabanında V003–V005 `admin_only` olmadan menü ekleyebiliyor mu.
+- **`RoleAccessIntegrationTest`**: rol bazlı yol kuralları ve admin yönetim kapsamı.
+- İstemci: `roles.spec.ts` ve kullanıcı listesi/formu ekranları (elle: süperadmin, admin, sahip, kullanıcı olarak giriş).
+
+Hata çıkarsa düzelt, sonra §8.2'ye geç.
+
+### 8.2 Bilinen yan etki
+
+Admin, kullanıcı yönetimi ekranından kendi kaydını düzenleyemez (admin yalnızca `USER` yönetir). Gerekirse ayrı bir
+"profilim" uç noktasıyla çözülebilir; henüz karar verilmedi.
+
+### 8.3 Sıradaki işler (Faz 1'in kalanı, bu sırayla)
+
+1. **Audit log** (§4.2): kendi tablomuz, `before_state` JSON, auth olayları da aynı tabloda.
+2. **Hesap bazlı kilit** (§4.6): kilidi şimdilik yalnızca süperadmin açar (e-posta Faz 4).
+3. **Güvenlik başlıkları** (§4.8).
+4. **Kullanım olaylarının toplanması** (§4.11): ham olaylar 90 gün, günlük özetler süresiz.
+
+Her madde bitince: Backend/Frontend_Architecture'a taşı, bu dosyadaki durumu ve §8'i güncelle, commit + push.

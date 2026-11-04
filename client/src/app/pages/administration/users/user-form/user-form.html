@@ -49,8 +49,8 @@
         <nz-form-label nzRequired>{{ 'user_role' | translate }}</nz-form-label>
         <nz-form-control [nzErrorTip]="'user_role_required' | translate">
           <nz-select formControlName="role">
-            @for (role of roles; track role) {
-              <nz-option [nzValue]="role" [nzLabel]="(role === 'ADMIN' ? 'role_admin' : 'role_user') | translate" />
+            @for (role of roles(); track role) {
+              <nz-option [nzValue]="role" [nzLabel]="roleLabelKeys[role] | translate" />
             }
           </nz-select>
         </nz-form-control>

@@ -75,7 +75,7 @@ class AuthFlowIntegrationTest {
     @Test
     void migrationsAreAppliedOnce() {
         List<Integer> versions = jdbc.queryForList("SELECT version FROM data_migration_history ORDER BY version", Integer.class);
-        assertThat(versions).containsExactly(1, 2, 3, 4, 5);
+        assertThat(versions).containsExactly(1, 2, 3, 4, 5, 6);
     }
 
     @Test
@@ -85,7 +85,7 @@ class AuthFlowIntegrationTest {
                 .andExpect(jsonPath("$", aMapWithSize(4)))
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.data.user.email").value(ADMIN_EMAIL))
-                .andExpect(jsonPath("$.data.user.role").value("ADMIN"))
+                .andExpect(jsonPath("$.data.user.role").value("SUPERADMIN"))
                 .andExpect(jsonPath("$.data.expiresIn").value(900))
                 .andExpect(jsonPath("$.data.menus[*].titleKey", hasItem("menu_administration")))
                 .andExpect(jsonPath("$.data.menus[0].titleKey").value("menu_home"))

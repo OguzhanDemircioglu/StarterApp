@@ -6,9 +6,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -19,9 +21,11 @@ public class MenuServiceImpl implements MenuService {
 
     @Override
     public List<MenuNode> getMenuTree(Role role) {
-        List<Menu> menus = role == Role.ADMIN
-                ? repository.findAllByOrderBySortOrderAsc()
-                : repository.findAllByAdminOnlyFalseOrderBySortOrderAsc();
+        Set<Role> reachable = role.reachable();
+        // Menü sayısı az olduğu için süzme Java'da yapılır. SUPERADMIN rolü boş menüleri de görür.
+        List<Menu> menus = repository.findAllByOrderBySortOrderAsc().stream()
+                .filter(menu -> role == Role.SUPERADMIN || !Collections.disjoint(menu.getRoles(), reachable))
+                .toList();
 
         Map<Long, List<Menu>> childrenByParent = new HashMap<>();
         for (Menu menu : menus) {

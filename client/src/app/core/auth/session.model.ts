@@ -1,6 +1,6 @@
 /** Backend'deki SessionInfo ve parçalarının birebir karşılığı (Backend_Architecture.md §8.6). */
 
-export type Role = 'ADMIN' | 'USER';
+export type Role = 'SUPERADMIN' | 'ADMIN' | 'OWNER' | 'USER';
 
 export interface SessionUser {
   id: number;

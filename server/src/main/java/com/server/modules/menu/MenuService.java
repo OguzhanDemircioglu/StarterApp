@@ -6,6 +6,6 @@ import java.util.List;
 
 public interface MenuService {
 
-    /** ADMIN bütün menüleri, USER sadece admin_only = false olanları görür. */
+    /** Rolün (hiyerarşiyle kapsadığı rollerle birlikte) görebildiği menüler; SUPERADMIN hepsini görür. */
     List<MenuNode> getMenuTree(Role role);
 }

@@ -34,9 +34,7 @@
             <td>{{ user.email }}</td>
             <td>{{ user.fullName }}</td>
             <td>
-              <nz-tag [nzColor]="user.role === 'ADMIN' ? 'gold' : 'blue'">
-                {{ (user.role === 'ADMIN' ? 'role_admin' : 'role_user') | translate }}
-              </nz-tag>
+              <app-role-tag [role]="user.role" />
             </td>
             <td>
               <nz-tag [nzColor]="user.active ? 'green' : 'default'">
@@ -45,30 +43,33 @@
             </td>
             <td>{{ user.createdAt | date: 'dd.MM.yyyy HH:mm' }}</td>
             <td nzAlign="right">
-              <button nz-button nzType="text" nz-tooltip [nzTooltipTitle]="'common_edit' | translate" (click)="openEdit(user)">
-                <nz-icon nzType="edit" />
-              </button>
-              <button
-                nz-button
-                nzType="text"
-                nz-tooltip
-                [nzTooltipTitle]="'user_reset_password' | translate"
-                (click)="openPasswordReset(user)"
-              >
-                <nz-icon nzType="key" />
-              </button>
-              <button
-                nz-button
-                nzType="text"
-                nzDanger
-                nz-popconfirm
-                [nzPopconfirmTitle]="'user_delete_confirm' | translate"
-                [nzOkText]="'common_delete' | translate"
-                [nzCancelText]="'common_cancel' | translate"
-                (nzOnConfirm)="remove(user)"
-              >
-                <nz-icon nzType="delete" />
-              </button>
+              <!-- Yönetim kapsamı dışındaki kullanıcıların (ör. ADMIN için diğer adminler) işlemleri gösterilmez. -->
+              @if (canManage(user)) {
+                <button nz-button nzType="text" nz-tooltip [nzTooltipTitle]="'common_edit' | translate" (click)="openEdit(user)">
+                  <nz-icon nzType="edit" />
+                </button>
+                <button
+                  nz-button
+                  nzType="text"
+                  nz-tooltip
+                  [nzTooltipTitle]="'user_reset_password' | translate"
+                  (click)="openPasswordReset(user)"
+                >
+                  <nz-icon nzType="key" />
+                </button>
+                <button
+                  nz-button
+                  nzType="text"
+                  nzDanger
+                  nz-popconfirm
+                  [nzPopconfirmTitle]="'user_delete_confirm' | translate"
+                  [nzOkText]="'common_delete' | translate"
+                  [nzCancelText]="'common_cancel' | translate"
+                  (nzOnConfirm)="remove(user)"
+                >
+                  <nz-icon nzType="delete" />
+                </button>
+              }
             </td>
           </tr>
         }

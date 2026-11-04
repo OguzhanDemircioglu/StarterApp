@@ -12,7 +12,9 @@ public final class UserMessages {
     public static final String PASSWORD_TOO_LONG = "user_password_too_long";
     public static final String ROLE_REQUIRED = "user_role_required";
     public static final String ACTIVE_REQUIRED = "user_active_required";
-    public static final String LAST_ADMIN = "user_last_admin";
+    public static final String LAST_SUPERADMIN = "user_last_superadmin";
+    public static final String NOT_MANAGEABLE = "user_not_manageable";
+    public static final String ROLE_NOT_ASSIGNABLE = "user_role_not_assignable";
 
     private UserMessages() {
     }

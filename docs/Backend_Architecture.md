@@ -439,7 +439,7 @@ Her satır bir oturumu temsil eder; bir tarayıcı, bir satır. Refresh token he
 - Başarılı olursa kullanıcının **diğer** bütün oturumları iptal edilir; şu anki oturum (`sid`) açık kalır.
 
 **Admin işlemleri**
-- Admin bir kullanıcının şifresini sıfırlarsa, onu pasife alırsa ya da silerse, kullanıcının **bütün** oturumları iptal edilir.
+- Admin bir kullanıcının şifresini sıfırlarsa, rolünü değiştirirse, onu pasife alırsa ya da silerse, kullanıcının **bütün** oturumları iptal edilir.
 
 **Bilinen sınır:** Rolü değişen ya da pasife alınan kullanıcının elindeki access token en fazla 15 dakika daha geçerli kalır. Stateless JWT'nin bilinen bedelidir ve kabul edilmiştir.
 
@@ -484,17 +484,38 @@ public class CurrentUser {
 - E-posta adresinin gerçekten kullanıcıya ait olduğu şimdilik doğrulanmaz (§19).
 - Normalizasyon `Locale.ROOT` ile yapılır (Türkçe locale'de "I" → "ı" olurdu). Türkçe klavyelerin "i" harfini "İ" olarak büyütebilmesi nedeniyle (ör. telefonda otomatik büyük harf) "İ" de "i" sayılır.
 - Şifreler `DelegatingPasswordEncoder` (bcrypt) ile hash'lenir. Şifre en az 8 karakter, en fazla **72 byte** (UTF-8) olabilir: bcrypt 72 byte'tan uzun şifreyi hash'lemez ve Türkçe harfler 2 byte'tır. Bu sınır `@Size` ile değil `@MaxBytes(72)` ile kontrol edilir; aksi halde uzun bir şifre doğrulamadan geçip 500 hatasına dönerdi.
-- Sistemde kalan **son aktif admin** silinemez, pasife alınamaz ve rolü düşürülemez: 422 `user_last_admin`.
+- Sistemde kalan **son aktif süperadmin** silinemez ve pasife alınamaz: 422 `user_last_superadmin`.
+- **Yönetim kapsamı** (`UserServiceImpl`, §9): ADMIN sadece `USER`'ları düzenler, siler ve şifresini sıfırlar; başka bir
+  kullanıcıya dokunursa 422 `user_not_manageable`. ADMIN sadece `USER` rolü verebilir; SUPERADMIN `USER`, `ADMIN` ve
+  `OWNER` arasında geçiş yapabilir. `SUPERADMIN` rolü API'den verilemez ve alınamaz. Kurala aykırı rol: 422
+  `user_role_not_assignable`.
+- Rolü değişen kullanıcının bütün oturumları iptal edilir; yeni rol bir sonraki girişte gelir.
+- Kayıt formu (`/api/auth/register`) `UserService.register` ile her zaman `USER` oluşturur; giriş yapmış biri olmadığı
+  için yönetim kapsamı kontrolüne girmez.
 
 ---
 
 ## 9. Yetkilendirme
 
-- **Roller:** Yalnızca `ADMIN` ve `USER` vardır. Kodda enum olarak tanımlıdır. Her kullanıcının tek rolü olur ve `users.role` kolonunda tutulur. Rol tablosu yoktur.
-- **Varsayılan kural:** Giriş yapmış herkes endpoint'lere erişebilir.
-- **Admin'e özel endpoint'ler:** `@PreAuthorize("hasRole('ADMIN')")` ile işaretlenir.
+- **Roller:** `SUPERADMIN`, `ADMIN`, `OWNER`, `USER`. Kodda `Role` enum'u olarak tanımlıdır. Her kullanıcının tek rolü olur ve `users.role` kolonunda tutulur. Rol tablosu yoktur.
+- **Hiyerarşi:** `SUPERADMIN > ADMIN > USER` ve `SUPERADMIN > OWNER`. Üstteki rol alttakinin bütün yetkilerini taşır.
+  `OWNER` (proje sahibi) bilerek `ADMIN`'in yanındadır, üstünde değil: salt okunurdur ve `ADMIN`/`USER` yetkilerini
+  miras almaz (docs/Security_Roadmap.md §4.1). Hiyerarşinin tek kaynağı `Role.implies()`'dır; Spring Security'nin
+  `RoleHierarchy` bean'i (`SecurityConfig`) ve menü süzme (§12) buradan üretilir.
+- **Yol kuralları** (`SecurityConfig`, ilk katman):
+
+  | Yol | Gereken rol |
+  |---|---|
+  | `/api/auth/**` | Giriş yapmış her rol |
+  | `/api/system/**` | `SUPERADMIN` |
+  | `/api/insights/**` | `OWNER` (ve hiyerarşiyle `SUPERADMIN`) |
+  | `/api/reports/**` | `USER` ya da `OWNER` |
+  | Diğer her şey | `USER` (hiyerarşiyle `ADMIN`, `SUPERADMIN`); **`OWNER` giremez** |
+
+- **Daha yüksek rol gereken endpoint'ler:** `@PreAuthorize("hasRole('ADMIN')")` gibi **en düşük gereken rolle** işaretlenir; hiyerarşi sayesinde üst roller de geçer.
   - Controller'ın tamamı admin'e özelse işaret sınıfın üstüne konur.
   - Herkes okuyabilip sadece admin değiştirebiliyorsa, işaret yalnızca create, update ve delete metotlarına konur.
+  - Yeni bir `/api/system/**` ya da `/api/insights/**` controller'ı yol kuralına ek olarak kendi `@PreAuthorize`'ını da taşır (çift katman).
 - **Herkese açık endpoint'ler** config'te beyaz listededir: `/api/auth/login`, `/api/auth/register`, `/api/auth/dev-login` (sadece geliştirmede var), `/api/auth/refresh`, `/api/auth/logout`, `/actuator/health/**`. Swagger sadece dev profilinde açılır.
 - DB'de endpoint ya da yetki tablosu **yoktur**.
 - **Menü görünürlüğü güvenlik değildir.** Bir menüyü gizlemek arkasındaki endpoint'i korumaz; asıl koruma `@PreAuthorize`'dır.
@@ -599,8 +620,8 @@ public class V003_InitialMenus implements DataMigration {
 
     public void migrate(JdbcTemplate jdbc) {
         jdbc.update("""
-            INSERT INTO menus (title_key, route, icon, sort_order, admin_only, version, deleted, created_at)
-            VALUES ('menu_definitions', NULL, 'settings', 1, false, 0, false, now())
+            INSERT INTO menus (title_key, route, icon, sort_order, roles, version, deleted, created_at)
+            VALUES ('menu_definitions', NULL, 'settings', 1, 'USER', 0, false, now())
             """);
     }
 }
@@ -619,12 +640,23 @@ public class V003_InitialMenus implements DataMigration {
 3. INSERT'lerde **id yazılmaz**, çünkü identity sayacı ilerlemez ve sonraki kayıtlar çakışır. Başka kayda referans verilirken alt sorgu kullanılır:
    `(SELECT id FROM menus WHERE title_key = 'menu_definitions')`.
 4. SQL ile JPA devre dışı kaldığı için BaseEntity kolonları INSERT'te açıkça verilir: `version = 0`, `deleted = false`, `created_at = now()`.
+5. **Eski migration'ların kullandığı kolonlar entity'den silinmez.** Boş bir veritabanında bütün migration'lar baştan
+   çalışır ve şema o an entity'lerden kurulur; kolon entity'den kalkarsa ona yazan eski migration bozulur. Kolonun
+   yerini başka bir alan alıyorsa eski alan entity'de getter/setter'sız bırakılır, yeni bir migration kolona varsayılan
+   değer verir (yeni migration'lar onu yazmak zorunda kalmasın) ve veriyi yeni alana taşır. Örnek: `menus.admin_only`
+   → `menus.roles` (`V006`).
+6. **Enum'a değer eklemek:** Hibernate'in koyduğu check constraint'i (§10.1) `EnumCheckConstraint.replace(...)` ile
+   yenilenir; değerler migration'a sabit olarak yazılır, enum'dan okunmaz.
 
-### 11.1 İlk admin kullanıcısı
+### 11.1 İlk süperadmin
 
-- `V002_InitialAdmin` migration'ı ile oluşturulur. Bu class `PasswordEncoder`'ı ve environment variable'ları inject alır; şifreyi hash'leyip INSERT eder.
-- `ADMIN_EMAIL` ve `ADMIN_PASSWORD` değişkenlerini kullanır. Sadece bir kez çalışır; sonradan bu değişkenleri değiştirmek mevcut admini etkilemez.
-- Prod'da `ADMIN_PASSWORD` tanımlı değilse migration hata verir ve uygulama açılmaz; varsayılan bir şifreyle admin oluşturulmaz.
+- İlk hesap `V002_InitialAdmin` ile `ADMIN` olarak oluşturulur, `V006_SuperadminAndOwnerRoles` onu `SUPERADMIN` yapar
+  (`ADMIN_EMAIL`'deki hesap; bulunamazsa en eski aktif admin). Yeni bir kurulumda ikisi art arda çalışır, yani
+  `ADMIN_EMAIL` ile açılan hesap süperadmindir.
+- `V002` `PasswordEncoder`'ı ve environment variable'ları inject alır; şifreyi hash'leyip INSERT eder.
+- `ADMIN_EMAIL` ve `ADMIN_PASSWORD` değişkenlerini kullanır. Sadece bir kez çalışır; sonradan bu değişkenleri değiştirmek mevcut hesabı etkilemez.
+- Prod'da `ADMIN_PASSWORD` tanımlı değilse migration hata verir ve uygulama açılmaz; varsayılan bir şifreyle hesap oluşturulmaz.
+- Süperadmin ekrandan ya da API'den oluşturulamaz; tek yolu bu migration'dır.
 
 ---
 
@@ -639,10 +671,13 @@ Tablo: `menus` (BaseEntity alanları + aşağıdakiler)
 | `route` | Frontend rotası; alt menüsü olan grup menülerinde `null` |
 | `icon` | Ant Design ikon adı (`home`, `setting`, `tag`, `team`); frontend `nz-icon` ile çizer. Yeni bir ikon frontend'de de kayıt edilmelidir (Frontend_Architecture.md §11) |
 | `sort_order` | Aynı seviyedeki menüler arasındaki sıra |
-| `admin_only` | `true` ise sadece ADMIN görür |
+| `roles` | Menüyü görebilen **en düşük** roller, virgülle ayrılmış (`USER`, `ADMIN`, `OWNER,USER`, `SUPERADMIN`). Java'da `Set<Role>` (`RoleSetConverter`) |
+| `admin_only` | Kullanılmaz; sadece V003–V005 boş kurulumda çalışabilsin diye durur, varsayılanı `false` (§11 kural 5) |
 
 **Kurallar:**
-- **Kim ne görür:** ADMIN bütün menüleri görür. USER sadece `admin_only = false` olanları görür.
+- **Kim ne görür:** Hiyerarşi uygulanır (§9): `roles` = `USER` olan menüyü USER, ADMIN ve SUPERADMIN görür; `ADMIN`
+  olanı ADMIN ve SUPERADMIN; `OWNER,USER` olanı sahip de görür. SUPERADMIN bütün menüleri (`roles` boş olanlar dahil) görür.
+- Yeni menü eklenirken `roles` yazılır, `admin_only` yazılmaz.
 - **Ağaç nasıl kurulur:** Tek bir sorgu yeterlidir. Kayıtlar `sort_order`'a göre çekilir, ağaç Java'da `parentId` üzerinden kurulur. Recursive SQL ya da `@OneToMany` self-ilişki kullanılmaz (lazy loading, N+1 sorgu ve JSON döngüsü sorunlarını önlemek için).
 - **Gizli üst menü:** Görünmeyen bir menünün alt menüleri de görünmez.
 - Menü ağacı `SessionInfo.menus` içinde döner (§8.6).
@@ -715,7 +750,7 @@ Dosyalar: `application.yml` (ortak), `application-dev.yml`, `application-prod.ym
 | `DB_SCHEMA` | **Zorunlu.** Uygulamanın şeması, küçük harf (§10.2) |
 | `JWT_PRIVATE_KEY_PATH`, `JWT_PUBLIC_KEY_PATH`, `JWT_KEY_ID` | Aktif RSA anahtarı |
 | `JWT_PREVIOUS_PUBLIC_KEY_PATH`, `JWT_PREVIOUS_KEY_ID` | İsteğe bağlı; anahtar değişimi sırasında bir önceki public key |
-| `ADMIN_EMAIL`, `ADMIN_PASSWORD` | Sadece ilk admin oluşturulurken kullanılır (`V002_InitialAdmin`) |
+| `ADMIN_EMAIL`, `ADMIN_PASSWORD` | Sadece ilk hesap (süperadmin) oluşturulurken kullanılır (`V002_InitialAdmin`, `V006`; §11.1) |
 | `CORS_ALLOWED_ORIGINS` | Virgülle ayrılmış origin listesi |
 | `COOKIE_SECURE` | dev: `false`, prod: `true` |
 | `FORWARD_HEADERS_STRATEGY` | `none` (varsayılan) ya da proxy arkasındaysa `native` |
@@ -803,7 +838,7 @@ Angular client kendi container'ında nginx ile sunulur ve `/api` isteklerini ser
 3. Mapper interface'i `BaseMapper`'dan türetilir (gövdesi yoktur).
 4. `XxxService extends BaseService`, `XxxServiceImpl extends BaseServiceImpl` olarak yazılır. İş kuralları kancalarda (§4.3) uygulanır.
 5. `XxxMessages` sınıfına modülün anahtarları eklenir.
-6. Controller yazılır; admin'e özelse `@PreAuthorize` eklenir.
+6. Controller yazılır; USER'dan yüksek bir rol gerekiyorsa en düşük gereken rolle `@PreAuthorize` eklenir (§9).
 7. Menü gerekiyorsa `migration/versions` altına yeni bir `Vxxx_...` migration class'ı yazılır (id belirtilmeden).
 8. Unique alan varsa silinmemiş kayıtlara özel unique index de aynı migration class'ında `SoftDeleteUniqueIndex` ile oluşturulur.
 

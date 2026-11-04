@@ -48,6 +48,6 @@ export const sessionFeature = createFeature({
   ),
   extraSelectors: ({ selectStatus, selectUser }) => ({
     selectIsAuthenticated: createSelector(selectStatus, (status) => status === 'authenticated'),
-    selectIsAdmin: createSelector(selectUser, (user) => user?.role === 'ADMIN'),
+    selectRole: createSelector(selectUser, (user) => user?.role ?? null),
   }),
 });

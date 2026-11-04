@@ -11,7 +11,7 @@ import { sessionFeature } from '../../auth/session.state';
 
 /**
  * Menü ağacı backend'den (SessionInfo.menus) gelir; burada sadece çizilir.
- * ADMIN'e özel menüleri backend zaten süzmüş olarak gönderir. Alt menüsü olan düğümler grup olur,
+ * Rolün göremediği menüleri backend zaten süzmüş olarak gönderir. Alt menüsü olan düğümler grup olur,
  * olmayanlar sayfa bağlantısıdır. Ağaç derinliği sınırsızdır (şablon kendini çağırır).
  */
 @Component({

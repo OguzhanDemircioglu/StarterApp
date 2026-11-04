@@ -87,7 +87,7 @@ client/
 │        │     ├─ category-form/       ekleme/düzenleme dialog'u
 │        │     ├─ category-api.ts      HTTP servisi
 │        │     └─ category.model.ts    backend DTO'larının tipleri
-│        └─ administration/            /administration (sadece ADMIN)
+│        └─ administration/            /administration (ADMIN ve SUPERADMIN)
 │           ├─ administration.routes.ts
 │           └─ users/                  /administration/users
 ├─ proxy.conf.json                     dev: /api → http://localhost:8080
@@ -118,9 +118,9 @@ export const routes: Routes = [
     canActivate: [authGuard],
     children: [
       { path: '', data: { title: 'menu_home' }, loadComponent: () => import('./pages/home/home') },
-      { path: 'definitions', data: { title: 'menu_definitions' },
+      { path: 'definitions', data: { title: 'menu_definitions' }, canActivate: [roleGuard('USER')],
         loadChildren: () => import('./pages/definitions/definitions.routes') },
-      { path: 'administration', data: { title: 'menu_administration' }, canActivate: [adminGuard],
+      { path: 'administration', data: { title: 'menu_administration' }, canActivate: [roleGuard('ADMIN')],
         loadChildren: () => import('./pages/administration/administration.routes') },
       { path: 'forbidden', data: { title: 'page_forbidden_title' }, loadComponent: () => import('./shared/pages/forbidden') },
       { path: '**', data: { title: 'page_not_found_title' }, loadComponent: () => import('./shared/pages/not-found') },
@@ -145,7 +145,8 @@ export default [
 - **`data.title`:** Her route'un başlığı bir çeviri anahtarıdır, menüdeki `title_key` ile aynıdır. Sayfa başlığı ve breadcrumb buradan **otomatik** üretilir (`shared/page/breadcrumb.ts`); sayfalarda elle breadcrumb yazılmaz.
 - **Guard'lar** (`core/auth/auth.guards.ts`):
   - `authGuard` **tek yerde**, shell'de durur ve bütün iç sayfaları korur. Giriş yoksa `returnUrl` ile login'e gönderir; girişten sonra o sayfaya dönülür.
-  - `adminGuard` yönetim grubunda durur; yetkisiz kullanıcıyı `/forbidden`'a gönderir.
+  - `roleGuard(rol)` her menü grubunda, grubun **en düşük** rolüyle durur (`definitions` → `USER`, `administration` → `ADMIN`); yetkisiz kullanıcıyı `/forbidden`'a gönderir. Hiyerarşi backend'le aynıdır (`core/auth/roles.ts`: `SUPERADMIN > ADMIN > USER`, `SUPERADMIN > OWNER`); `OWNER` `USER` gruplarına giremez. Anasayfa herkese açıktır.
+  - Rol etiketi (`app-role-tag`), "kim hangi rolü verebilir" (`assignableRoles`) ve "kim kimi yönetebilir" (`canManage`) de `roles.ts`'tedir; kullanıcı ekranı yönetemediği satırların düğmelerini gizler.
   - `guestGuard` login sayfasında durur; giriş yapmış kullanıcıyı anasayfaya gönderir.
   - Guard'lar sadece kullanıcı deneyimi içindir. Asıl güvenlik backend'dedir (`@PreAuthorize`).
 - **Shell'in dışında sadece login vardır.** 404 ve 403 sayfaları da shell içindedir; kullanıcı menüyü kaybetmez.
@@ -317,8 +318,8 @@ Uygulamalarda çok sayıda grafik kullanılacak. Bu yüzden grafikler için tek 
 |---|---|---|
 | Login | `/login` | Herkes |
 | Anasayfa | `/` | Giriş yapmış herkes: karşılama, mock restoran panosu (sekmeli), canlı örnek grafik |
-| Kategoriler (referans CRUD) | `/definitions/categories` | Giriş yapmış herkes |
-| Kullanıcılar | `/administration/users` | ADMIN: liste, ekleme, düzenleme (rol, aktif/pasif), şifre sıfırlama, silme |
+| Kategoriler (referans CRUD) | `/definitions/categories` | USER, ADMIN, SUPERADMIN (OWNER değil) |
+| Kullanıcılar | `/administration/users` | ADMIN: USER'ları ekler, düzenler (aktif/pasif), şifresini sıfırlar, siler. SUPERADMIN: herkesi yönetir, USER/ADMIN/OWNER arasında rol değiştirir |
 | Şifremi değiştir | topbar'dan dialog | Giriş yapmış herkes |
 | 403 / 404 | `/forbidden`, bilinmeyen adresler | |
 
