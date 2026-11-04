@@ -1,0 +1,79 @@
+# StarterApp prod kurulumu: tek sunucu, Docker Compose. Ayrıntı: deploy/README.md
+#   cd deploy && docker compose up -d --build
+# Değerler deploy/.env'den gelir (.env.example'dan kopyalanır). Log toplama eklentisi: compose.observability.yml
+
+# Docker'ın container loglarını dosyada sınırsız biriktirmemesi için: container başına en fazla 5 x 10 MB.
+x-logging: &default-logging
+  driver: json-file
+  options:
+    max-size: "10m"
+    max-file: "5"
+
+services:
+  postgres:
+    image: postgres:18
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      # PostgreSQL 18 ile volume yolu değişti: /var/lib/postgresql/data değil /var/lib/postgresql.
+      - pgdata:/var/lib/postgresql
+    # Port dışarı açılmaz; sadece server compose ağından erişir.
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    logging: *default-logging
+
+  server:
+    build: ../server
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      DB_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB}
+      DB_USERNAME: ${POSTGRES_USER}
+      DB_PASSWORD: ${POSTGRES_PASSWORD}
+      DB_SCHEMA: ${DB_SCHEMA}
+      JWT_KEY_ID: ${JWT_KEY_ID}
+      JWT_PRIVATE_KEY_PATH: /run/secrets/jwt_private_key
+      JWT_PUBLIC_KEY_PATH: /run/secrets/jwt_public_key
+      ADMIN_EMAIL: ${ADMIN_EMAIL}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD}
+      # Client aynı adresten (nginx) geldiği için CORS gerekmez; gerçek istemci IP'si nginx'in X-Forwarded-For'undan.
+      CORS_ALLOWED_ORIGINS: ""
+      FORWARD_HEADERS_STRATEGY: native
+      COOKIE_SECURE: "true"
+    secrets:
+      - jwt_private_key
+      - jwt_public_key
+    # Port dışarı açılmaz; API'ye client'taki nginx üzerinden ulaşılır.
+    # Uygulamanın graceful shutdown süresi 30 saniye (application.yml); Docker bundan önce öldürmesin.
+    stop_grace_period: 40s
+    logging: *default-logging
+
+  client:
+    build: ../client
+    restart: unless-stopped
+    depends_on:
+      server:
+        condition: service_healthy
+    ports:
+      # HTTPS bu container'da değil, önündeki reverse proxy'de sonlanır (README → HTTPS).
+      - "${HTTP_BIND:-127.0.0.1}:${HTTP_PORT:-8080}:80"
+    logging: *default-logging
+
+# Compose (Swarm olmadan) secret'ları dosyadan container'daki /run/secrets/<ad> yoluna bağlar.
+secrets:
+  jwt_private_key:
+    file: ./keys/private.pem
+  jwt_public_key:
+    file: ./keys/public.pem
+
+volumes:
+  pgdata:

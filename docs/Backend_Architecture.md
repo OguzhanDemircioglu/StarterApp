@@ -696,7 +696,9 @@ Swarm'da bu iş her replica'da ayrı ayrı çalışır. Bu zararsızdır, çünk
 - **TraceId:** `TraceIdFilter`, Security filtrelerinden **önce** çalışır. Her istek için 16 karakterlik bir id üretir, bunu MDC'ye ve `X-Trace-Id` response başlığına yazar. Böylece 401 ve 403 cevaplarında da traceId bulunur.
 - `ApiResponse.traceId` değeri MDC'den okunur.
 - **dev profili:** Okunabilir düz metin, konsola. Her satırda thread adından sonra `[traceId]` bulunur (`logging.pattern.correlation`); istek dışındaki satırlarda boş kalır.
-- **prod profili:** Boot'un yerleşik JSON (structured) log formatı, stdout'a. Log dosyası **yazılmaz**: Swarm'da birden fazla replica aynı dosyaya yazamaz. Loglar `docker service logs` ile okunur; Docker log driver'ında boyut ve rotasyon ayarı yapılır.
+- **prod profili:** Boot'un yerleşik JSON (structured) log formatı (`logstash`), stdout'a. Log dosyası **yazılmaz**: birden fazla replica aynı dosyaya yazamaz ve logun nereye gideceği uygulamanın değil, kurulumun işidir.
+- **Logların toplanması uygulamanın dışındadır.** `deploy/compose.yml` Docker'ın `json-file` driver'ını container başına 5 x 10 MB ile sınırlar; loglar `docker compose logs` ile okunur. İsteğe bağlı eklenti `deploy/compose.observability.yml` (Alloy → Loki → Grafana) logları toplar, 30 gün saklar ve `traceId` ile aranabilir yapar. Uygulama hangi sistemin kullanıldığını bilmez; başka bir log sistemine geçmek kod değişikliği gerektirmez. Ayrı bir "logger servisi" yazılmaz.
+- Audit kayıtları ve kullanım istatistikleri (Security_Roadmap §4.2, §4.11) log değildir; DB'de tutulur.
 - Log zamanları `Europe/Istanbul` saat dilimiyle yazılır.
 - Şifreler, token'lar ve cookie değerleri **loglanmaz**.
 
@@ -719,7 +721,7 @@ Dosyalar: `application.yml` (ortak), `application-dev.yml`, `application-prod.ym
 | `FORWARD_HEADERS_STRATEGY` | `none` (varsayılan) ya da proxy arkasındaysa `native` |
 | `TZ` | `Europe/Istanbul` |
 
-- Kodda ve repoda secret **bulunmaz**. Repoda değişkenleri listeleyen bir `.env.example` dosyası durur.
+- Kodda ve repoda secret **bulunmaz**. Repoda değişkenleri listeleyen bir `.env.example` dosyası durur: `server/.env.example` uygulamanın bütün değişkenlerini, `deploy/.env.example` Docker Compose kurulumunun ayarlarını listeler (compose bunlardan server'ın değişkenlerini kurar, §16.1).
 - Lokal geliştirmede değerler `server/.env` dosyasına yazılır (git'e girmez). Bu dosya **sadece dev profilinde** okunur
   (`spring.config.import: optional:file:.env[.properties]`, `application-dev.yml`); testler ve prod onu kullanmaz.
   Profil `.env`'den seçilemez; çalıştırma ayarından verilir.
@@ -727,7 +729,7 @@ Dosyalar: `application.yml` (ortak), `application-dev.yml`, `application-prod.ym
 
 ---
 
-## 16. Docker ve Swarm hazırlığı
+## 16. Docker ve deploy
 
 - **Dockerfile:**
   - Multi-stage: build aşamasında `maven:3.9-eclipse-temurin-25`, çalışma aşamasında `eclipse-temurin:25-jre` imajı.
@@ -737,7 +739,31 @@ Dosyalar: `application.yml` (ortak), `application-dev.yml`, `application-prod.ym
 - **Graceful shutdown:** Boot'ta varsayılan olarak açıktır. `spring.lifecycle.timeout-per-shutdown-phase=30s` ayarlanır; Swarm'daki `stop_grace_period` bundan uzun olmalıdır.
 - **Geliştirme ortamı:** Repo kökündeki `docker-compose.yml`'de `app` profili server'ı ve client'ı çalıştırır. Server, admin bilgilerini ve varsa `DB_URL`'i IDE'den çalıştırmayla aynı `server/.env` dosyasından (`env_file`) alır; `DB_URL` yoksa H2'yi `h2data` volume'ünde tutar (§10.6). İsteğe bağlı yerel PostgreSQL 18 `db` profilindedir; PostgreSQL 18'de volume `/var/lib/postgresql` yoluna bağlanır.
 
-**Stateless kontrol listesi** (Swarm'da her replica eşit olmalı):
+### 16.1 Prod kurulumu (`deploy/`)
+
+Template'in varsayılan kurulumu **tek sunucu + Docker Compose**'tur. Kurulum adımları, HTTPS, güncelleme, yedekleme ve
+loglar: `deploy/README.md`.
+
+- `deploy/compose.yml`: `postgres` (18), `server` (`prod` profili), `client` (nginx). Ayarlar `deploy/.env`'den gelir
+  (`deploy/.env.example`); `DB_URL` compose'da postgres servisine göre kurulur.
+- Sadece client'ın portu yayınlanır, varsayılan olarak `127.0.0.1:8080`'e. PostgreSQL ve server dışarı açılmaz.
+- **HTTPS** compose'un içinde değil, sunucudaki reverse proxy'de (Caddy, nginx...) sonlanır. `COOKIE_SECURE=true`
+  olduğu için HTTPS olmadan giriş yapılamaz.
+- JWT anahtarları Compose `secrets` ile `deploy/keys/`'ten `/run/secrets/...`'e bağlanır; Swarm'a geçilirse aynı yollar
+  Docker secret ile kullanılır.
+- `stop_grace_period: 40s`: uygulamanın 30 saniyelik graceful shutdown süresinden uzun.
+- **Boyut ayarı yapılmaz.** JVM belleği container limitine göre ayarlanır (`MaxRAMPercentage`), HikariCP'nin varsayılan
+  havuzu (10) orta ölçeğe kadar yeter. Büyük bir projede gereken birkaç değer o projede değiştirilir; template'e
+  kapasiteye göre parametre eklenmez.
+- Tek instance olduğu için güncellemede server yeniden açılırken kısa bir kesinti olur. Kesintisiz güncelleme ya da
+  yatay ölçekleme gerekirse Swarm'a (ya da birden fazla replica'ya) geçilir; uygulama buna hazırdır (aşağıdaki liste).
+
+### 16.2 Birden fazla replica hazırlığı
+
+Uygulama tek sunucuda çalışsa da birden fazla replica ile (Swarm) çalışabilecek şekilde yazılır. Bu bölümdeki ve
+§10, §13'teki "Swarm" notları o durum içindir.
+
+**Stateless kontrol listesi** (her replica eşit olmalı):
 
 | Konu | Durum |
 |---|---|
@@ -748,10 +774,11 @@ Dosyalar: `application.yml` (ortak), `application-dev.yml`, `application-prod.ym
 | Data migration | Advisory lock altında |
 | Loglar | stdout |
 
-**Docker aşamasına bırakılanlar:**
-- HTTPS (Swarm'da genelde önüne Traefik gibi bir reverse proxy konur).
+**Swarm'a geçilirse ayrıca yapılacaklar:**
+- HTTPS için önüne Traefik gibi bir reverse proxy konur.
 - Gerçek IP'nin korunması (`mode: host`, §13).
-- Angular client kendi container'ında nginx ile sunulur ve `/api` isteklerini server'a iletir (Frontend_Architecture.md §14). Bu yüzden compose'da server'a `FORWARD_HEADERS_STRATEGY=native` verilir ve CORS kapalıdır.
+
+Angular client kendi container'ında nginx ile sunulur ve `/api` isteklerini server'a iletir (Frontend_Architecture.md §14). Bu yüzden compose'da server'a `FORWARD_HEADERS_STRATEGY=native` verilir ve CORS kapalıdır.
 
 ---
 

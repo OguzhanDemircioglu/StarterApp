@@ -331,8 +331,10 @@ Uygulamalarda çok sayıda grafik kullanılacak. Bu yüzden grafikler için tek 
   - Bilinmeyen yollar `index.html`'e düşer; böylece `/definitions/categories` sayfasında F5'e basınca 404 alınmaz.
   - `/api/` istekleri `server:8080` adresine yönlendirilir. Tarayıcı frontend ve backend'i aynı adreste görür: CORS gerekmez, `SameSite=Strict` cookie sorunsuz çalışır.
   - Gerçek istemci IP'si `X-Forwarded-For` ile iletilir. Compose'da server'a `FORWARD_HEADERS_STRATEGY=native` verilir; brute-force anahtarı (`IP_email`) doğru IP'yi kullanır.
+  - `X-Forwarded-Proto`: önde HTTPS yapan bir reverse proxy varsa onun gönderdiği değer (`https`) korunur, yoksa nginx'in kendi bağlantısının protokolü yazılır.
   - Hash'li JS ve CSS dosyaları 1 yıl önbelleğe alınır; `index.html` ve çeviri dosyaları alınmaz.
 - Repo kökündeki `docker-compose.yml`'deki `client` servisi `app` profilindedir: `docker compose --profile app up -d` → `http://localhost:4200`.
+- Prod'da aynı imaj `deploy/compose.yml` ile çalışır; HTTPS önündeki reverse proxy'de sonlanır (Backend_Architecture §16, `deploy/README.md`).
 
 ---
 

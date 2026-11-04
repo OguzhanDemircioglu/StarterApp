@@ -1,0 +1,68 @@
+# İsteğe bağlı log toplama: Alloy container loglarını okur, Loki saklar, Grafana gösterir. Ayrıntı: deploy/README.md
+# Açmak için deploy/.env'de: COMPOSE_FILE=compose.yml:compose.observability.yml
+# Uygulama bu eklentiden habersizdir: loglarını her zamanki gibi stdout'a yazar.
+
+x-logging: &default-logging
+  driver: json-file
+  options:
+    max-size: "10m"
+    max-file: "5"
+
+services:
+  # Logları toplanacak servisler bu etiketle işaretlenir; Alloy sadece etiketli container'lara bakar.
+  postgres:
+    labels:
+      logs.collect: "true"
+  server:
+    labels:
+      logs.collect: "true"
+  client:
+    labels:
+      logs.collect: "true"
+
+  loki:
+    image: grafana/loki:3.5.0
+    restart: unless-stopped
+    command: ["-config.file=/etc/loki/loki.yml", "-config.expand-env=true"]
+    environment:
+      LOG_RETENTION: ${LOG_RETENTION:-720h}
+    volumes:
+      - ./observability/loki.yml:/etc/loki/loki.yml:ro
+      - lokidata:/loki
+    logging: *default-logging
+
+  alloy:
+    image: grafana/alloy:v1.10.0
+    restart: unless-stopped
+    command: ["run", "/etc/alloy/config.alloy", "--storage.path=/var/lib/alloy/data"]
+    volumes:
+      - ./observability/config.alloy:/etc/alloy/config.alloy:ro
+      # Container loglarını Docker API'sinden okumak için. Salt okunur bağlanır.
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - alloydata:/var/lib/alloy/data
+    depends_on:
+      - loki
+    logging: *default-logging
+
+  grafana:
+    image: grafana/grafana:12.1.0
+    restart: unless-stopped
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:?GRAFANA_ADMIN_PASSWORD deploy/.env'de verilmeli}
+      GF_USERS_ALLOW_SIGN_UP: "false"
+      GF_ANALYTICS_REPORTING_ENABLED: "false"
+      GF_ANALYTICS_CHECK_FOR_UPDATES: "false"
+    volumes:
+      - ./observability/grafana-datasources.yml:/etc/grafana/provisioning/datasources/datasources.yml:ro
+      - grafanadata:/var/lib/grafana
+    ports:
+      # Sadece sunucunun kendisinden: SSH tüneliyle açılır (README → Loglar).
+      - "127.0.0.1:3000:3000"
+    depends_on:
+      - loki
+    logging: *default-logging
+
+volumes:
+  lokidata:
+  alloydata:
+  grafanadata:

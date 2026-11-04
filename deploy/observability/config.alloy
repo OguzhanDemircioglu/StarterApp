@@ -1,0 +1,49 @@
+// Sadece "logs.collect=true" etiketli container'ların loglarını okur ve Loki'ye gönderir.
+// Etiketler (label) az tutulur: service ve level. traceId log içeriğinde kalır, Grafana'da şöyle aranır:
+//   {service="server"} | json | traceId="..."
+
+discovery.docker "app" {
+  host = "unix:///var/run/docker.sock"
+
+  filter {
+    name   = "label"
+    values = ["logs.collect=true"]
+  }
+}
+
+discovery.relabel "app" {
+  targets = []
+
+  // Compose servis adı (server, client, postgres) → service etiketi
+  rule {
+    source_labels = ["__meta_docker_container_label_com_docker_compose_service"]
+    target_label  = "service"
+  }
+}
+
+loki.source.docker "app" {
+  host          = "unix:///var/run/docker.sock"
+  targets       = discovery.docker.app.targets
+  relabel_rules = discovery.relabel.app.rules
+  forward_to    = [loki.process.app.receiver]
+}
+
+// Server'ın prod logları JSON (logstash formatı); seviye alanı etikete çevrilir.
+// JSON olmayan satırlar (nginx, PostgreSQL) olduğu gibi geçer.
+loki.process "app" {
+  stage.json {
+    expressions = { level = "level" }
+  }
+
+  stage.labels {
+    values = { level = "" }
+  }
+
+  forward_to = [loki.write.default.receiver]
+}
+
+loki.write "default" {
+  endpoint {
+    url = "http://loki:3100/loki/api/v1/push"
+  }
+}

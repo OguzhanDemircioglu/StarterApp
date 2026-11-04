@@ -11,6 +11,7 @@ Yeni bir projeye bu repo kopyalanarak başlanır.
 | [docs/Frontend_Architecture.md](docs/Frontend_Architecture.md) | Frontend'in bağlayıcı kuralları ve tasarım kararları |
 | [docs/Security_Roadmap.md](docs/Security_Roadmap.md) | Taslak: süperadmin rolü, audit, 2FA ve güvenlik sertleştirme yol haritası (henüz uygulanmadı) |
 | [docker-compose.yml](docker-compose.yml) | Geliştirme ortamı: server ve client (varsayılan veritabanı H2; `server/.env`'de `DB_URL` verilirse oraya bağlanır); isteğe bağlı yerel PostgreSQL 18 |
+| [deploy/](deploy/README.md) | Prod kurulumu: tek sunucu, Docker Compose (PostgreSQL + server + client); isteğe bağlı log toplama (Loki + Grafana) |
 
 ## Hızlı başlangıç
 
@@ -29,6 +30,7 @@ Yeni bir projeye bu repo kopyalanarak başlanır.
      `--profile app` için `server/.env` ve `server/keys/` hazır olmalıdır. Server, admin bilgilerini ve varsa `DB_URL`'i
      `server/.env`'den alır. `DB_URL` yoksa H2'yi `h2data` volume'ünde tutar; bu veri IDE'den çalıştırmanın
      `server/data/` klasöründen ayrıdır.
+3. **Sunucuya kur:** [deploy/README.md](deploy/README.md).
 
 ## Gereksinimler
 

@@ -31,3 +31,7 @@ replay_pid*
 # İşletim sistemi dosyaları
 .DS_Store
 Thumbs.db
+
+# Prod kurulumu: sunucudaki ayarlar ve JWT anahtarları
+deploy/.env
+deploy/keys/

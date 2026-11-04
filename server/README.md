@@ -105,7 +105,8 @@ Admin bilgileri ve varsa `DB_URL` `server/.env`'den okunur (bkz. "İlk kurulum")
 
 Sadece server imajı için (`server/` klasöründe): `docker build -t starterapp-server .`
 
-Prod'da gereken değişkenlerin listesi [.env.example](.env.example) dosyasındadır.
+Prod'da gereken değişkenlerin listesi [.env.example](.env.example) dosyasındadır. Sunucuya Docker Compose ile kurulum
+için: [deploy/README.md](../deploy/README.md) (orada değişkenler `deploy/.env`'den kurulur).
 
 ## Yeni modül ekleme
 
