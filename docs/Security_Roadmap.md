@@ -1,7 +1,6 @@
 # Güvenlik ve Süperadmin Yol Haritası
 
-> **Durum (2026-11-04):** Taslak. Hiçbir madde uygulanmadı. Rol yapısı, TOTP politikası ve sahip rolü kararlaştırıldı
-> (§6.1); başlamadan önce §6.2'deki açık kararlar netleşmelidir.
+> **Durum (2026-11-04):** Bütün kararlar verildi (§6), uygulama Faz 1 ile başlıyor. Henüz hiçbir madde uygulanmadı.
 > Kararlar verildikçe bu dosya güncellenir; uygulanan maddeler `Backend_Architecture.md` ve `Frontend_Architecture.md`'ye taşınır.
 
 ## 1. Amaç
@@ -57,6 +56,7 @@ istatistikleri (§4.11, §4.12) PetStockPro'da yoktur, bu projeye özgüdür.
 
 ### 4.2 Audit log (süperadminin "adminin yaptığını görme ve geri alma" temeli)
 
+- Hibernate Envers değil, kendi tablomuz (`audit_logs`) kullanılır (§6.1).
 - Tablo: kim (`user_id`, `session_id`), ne zaman, işlem (`action`), varlık (`entity_type`, `entity_id`),
   `before_state` / `after_state` (JSON), `reason`, `ip`, `user_agent`, `trace_id`.
 - Değiştirilemez: süperadmin dahil kimse UPDATE/DELETE yapamaz.
@@ -102,8 +102,16 @@ Telefondaki authenticator uygulamalarının (Google/Microsoft Authenticator, Aut
 
 ### 4.5 Oturum sertleştirme
 
-- Rol başına süre: `USER` bugünkü gibi 90 gün; `ADMIN`, `OWNER` ve `SUPERADMIN` için kısa (PetStockPro: süperadmin 8 saat,
-  30 dakika boşta kalınca biter). Kesin değerler karar verilirken yazılır.
+- Rol başına süre (refresh token / oturum ömrü):
+
+  | Rol | Toplam süre | Boşta kalınca biter |
+  |---|---|---|
+  | `USER` | 90 gün (bugünkü gibi) | Hayır |
+  | `OWNER` | 7 gün | Hayır |
+  | `ADMIN` | 12 saat | 1 saat |
+  | `SUPERADMIN` | 8 saat | 30 dakika |
+
+  "Boşta" = son refresh'ten bu yana geçen süre. Sahip salt okunur olduğu için süresi uzundur.
 - Yetkili isteklerde her istekte oturumun iptal edilip edilmediği kontrol edilir (`sid` → `user_sessions`).
   Bugün kabul edilen "rolü değişen kullanıcının token'ı 15 dakika daha geçerli" sınırı adminler için kapanır.
 - Rol değişince (ör. `USER` → `OWNER`) kullanıcının oturumları iptal edilir; yeni rol yeni girişte gelir.
@@ -162,7 +170,7 @@ Bugün böyle bir veri toplanmıyor; audit log yalnızca yönetim işlemlerini t
   elemanlarla sınırlıdır (ör. bir directive ile olay adı verilir); her tıklama toplanmaz.
 - Ham olay tablosu: olay tipi, olay adı / sayfa yolu, zaman, rol, oturum kimliği. `user_id` ve IP **tutulmaz**;
   günlük tekil kullanıcı sayısı için kullanıcı kimliğinin günlük değişen tuzla hash'i yeterlidir.
-- Ham olaylar kısa süre saklanır (ör. 30-90 gün), süreli temizlik işi bunları günlük özet tablolara toplayıp siler.
+- Ham olaylar 90 gün saklanır, süreli temizlik işi bunları günlük özet tablolara toplayıp siler.
   Panel özet tablolardan okur.
 - Audit'ten farkı: değiştirilemez olması gerekmez, silinebilir; güvenlik kaydı değil, ürün istatistiğidir.
 - KVKK: kişi bazında veri sunulmadığı için sahip paneli kişisel veri işlemez; gizlilik metnine kullanım istatistiği
@@ -201,16 +209,17 @@ Bugün böyle bir veri toplanmıyor; audit log yalnızca yönetim işlemlerini t
    `ADMIN`'in üstünde değil, yanında durur (§4.1).
 4. **Sahip hesabı** normal kayıtla açılır, süperadmin rolünü değiştirir.
 
+5. **Audit için kendi tablomuz**, Hibernate Envers değil. Envers `reason`, `ip`, `trace_id`, hash zinciri gibi alanları
+   doğal taşımaz; auth olayları entity değişikliği olmadığı için yine ayrı tablo gerekirdi (iki audit sistemi);
+   `@SoftDelete` uyumu belirsiz; geri alma servis üzerinden yapılacağı için `before_state` JSON'u yeterli.
+6. **E-posta Faz 4'e ertelenir.** O zamana kadar hesap kilidini yalnızca süperadmin açar.
+7. **Birden fazla sahip olabilir**; sınır yok (rol salt okunur).
+8. **Ham kullanım olayları 90 gün** saklanır; günlük özetler süresiz.
+9. **Oturum süreleri** §4.5'teki tablodaki gibidir.
+
 ### 6.2 Açık kararlar
 
-1. **Audit nasıl tutulsun?** Hibernate Envers ya da kendi tablomuz. Öneri: kendi tablomuz. Envers `reason`, `ip`,
-   `trace_id`, hash zinciri gibi alanları doğal taşımaz; auth olayları entity değişikliği olmadığı için yine ayrı tablo
-   gerekir (iki audit sistemi olur); `@SoftDelete` uyumu belirsiz; geri alma servis üzerinden yapılacağı için
-   `before_state` JSON'u yeterli.
-2. **E-posta gönderimi kurulsun mu?** §4.10 buna bağlı. Öneri: Faz 4'e kadar ertelenir; o zamana kadar kilidi yalnızca
-   süperadmin açar.
-3. **Birden fazla sahip olabilir mi?** Öneri: evet, sınır gerekmez (rol salt okunur).
-4. **Kullanım istatistiği saklama süresi:** ham olaylar kaç gün tutulsun? (Öneri: 90 gün; özetler süresiz.)
+Yok.
 
 ## 7. Uygulama sırası
 
