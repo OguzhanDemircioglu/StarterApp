@@ -1,13 +1,8 @@
 /**
- * Mezun Portalı için geçici veriler. Backend uçları yazıldığında bu dosya bir API servisi ve
+ * Mezun Portalı sayfalarının ORTAK geçici verileri (birden fazla sayfada kullanılanlar). Sayfaya özel veriler
+ * o sayfanın klasöründeki *.mock.ts dosyasındadır. Backend uçları yazıldığında bunlar bir API servisi ve
  * model dosyasıyla değiştirilecek; ekranlar sadece buradaki tiplere bağlıdır.
  */
-
-export interface PortalMenuItem {
-  label: string;
-  icon: string;
-  route: string;
-}
 
 export interface ContactInfo {
   icon: string;
@@ -51,19 +46,6 @@ export interface GraduateProfile {
   experiences: Experience[];
   educations: Education[];
 }
-
-/** Sol menü. Sırası ve adları tasarımdaki gibidir. */
-export const PORTAL_MENU: PortalMenuItem[] = [
-  { label: 'Ana Sayfa', icon: 'home', route: 'home' },
-  { label: 'Profilim', icon: 'user', route: 'profile' },
-  { label: 'Hizmetler', icon: 'profile', route: 'services' },
-  { label: 'Staj / Kariyer', icon: 'solution', route: 'career' },
-  { label: 'Etkinlikler', icon: 'calendar', route: 'events' },
-  { label: 'Duyurular', icon: 'notification', route: 'announcements' },
-  { label: 'Mesajlar', icon: 'mail', route: 'messages' },
-  { label: 'Ayarlar', icon: 'setting', route: 'settings' },
-  { label: 'Yardım', icon: 'question-circle', route: 'help' },
-];
 
 /** Üst menü: kurumsal sitenin bağlantıları. Şimdilik bir yere gitmez; "Dijital Platform" bu portaldır. */
 export const SITE_LINKS = ['Ana Sayfa', 'Kurumlar', 'Hizmetler', 'Duyurular', 'Dijital Platform', 'İletişim'];
@@ -127,4 +109,70 @@ export const INSTITUTIONS: Institution[] = [
   { name: 'Diyanet İşleri Başkanlığı', emblem: 'ministry' },
   { name: 'Yükseköğretim Kurulu (YÖK)', emblem: 'ministry' },
   { name: 'Türkiye Maarif Vakfı', emblem: 'ministry' },
+];
+
+/** Dijital kimlik: mezunun Mezun Kartı. */
+export interface GraduateCard {
+  cardNo: string;
+  holder: string;
+  nationality: string;
+  degree: string;
+  group: 1 | 2 | 3;
+  issuedAt: string;
+  validUntil: string;
+  status: 'Aktif' | 'Askıda' | 'Süresi doldu';
+}
+
+export const MOCK_CARD: GraduateCard = {
+  cardNo: 'MK-2024-000184',
+  holder: 'Jennet Hojamova',
+  nationality: 'Türkmenistan',
+  degree: 'Lisans – Gazi Üniversitesi',
+  group: 2,
+  issuedAt: '15.09.2024',
+  validUntil: '15.09.2026',
+  status: 'Aktif',
+};
+
+/** Mezun Kartının sağlayacağı haklar (sunum: "Mezun Kartının Sağlayacağı Haklar"). */
+export interface RightGroup {
+  group: 1 | 2 | 3;
+  who: string[];
+  rights: string[];
+}
+
+export const RIGHT_GROUPS: RightGroup[] = [
+  {
+    group: 1,
+    who: ['Ön Lisans'],
+    rights: [
+      'Mezuniyet sonrası 2 yıl ikamet',
+      'Staj imkânı',
+      'Çok girişli vize (2 yıl) ve e-vize imkânı',
+      'Aile üyelerine de kolaylık sağlanması (vize/ikamet)',
+    ],
+  },
+  {
+    group: 2,
+    who: ['Lisans', 'Yüksek Lisans', 'UA Lise Mezunları'],
+    rights: [
+      'Mezuniyet sonrası 2 yıl ikamet',
+      'Staj imkânı',
+      'Çok girişli vize (5 yıl)',
+      'Çalışma izni kriterlerinde istisna sağlanması',
+      'Aile üyelerine de kolaylık sağlanması (vize/ikamet)',
+    ],
+  },
+  {
+    group: 3,
+    who: ['YTB, YÖK Bursluları', 'Doktora Mezunları', 'Lisans veya Yüksek Lisans düzeyinde derece ile mezunlar'],
+    rights: [
+      'Mezuniyet sonrası 2 yıl ikamet',
+      'Staj imkânı',
+      'Çok girişli vize (5 yıl)',
+      'Çalışma izni kriterlerinde istisna sağlanması',
+      'Aile üyelerine de kolaylık sağlanması (vize/ikamet)',
+      'Uzun dönem ikamet izinlerinde kolaylık sağlanması',
+    ],
+  },
 ];

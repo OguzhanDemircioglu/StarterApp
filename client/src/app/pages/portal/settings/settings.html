@@ -1,0 +1,189 @@
+<div class="layout">
+  <nav class="card side-nav">
+    @for (s of sections; track s.key) {
+      <button class="side-item" [class.active]="section() === s.key" (click)="section.set(s.key)">
+        <nz-icon [nzType]="s.icon" /> {{ s.label }}
+      </button>
+    }
+  </nav>
+
+  <section class="card panel">
+    @switch (section()) {
+      @case ('account') {
+        <header class="card-head">
+          <div>
+            <h2>Hesap Bilgileri</h2>
+            <p>Profilinizde ve kurumlarla paylaşılan temel bilgiler</p>
+          </div>
+        </header>
+        <div class="form">
+          <label>
+            <span>Ad Soyad</span>
+            <input nz-input [(ngModel)]="account.fullName" />
+          </label>
+          <label>
+            <span>E-posta</span>
+            <input nz-input type="email" [(ngModel)]="account.email" />
+          </label>
+          <label>
+            <span>Telefon</span>
+            <input nz-input [(ngModel)]="account.phone" />
+          </label>
+          <label>
+            <span>Uyruk</span>
+            <nz-select [(ngModel)]="account.nationality">
+              @for (n of nationalities; track n) {
+                <nz-option [nzValue]="n" [nzLabel]="n" />
+              }
+            </nz-select>
+          </label>
+          <label>
+            <span>Şehir</span>
+            <input nz-input [(ngModel)]="account.city" />
+          </label>
+          <label class="wide">
+            <span>Kısa tanıtım</span>
+            <textarea nz-input rows="4" [(ngModel)]="account.bio"></textarea>
+          </label>
+        </div>
+        <footer class="panel-foot">
+          <button class="btn btn-primary" (click)="save()">Kaydet</button>
+        </footer>
+      }
+
+      @case ('security') {
+        <header class="card-head">
+          <div>
+            <h2>Güvenlik</h2>
+            <p>Şifre, iki adımlı doğrulama ve açık oturumlar</p>
+          </div>
+        </header>
+        <ul class="rows settings-rows">
+          <li>
+            <div>
+              <strong>Şifre</strong>
+              <p class="muted">Hesabınızın şifresini değiştirin</p>
+            </div>
+            <button class="btn" (click)="changePasswordOpen.set(true)"><nz-icon nzType="key" /> Şifre değiştir</button>
+          </li>
+          <li>
+            <div>
+              <strong>İki adımlı doğrulama</strong>
+              <p class="muted">Girişte telefonunuza gönderilen kod istenir</p>
+            </div>
+            <nz-switch [(ngModel)]="twoFactor" />
+          </li>
+        </ul>
+
+        <h3 class="sub">Açık oturumlar</h3>
+        <ul class="rows">
+          @for (s of sessions; track s.device) {
+            <li class="session">
+              <span class="bubble"><nz-icon [nzType]="s.icon" /></span>
+              <div>
+                <strong>{{ s.device }}</strong>
+                <p class="muted">{{ s.place }} · {{ s.time }}</p>
+              </div>
+              @if (s.current) {
+                <span class="tag tag-green">Bu cihaz</span>
+              } @else {
+                <button class="btn btn-sm">Oturumu kapat</button>
+              }
+            </li>
+          }
+        </ul>
+      }
+
+      @case ('notifications') {
+        <header class="card-head">
+          <div>
+            <h2>Bildirimler</h2>
+            <p>Hangi bildirimleri hangi kanaldan almak istediğinizi seçin</p>
+          </div>
+        </header>
+        <div class="notif">
+          <div class="notif-head">
+            <span></span>
+            <span>E-posta</span>
+            <span>SMS</span>
+            <span>Uygulama</span>
+          </div>
+          @for (n of notifications; track n.label) {
+            <div class="notif-row">
+              <div>
+                <strong>{{ n.label }}</strong>
+                <p class="muted">{{ n.hint }}</p>
+              </div>
+              <nz-switch nzSize="small" [(ngModel)]="n.email" />
+              <nz-switch nzSize="small" [(ngModel)]="n.sms" />
+              <nz-switch nzSize="small" [(ngModel)]="n.app" />
+            </div>
+          }
+        </div>
+        <footer class="panel-foot">
+          <button class="btn btn-primary" (click)="save()">Kaydet</button>
+        </footer>
+      }
+
+      @case ('privacy') {
+        <header class="card-head">
+          <div>
+            <h2>Gizlilik</h2>
+            <p>Profilinizi kimlerin görebileceğini belirleyin</p>
+          </div>
+        </header>
+        <h3 class="sub">Profil görünürlüğü</h3>
+        <nz-radio-group [(ngModel)]="visibility" class="visibility">
+          <label nz-radio nzValue="public">
+            <strong>Herkese açık</strong>
+            <span class="muted">Portaldaki tüm mezunlar ve kurumlar</span>
+          </label>
+          <label nz-radio nzValue="graduates">
+            <strong>Sadece bağlantılarım ve kurumlar</strong>
+            <span class="muted">Önerilen ayar</span>
+          </label>
+          <label nz-radio nzValue="institutions">
+            <strong>Sadece kurumlar</strong>
+            <span class="muted">Diğer mezunlar profilinizi göremez</span>
+          </label>
+        </nz-radio-group>
+
+        <ul class="rows settings-rows">
+          <li>
+            <div>
+              <strong>E-posta adresimi göster</strong>
+              <p class="muted">Profilinizdeki iletişim bilgilerinde görünür</p>
+            </div>
+            <nz-switch [(ngModel)]="showEmail" />
+          </li>
+          <li>
+            <div>
+              <strong>Telefon numaramı göster</strong>
+              <p class="muted">Sadece bağlantılarınız görebilir</p>
+            </div>
+            <nz-switch [(ngModel)]="showPhone" />
+          </li>
+          <li>
+            <div>
+              <strong>İş fırsatlarına açığım</strong>
+              <p class="muted">İşverenler sizi aramalarda görebilir</p>
+            </div>
+            <nz-switch [(ngModel)]="openToWork" />
+          </li>
+          <li>
+            <div>
+              <strong>Kişisel verilerim (KVKK)</strong>
+              <p class="muted">Portalda tutulan verilerinizin bir kopyasını isteyin</p>
+            </div>
+            <button class="btn"><nz-icon nzType="download" /> Verilerimi indir</button>
+          </li>
+        </ul>
+        <footer class="panel-foot">
+          <button class="btn btn-primary" (click)="save()">Kaydet</button>
+        </footer>
+      }
+    }
+  </section>
+</div>
+
+<app-change-password [(open)]="changePasswordOpen" />

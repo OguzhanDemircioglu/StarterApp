@@ -1,0 +1,76 @@
+<section class="card chat" [class.has-active]="active() !== null">
+  <aside class="list">
+    <div class="list-head">
+      <nz-input-wrapper>
+        <nz-icon nzInputPrefix nzType="search" />
+        <input nz-input placeholder="Kişi ara" [ngModel]="query()" (ngModelChange)="query.set($event)" />
+      </nz-input-wrapper>
+    </div>
+    <ul>
+      @for (c of visible(); track c.id) {
+        <li>
+          <button class="conv" [class.active]="c.id === activeId()" (click)="open(c.id)">
+            <span class="avatar-wrap">
+              <span class="avatar" [class.institution]="c.institution" [style.--avatar-bg]="c.color">{{ c.initials }}</span>
+              @if (c.online) {
+                <span class="online"></span>
+              }
+            </span>
+            <span class="conv-body">
+              <span class="conv-top">
+                <strong>{{ c.name }}</strong>
+                <span class="muted">{{ c.lastTime }}</span>
+              </span>
+              <span class="conv-bottom">
+                <span class="preview" [class.unread]="c.unread > 0">{{ lastMessage(c) }}</span>
+                @if (c.unread > 0) {
+                  <span class="badge">{{ c.unread }}</span>
+                }
+              </span>
+            </span>
+          </button>
+        </li>
+      } @empty {
+        <li class="empty">Kişi bulunamadı.</li>
+      }
+    </ul>
+  </aside>
+
+  <div class="conversation">
+    @if (active(); as c) {
+      <header class="conv-header">
+        <button class="back" aria-label="Konuşmalara dön" (click)="back()"><nz-icon nzType="left" /></button>
+        <span class="avatar" [class.institution]="c.institution" [style.--avatar-bg]="c.color">{{ c.initials }}</span>
+        <div>
+          <strong>{{ c.name }}</strong>
+          <p class="muted">{{ c.online ? 'Çevrimiçi' : c.subtitle }}</p>
+        </div>
+        <button class="btn btn-ghost more" aria-label="Diğer"><nz-icon nzType="more" /></button>
+      </header>
+
+      <div class="thread" #thread>
+        @for (m of c.messages; track $index) {
+          <div class="msg" [class.mine]="m.mine">
+            <p>{{ m.text }}</p>
+            <span>{{ m.time }}</span>
+          </div>
+        }
+      </div>
+
+      <footer class="composer">
+        <button class="btn btn-ghost" aria-label="Dosya ekle"><nz-icon nzType="paper-clip" /></button>
+        <input
+          placeholder="Mesaj yazın…"
+          [ngModel]="draft()"
+          (ngModelChange)="draft.set($event)"
+          (keydown.enter)="send()"
+        />
+        <button class="btn btn-primary" [disabled]="!draft().trim()" (click)="send()">
+          <nz-icon nzType="send" /> Gönder
+        </button>
+      </footer>
+    } @else {
+      <div class="empty select">Bir konuşma seçin.</div>
+    }
+  </div>
+</section>

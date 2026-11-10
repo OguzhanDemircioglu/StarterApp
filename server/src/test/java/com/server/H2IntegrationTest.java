@@ -56,7 +56,7 @@ class H2IntegrationTest {
     @Test
     void migrationsAreApplied() {
         List<Integer> versions = jdbc.queryForList("SELECT version FROM data_migration_history ORDER BY version", Integer.class);
-        assertThat(versions).containsExactly(1, 2, 3, 4, 5);
+        assertThat(versions).containsExactly(1, 2, 3, 4, 5, 6);
     }
 
     @Test

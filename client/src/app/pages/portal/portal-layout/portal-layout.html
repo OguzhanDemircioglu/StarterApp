@@ -54,10 +54,12 @@
       <strong>Mezun Portalı</strong>
     </div>
     <nav>
-      @for (item of menu; track item.route) {
+      @for (item of menu(); track item.id) {
         <a class="nav-item" [routerLink]="item.route" routerLinkActive="active">
-          <nz-icon [nzType]="item.icon" />
-          <span>{{ item.label }}</span>
+          @if (item.icon) {
+            <nz-icon [nzType]="item.icon" />
+          }
+          <span>{{ item.titleKey | translate }}</span>
         </a>
       }
     </nav>
@@ -77,6 +79,12 @@
         />
       </svg>
     </div>
+    @if (titleKey(); as key) {
+      <div class="page-title">
+        <span class="crumb">{{ 'menu_portal' | translate }} <nz-icon nzType="right" /> {{ key | translate }}</span>
+        <h1>{{ key | translate }}</h1>
+      </div>
+    }
     <router-outlet />
   </main>
 </div>

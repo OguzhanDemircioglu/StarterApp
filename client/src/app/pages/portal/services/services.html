@@ -1,0 +1,127 @@
+<div class="top">
+  <section class="card my-card">
+    <header class="card-head">
+      <div>
+        <h2>Mezun Kartım</h2>
+        <p>Dijital kimliğiniz; kurumlarda karekod ile doğrulanır.</p>
+      </div>
+      <span class="tag tag-green"><nz-icon nzType="check-circle" /> {{ card.status }}</span>
+    </header>
+    <app-graduate-card [card]="card" />
+    <dl class="card-facts">
+      <div><dt>Veriliş</dt><dd>{{ card.issuedAt }}</dd></div>
+      <div><dt>Geçerlilik</dt><dd>{{ card.validUntil }}</dd></div>
+      <div><dt>Grup</dt><dd>Grup {{ card.group }}</dd></div>
+    </dl>
+    <div class="card-actions">
+      <button class="btn"><nz-icon nzType="download" /> PDF indir</button>
+      <button class="btn"><nz-icon nzType="qrcode" /> Doğrulama kodu</button>
+    </div>
+  </section>
+
+  <section class="card">
+    <header class="card-head">
+      <div>
+        <h2>Haklarınız</h2>
+        <p>Grup {{ card.group }} kart sahibi olarak yararlanabileceğiniz haklar</p>
+      </div>
+    </header>
+    <ul class="rights">
+      @for (r of myRights; track r) {
+        <li><nz-icon nzType="check-circle" nzTheme="fill" /> {{ r }}</li>
+      }
+    </ul>
+
+    <header class="card-head apps-head">
+      <h2>Başvurularım</h2>
+      <span class="muted">{{ applications.length }} başvuru</span>
+    </header>
+    <ul class="rows">
+      @for (a of applications; track a.id) {
+        <li class="application">
+          <div class="app-head">
+            <div>
+              <strong>{{ a.title }}</strong>
+              <p class="muted">{{ a.institution }} · {{ a.id }} · {{ a.appliedAt }}</p>
+            </div>
+            @switch (a.status) {
+              @case ('finish') {
+                <span class="tag tag-green">Onaylandı</span>
+              }
+              @case ('error') {
+                <span class="tag tag-red">İşlem bekliyor</span>
+              }
+              @default {
+                <span class="tag tag-amber">Değerlendirmede</span>
+              }
+            }
+          </div>
+          <nz-steps nzSize="small" [nzCurrent]="a.current" [nzStatus]="a.status">
+            @for (s of a.steps; track s) {
+              <nz-step [nzTitle]="s" />
+            }
+          </nz-steps>
+          <p class="app-note" [class.warn]="a.status === 'error'">{{ a.note }}</p>
+        </li>
+      }
+    </ul>
+  </section>
+</div>
+
+<section class="card">
+  <header class="card-head">
+    <div>
+      <h2>Hizmet Kataloğu</h2>
+      <p>Paydaş kurumların Mezun Kart sahiplerine sunduğu hizmetler</p>
+    </div>
+  </header>
+  <div class="catalog">
+    @for (s of services; track s.id) {
+      <article class="service" [class.locked]="!eligible(s)">
+        <span class="bubble"><nz-icon [nzType]="s.icon" /></span>
+        <h3>{{ s.title }}</h3>
+        <p class="muted">{{ s.institution }}</p>
+        <p class="desc">{{ s.description }}</p>
+        <div class="service-foot">
+          @if (eligible(s)) {
+            <span class="tag tag-green">Uygunsunuz</span>
+            <button class="btn btn-primary btn-sm" (click)="apply(s)">Başvur</button>
+          } @else {
+            <span class="tag"><nz-icon nzType="lock" /> Grup {{ s.groups.join(', ') }}’e özel</span>
+          }
+        </div>
+      </article>
+    }
+  </div>
+</section>
+
+<section class="card">
+  <header class="card-head">
+    <div>
+      <h2>Kart Grupları ve Haklar</h2>
+      <p>Mezuniyet düzeyine göre belirlenen gruplar</p>
+    </div>
+  </header>
+  <div class="groups">
+    @for (g of groups; track g.group) {
+      <article class="group" [class.mine]="g.group === card.group">
+        <header>
+          <span>GRUP {{ g.group }}</span>
+          @if (g.group === card.group) {
+            <span class="tag tag-red">Sizin grubunuz</span>
+          }
+        </header>
+        <ul class="who">
+          @for (w of g.who; track w) {
+            <li>{{ w }}</li>
+          }
+        </ul>
+        <ul class="group-rights">
+          @for (r of g.rights; track r) {
+            <li><nz-icon nzType="check" /> {{ r }}</li>
+          }
+        </ul>
+      </article>
+    }
+  </div>
+</section>

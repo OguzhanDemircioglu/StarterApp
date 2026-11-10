@@ -1,0 +1,153 @@
+<section class="card filters">
+  <nz-input-wrapper class="search">
+    <nz-icon nzInputPrefix nzType="search" />
+    <input
+      nz-input
+      placeholder="Pozisyon, kurum ya da alan ara"
+      [ngModel]="query()"
+      (ngModelChange)="query.set($event)"
+    />
+  </nz-input-wrapper>
+  <nz-select nzPlaceHolder="Çalışma şekli" nzAllowClear [ngModel]="type()" (ngModelChange)="type.set($event)">
+    @for (t of types; track t) {
+      <nz-option [nzValue]="t" [nzLabel]="t" />
+    }
+  </nz-select>
+  <nz-select nzPlaceHolder="Şehir" nzAllowClear [ngModel]="city()" (ngModelChange)="city.set($event)">
+    @for (c of cities; track c) {
+      <nz-option [nzValue]="c" [nzLabel]="c" />
+    }
+  </nz-select>
+  <label nz-checkbox [ngModel]="exemptOnly()" (ngModelChange)="exemptOnly.set($event)">
+    Çalışma izni istisnasına uygun
+  </label>
+</section>
+
+<div class="with-side">
+  <section class="card">
+    <nz-tabs>
+      <nz-tab [nzTitle]="'İlanlar (' + filtered().length + ')'">
+        <ul class="rows">
+          @for (job of filtered(); track job.id) {
+            <li class="job">
+              <span class="org-logo" [class.public]="job.publicSector">{{ job.organization.charAt(0) }}</span>
+              <div class="job-body">
+                <div class="job-title">
+                  <strong>{{ job.title }}</strong>
+                  <button
+                    class="icon-btn"
+                    [class.saved]="job.saved"
+                    [attr.aria-label]="job.saved ? 'Kaydedilenlerden çıkar' : 'Kaydet'"
+                    (click)="toggleSave(job)"
+                  >
+                    <nz-icon nzType="star" [nzTheme]="job.saved ? 'fill' : 'outline'" />
+                  </button>
+                </div>
+                <p class="muted">{{ job.organization }} · {{ job.city }}</p>
+                <p class="summary">{{ job.summary }}</p>
+                <div class="job-tags">
+                  <span class="tag tag-blue">{{ job.type }}</span>
+                  <span class="tag">{{ job.field }}</span>
+                  @if (job.publicSector) {
+                    <span class="tag tag-red">Kamu</span>
+                  }
+                  @if (job.workPermitExempt) {
+                    <span class="tag tag-green"><nz-icon nzType="check" /> Çalışma izni istisnası</span>
+                  }
+                </div>
+                <div class="job-foot">
+                  <span class="muted">
+                    {{ job.postedDaysAgo }} gün önce · {{ job.applicants }} başvuru · Son başvuru {{ job.deadline }}
+                  </span>
+                  @if (isApplied(job)) {
+                    <span class="tag tag-green">Başvuruldu</span>
+                  } @else {
+                    <button class="btn btn-primary btn-sm" (click)="apply(job)">Başvur</button>
+                  }
+                </div>
+              </div>
+            </li>
+          } @empty {
+            <li class="empty">
+              Aramanıza uygun ilan bulunamadı.
+              <button class="btn btn-sm" (click)="clearFilters()">Filtreleri temizle</button>
+            </li>
+          }
+        </ul>
+      </nz-tab>
+
+      <nz-tab [nzTitle]="'Başvurularım (' + applied().length + ')'">
+        <ul class="rows">
+          @for (a of applied(); track a.jobId) {
+            <li class="job">
+              <span class="org-logo" [class.public]="a.job.publicSector">{{ a.job.organization.charAt(0) }}</span>
+              <div class="job-body">
+                <div class="job-title">
+                  <strong>{{ a.job.title }}</strong>
+                  <span class="tag" [class]="statusTag(a.status)">{{ a.status }}</span>
+                </div>
+                <p class="muted">{{ a.job.organization }} · Başvuru: {{ a.appliedAt }}</p>
+                <p class="summary">{{ a.note }}</p>
+              </div>
+            </li>
+          }
+        </ul>
+      </nz-tab>
+
+      <nz-tab [nzTitle]="'Kaydedilenler (' + saved().length + ')'">
+        <ul class="rows">
+          @for (job of saved(); track job.id) {
+            <li class="job">
+              <span class="org-logo" [class.public]="job.publicSector">{{ job.organization.charAt(0) }}</span>
+              <div class="job-body">
+                <div class="job-title">
+                  <strong>{{ job.title }}</strong>
+                  <button class="btn btn-sm" (click)="toggleSave(job)">Kaldır</button>
+                </div>
+                <p class="muted">{{ job.organization }} · {{ job.city }} · Son başvuru {{ job.deadline }}</p>
+              </div>
+            </li>
+          } @empty {
+            <li class="empty">Henüz kaydettiğiniz bir ilan yok. İlanlardaki yıldız ile kaydedebilirsiniz.</li>
+          }
+        </ul>
+      </nz-tab>
+    </nz-tabs>
+  </section>
+
+  <aside class="stack">
+    <section class="card">
+      <header class="card-head"><h2>Kariyer Profiliniz</h2></header>
+      <nz-progress nzType="circle" [nzPercent]="72" [nzWidth]="96" nzStrokeColor="#d71920" />
+      <ul class="checklist">
+        <li class="done"><nz-icon nzType="check-circle" nzTheme="fill" /> Eğitim bilgileri</li>
+        <li class="done"><nz-icon nzType="check-circle" nzTheme="fill" /> Deneyimler</li>
+        <li class="done"><nz-icon nzType="check-circle" nzTheme="fill" /> Yabancı diller</li>
+        <li><nz-icon nzType="exclamation-circle" /> CV yüklenmedi</li>
+        <li><nz-icon nzType="exclamation-circle" /> Referans eklenmedi</li>
+      </ul>
+      <button class="btn btn-primary btn-block"><nz-icon nzType="upload" /> CV yükle</button>
+    </section>
+
+    <section class="card perk">
+      <nz-icon nzType="safety-certificate" />
+      <h3>Mezun Kart avantajı</h3>
+      <p>
+        Grup 2 kart sahibi olarak çalışma izni başvurularında değerlendirme kriterlerinden istisna tutulursunuz.
+        İşverene kart numaranızı iletmeniz yeterlidir.
+      </p>
+    </section>
+
+    <section class="card">
+      <header class="card-head"><h2>Kariyer Etkinlikleri</h2></header>
+      <ul class="rows">
+        @for (e of careerEvents; track e.id) {
+          <li class="career-event">
+            <strong>{{ e.title }}</strong>
+            <p class="muted">{{ e.date | trDate: 'long' }} · {{ e.place }}</p>
+          </li>
+        }
+      </ul>
+    </section>
+  </aside>
+</div>

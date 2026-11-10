@@ -1,0 +1,147 @@
+<div class="layout">
+  <!-- Sol: profil özeti ve dijital kart -->
+  <aside class="stack">
+    <section class="card me">
+      <span class="avatar" style="--size: 72px; --avatar-bg: #d71920">{{ profile.initials }}</span>
+      <h2>{{ profile.fullName }}</h2>
+      <p class="muted">{{ profile.department }} · {{ profile.university }}</p>
+      <div class="me-stats">
+        <div>
+          <strong>{{ stats.connections }}</strong>
+          <span class="muted">Bağlantı</span>
+        </div>
+        <div>
+          <strong>{{ stats.views }}</strong>
+          <span class="muted">Profil görüntüleme</span>
+        </div>
+      </div>
+      <div class="completeness">
+        <div class="muted">Profil doluluğu</div>
+        <nz-progress [nzPercent]="stats.completeness" nzStrokeColor="#d71920" nzSize="small" />
+      </div>
+      <a class="btn btn-block" routerLink="../profile">Profilimi görüntüle</a>
+    </section>
+
+    <section class="card">
+      <header class="card-head">
+        <h2>Dijital Kimliğim</h2>
+        <a class="see-all" routerLink="../services">Detay <nz-icon nzType="right" /></a>
+      </header>
+      <app-graduate-card [card]="card" [compact]="true" />
+    </section>
+  </aside>
+
+  <!-- Orta: akış -->
+  <div class="stack">
+    <section class="card composer">
+      <span class="avatar" style="--avatar-bg: #d71920">{{ profile.initials }}</span>
+      <div class="composer-body">
+        <textarea
+          rows="2"
+          placeholder="Bir gelişme, başarı ya da soru paylaşın…"
+          [ngModel]="draft()"
+          (ngModelChange)="draft.set($event)"
+        ></textarea>
+        <div class="composer-actions">
+          <button class="btn btn-ghost btn-sm"><nz-icon nzType="picture" /> Fotoğraf</button>
+          <button class="btn btn-ghost btn-sm"><nz-icon nzType="calendar" /> Etkinlik</button>
+          <button class="btn btn-ghost btn-sm"><nz-icon nzType="solution" /> İş ilanı</button>
+          <button class="btn btn-primary btn-sm share" [disabled]="!draft().trim()" (click)="share()">Paylaş</button>
+        </div>
+      </div>
+    </section>
+
+    @for (post of posts(); track post.id) {
+      <article class="card post">
+        <header class="post-head">
+          <span class="avatar" [class.institution]="post.institution" [style.--avatar-bg]="post.color">
+            {{ post.initials }}
+          </span>
+          <div>
+            <strong>{{ post.author }}</strong>
+            <p class="muted">{{ post.subtitle }}</p>
+            <p class="muted">{{ post.time }}</p>
+          </div>
+          @if (post.tag) {
+            <span class="tag tag-red post-tag">{{ post.tag }}</span>
+          }
+        </header>
+        <p class="post-text">{{ post.text }}</p>
+        <div class="post-counts muted">
+          <span>{{ post.likes | trNumber }} beğeni</span>
+          <span>{{ post.comments }} yorum</span>
+        </div>
+        <footer class="post-actions">
+          <button class="btn btn-ghost" [class.liked]="post.liked" (click)="toggleLike(post.id)">
+            <nz-icon nzType="like" [nzTheme]="post.liked ? 'fill' : 'outline'" /> Beğen
+          </button>
+          <button class="btn btn-ghost"><nz-icon nzType="message" /> Yorum yap</button>
+          <button class="btn btn-ghost"><nz-icon nzType="share-alt" /> Paylaş</button>
+        </footer>
+      </article>
+    }
+  </div>
+
+  <!-- Sağ: etkinlikler, öneriler, duyurular -->
+  <aside class="stack">
+    <section class="card">
+      <header class="card-head">
+        <h2>Yaklaşan Etkinlikler</h2>
+        <a class="see-all" routerLink="../events">Tümü <nz-icon nzType="right" /></a>
+      </header>
+      <ul class="rows">
+        @for (e of upcoming; track e.id) {
+          <li class="event">
+            <span class="date-box">
+              <strong>{{ e.date | trDate: 'day' }}</strong>
+              <span>{{ e.date | trDate: 'month' }}</span>
+            </span>
+            <div>
+              <strong>{{ e.title }}</strong>
+              <p class="muted">{{ e.place }}</p>
+              @if (e.going) {
+                <span class="tag tag-green"><nz-icon nzType="check" /> Katılıyorum</span>
+              }
+            </div>
+          </li>
+        }
+      </ul>
+    </section>
+
+    <section class="card">
+      <header class="card-head"><h2>Tanıyor Olabileceğiniz Mezunlar</h2></header>
+      <ul class="rows">
+        @for (s of suggestions; track s.name) {
+          <li class="person">
+            <span class="avatar" [style.--avatar-bg]="s.color">{{ s.initials }}</span>
+            <div>
+              <strong>{{ s.name }}</strong>
+              <p class="muted">{{ s.title }}</p>
+              <p class="muted">{{ s.mutual }} ortak bağlantı</p>
+            </div>
+            @if (requested().has(s.name)) {
+              <span class="tag">İstek gönderildi</span>
+            } @else {
+              <button class="btn btn-sm" (click)="connect(s.name)"><nz-icon nzType="plus" /> Bağlan</button>
+            }
+          </li>
+        }
+      </ul>
+    </section>
+
+    <section class="card">
+      <header class="card-head">
+        <h2>Son Duyurular</h2>
+        <a class="see-all" routerLink="../announcements">Tümü <nz-icon nzType="right" /></a>
+      </header>
+      <ul class="rows">
+        @for (a of announcements; track a.id) {
+          <li class="news">
+            <a routerLink="../announcements">{{ a.title }}</a>
+            <p class="muted">{{ a.institution }} · {{ a.date | trDate: 'dayMonth' }}</p>
+          </li>
+        }
+      </ul>
+    </section>
+  </aside>
+</div>

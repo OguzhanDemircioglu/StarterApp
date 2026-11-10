@@ -75,7 +75,7 @@ class AuthFlowIntegrationTest {
     @Test
     void migrationsAreAppliedOnce() {
         List<Integer> versions = jdbc.queryForList("SELECT version FROM data_migration_history ORDER BY version", Integer.class);
-        assertThat(versions).containsExactly(1, 2, 3, 4, 5);
+        assertThat(versions).containsExactly(1, 2, 3, 4, 5, 6);
     }
 
     @Test
@@ -184,7 +184,9 @@ class AuthFlowIntegrationTest {
         String email = createUser(adminToken, "USER");
 
         ResultActions userLogin = login(email, "User12345")
-                .andExpect(jsonPath("$.data.menus[*].titleKey", not(hasItem("menu_administration"))));
+                .andExpect(jsonPath("$.data.menus[*].titleKey", not(hasItem("menu_administration"))))
+                // USER'ın arayüzü Mezun Portalı'dır: portal grubu ve alt menüleri oturumla gelir (V006).
+                .andExpect(jsonPath("$.data.menus[?(@.route == '/portal')].children[*].route", hasItem("/portal/profile")));
         String userToken = accessToken(userLogin);
 
         expectError(withToken(get("/api/users"), userToken), 403, GlobalMessages.ACCESS_DENIED);

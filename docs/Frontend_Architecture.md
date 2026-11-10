@@ -43,7 +43,8 @@ ErpStockTracer'dan **taşınmayanlar:** jQuery, AdminLTE, Bootstrap JS, SweetAle
 | └ Kategoriler (`menu_categories`) | `/definitions/categories` | `pages/definitions/categories/` |
 | Yönetim (`menu_administration`) | `/administration` | `pages/administration/` |
 | └ Kullanıcılar (`menu_users`) | `/administration/users` | `pages/administration/users/` |
-| Mezun Portalı (USER arayüzü, menüsü şimdilik client'ta) | `/portal/profile` … | `pages/portal/` |
+| Mezun Portalı (`menu_portal`, USER arayüzü) | `/portal` | `pages/portal/` |
+| └ Ana Sayfa, Profilim, Hizmetler, Staj / Kariyer, Etkinlikler, Duyurular, Mesajlar, Ayarlar, Yardım (`menu_portal_*`) | `/portal/home`, `/portal/profile` … | `pages/portal/home/`, `pages/portal/profile/` … |
 
 - Menü kayıtları backend'de migration class'larıyla tutulur (`V005_HierarchicalMenuRoutes`); `route` değerleri bu tabloya uyar.
 - Yeni bir sayfa eklenirken üçü birlikte eklenir: klasör, route ve menü kaydı.
@@ -92,11 +93,14 @@ client/
 │        │  ├─ administration.routes.ts
 │        │  └─ users/                  /administration/users
 │        └─ portal/                    /portal: USER rolünün arayüzü (Mezun Portalı), kendi iskeleti
-│           ├─ portal.routes.ts
-│           ├─ portal.mock.ts          geçici veriler (API gelince servis + model ile değişir)
-│           ├─ portal-layout/          üst bar + sol menü
-│           ├─ profile/                /portal/profile
-│           └─ coming-soon/            içeriği henüz olmayan menüler
+│           ├─ portal.routes.ts        sayfalar; path ve data.title backend menüleriyle aynı (V006_PortalMenus)
+│           ├─ portal-layout/          üst bar + sol menü (oturumdaki menu_portal grubunun çocukları) + banner başlığı
+│           ├─ portal.css              portal sayfalarının ortak parçaları (.card, .btn, .tag, .chip, .with-side…)
+│           ├─ portal.mock.ts          birden fazla sayfanın kullandığı geçici veriler (profil, kart, haklar, kurumlar)
+│           ├─ portal-pipes.ts         trDate / trNumber (Intl ile; Angular tr locale verisi kayıtlı değil)
+│           ├─ graduate-card/          dijital Mezun Kartı (Ana Sayfa ve Hizmetler)
+│           └─ home/ profile/ services/ career/ events/ announcements/ messages/ settings/ help/
+│                                      her sayfa: component + kendi *.mock.ts verisi (API gelince servis + model ile değişir)
 ├─ proxy.conf.json                     dev: /api → http://localhost:8080
 ├─ nginx.conf                          Docker: SPA + /api yönlendirmesi (§14)
 ├─ Dockerfile
@@ -156,7 +160,7 @@ export default [
   - `guestGuard` login sayfasında durur; giriş yapmış kullanıcıyı anasayfaya gönderir.
   - `staffGuard` shell'de durur; USER rolünü `/portal`'a gönderir (admin arayüzünü sadece ADMIN görür).
   - Guard'lar sadece kullanıcı deneyimi içindir. Asıl güvenlik backend'dedir (`@PreAuthorize`).
-- **Shell'in dışında sadece login ve `/portal` vardır.** Portal USER rolünün kendi iskeletidir (`authGuard` ile korunur, admin de önizleme için açabilir). 404 ve 403 sayfaları shell içindedir; kullanıcı menüyü kaybetmez.
+- **Shell'in dışında sadece login ve `/portal` vardır.** Portal USER rolünün kendi iskeletidir (`authGuard` ile korunur, admin de önizleme için açabilir; admin sidebar'ında `Mezun Portalı` grubu görünür). Portal sayfaları `styleUrls: ['../portal.css', './sayfa.css']` ile ortak stili yükler; NG-ZORRO'nun ana rengi portalda `portal-layout.css` içinde kırmızıya çekilir. 404 ve 403 sayfaları shell içindedir; kullanıcı menüyü kaybetmez.
 - **Detay sayfaları** ana sayfanın altında yer alır: `/definitions/categories/:id`. Route parametreleri component'e `input()` olarak gelir (`withComponentInputBinding`).
 
 ---

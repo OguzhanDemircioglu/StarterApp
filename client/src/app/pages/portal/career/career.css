@@ -1,0 +1,162 @@
+.filters {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 180px 160px auto;
+  gap: 12px;
+  align-items: center;
+}
+
+.job {
+  display: flex;
+  gap: 14px;
+}
+
+.org-logo {
+  display: grid;
+  place-items: center;
+  flex: 0 0 48px;
+  height: 48px;
+  font-size: 20px;
+  font-weight: 700;
+  color: #0d5c73;
+  background: #e8f1f4;
+  border-radius: 10px;
+}
+
+.org-logo.public {
+  color: var(--portal-red);
+  background: #fdecec;
+}
+
+.job-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.job-title {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.job-title strong {
+  font-size: 15px;
+}
+
+.icon-btn {
+  padding: 0;
+  font-size: 18px;
+  color: #999;
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+
+.icon-btn.saved,
+.icon-btn:hover {
+  color: #e0a100;
+}
+
+.summary {
+  margin: 8px 0;
+  font-size: 13px;
+  line-height: 20px;
+  color: #333;
+}
+
+.job-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.job-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 10px;
+}
+
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+/* Yan sütun */
+nz-progress[nztype='circle'] {
+  display: block;
+  text-align: center;
+}
+
+.checklist {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 16px 0;
+  font-size: 13px;
+  color: #9a5b00;
+}
+
+.checklist li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.checklist .done {
+  color: #333;
+}
+
+.checklist .done nz-icon {
+  color: #1e7b45;
+}
+
+.perk {
+  color: #fff;
+  background: linear-gradient(135deg, #1b222b, #0d5c73);
+  border: 0;
+}
+
+.perk nz-icon {
+  font-size: 28px;
+}
+
+.perk h3 {
+  margin: 8px 0 6px;
+  font-size: 15px;
+}
+
+.perk p {
+  font-size: 12px;
+  line-height: 19px;
+  opacity: 0.9;
+}
+
+.career-event strong {
+  display: block;
+  font-size: 13px;
+}
+
+@media (max-width: 1000px) {
+  .filters {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .filters .search {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 560px) {
+  .filters {
+    grid-template-columns: 1fr;
+  }
+
+  .job-foot {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

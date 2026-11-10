@@ -1,0 +1,122 @@
+<section class="hero">
+  <h2>Size nasıl yardımcı olabiliriz?</h2>
+  <p>Sık sorulan sorularda arayın ya da destek ekibimize yazın.</p>
+  <nz-input-wrapper class="hero-search" nzSize="large">
+    <nz-icon nzInputPrefix nzType="search" />
+    <input nz-input placeholder="Örn. ikamet izni, çok girişli vize, şifre" [ngModel]="query()" (ngModelChange)="query.set($event)" />
+  </nz-input-wrapper>
+</section>
+
+<div class="topics">
+  @for (t of topics; track t.topic) {
+    <button class="card topic" [class.active]="topic() === t.topic" (click)="pickTopic(t.topic)">
+      <span class="bubble"><nz-icon [nzType]="t.icon" /></span>
+      <div>
+        <strong>{{ t.topic }}</strong>
+        <p class="muted">{{ t.description }} · {{ countOf(t.topic) }} soru</p>
+      </div>
+    </button>
+  }
+</div>
+
+<div class="with-side">
+  <section class="card">
+    <header class="card-head">
+      <h2>Sık Sorulan Sorular</h2>
+      @if (topic()) {
+        <a class="see-all" (click)="topic.set(null)">Tüm konular</a>
+      }
+    </header>
+    @if (faqs().length > 0) {
+      <nz-collapse nzGhost nzExpandIconPosition="end">
+        @for (f of faqs(); track f.question; let first = $first) {
+          <nz-collapse-panel [nzHeader]="f.question" [nzActive]="first">
+            <p class="answer">{{ f.answer }}</p>
+            <span class="tag">{{ f.topic }}</span>
+          </nz-collapse-panel>
+        }
+      </nz-collapse>
+    } @else {
+      <p class="empty">Aramanıza uygun soru bulunamadı. Destek ekibimize yazabilirsiniz.</p>
+    }
+  </section>
+
+  <aside class="stack">
+    <section class="card">
+      <header class="card-head"><h2>İletişim Kanalları</h2></header>
+      <ul class="rows channels">
+        <li>
+          <span class="bubble"><nz-icon nzType="phone" /></span>
+          <div>
+            <strong>YİMER 157</strong>
+            <p class="muted">Yabancılar İletişim Merkezi · 7/24</p>
+          </div>
+        </li>
+        <li>
+          <span class="bubble"><nz-icon nzType="mail" /></span>
+          <div>
+            <strong>destek&#64;mezunkart.goc.gov.tr</strong>
+            <p class="muted">En geç 2 iş günü içinde yanıt</p>
+          </div>
+        </li>
+        <li>
+          <span class="bubble"><nz-icon nzType="customer-service" /></span>
+          <div>
+            <strong>Canlı destek</strong>
+            <p class="muted">Hafta içi 09:00 – 18:00</p>
+          </div>
+        </li>
+      </ul>
+    </section>
+
+    <section class="card">
+      <header class="card-head"><h2>Destek Talebi</h2></header>
+      <div class="ticket">
+        <nz-select nzPlaceHolder="Konu seçin" [(ngModel)]="ticket.subject">
+          @for (t of topics; track t.topic) {
+            <nz-option [nzValue]="t.topic" [nzLabel]="t.topic" />
+          }
+        </nz-select>
+        <textarea nz-input rows="4" placeholder="Sorununuzu kısaca anlatın" [(ngModel)]="ticket.text"></textarea>
+        <button class="btn btn-primary btn-block" (click)="sendTicket()"><nz-icon nzType="send" /> Gönder</button>
+      </div>
+    </section>
+  </aside>
+</div>
+
+<section class="card">
+  <header class="card-head">
+    <div>
+      <h2>Program Hakkında</h2>
+      <p>Mezun Kart projesinin öngörülen çıktıları</p>
+    </div>
+  </header>
+  <div class="outcomes">
+    @for (o of outcomes; track o.title) {
+      <article class="outcome">
+        <header><nz-icon [nzType]="o.icon" /> {{ o.title }}</header>
+        <ul>
+          @for (i of o.items; track i) {
+            <li><nz-icon nzType="check" /> {{ i }}</li>
+          }
+        </ul>
+      </article>
+    }
+  </div>
+
+  <h3 class="roadmap-title">Yol Haritası</h3>
+  <ol class="roadmap">
+    @for (r of roadmap; track r.title; let i = $index) {
+      <li [class.done]="r.done">
+        <span class="step">
+          @if (r.done) {
+            <nz-icon nzType="check" />
+          } @else {
+            {{ i + 1 }}
+          }
+        </span>
+        <span>{{ r.title }}</span>
+      </li>
+    }
+  </ol>
+</section>

@@ -1,0 +1,68 @@
+<div class="toolbar">
+  <div class="chips">
+    @for (c of categories; track c) {
+      <button class="chip" [class.active]="category() === c" (click)="category.set(c)">{{ c }}</button>
+    }
+  </div>
+  <nz-input-wrapper class="search">
+    <nz-icon nzInputPrefix nzType="search" />
+    <input nz-input placeholder="Duyurularda ara" [ngModel]="query()" (ngModelChange)="query.set($event)" />
+  </nz-input-wrapper>
+</div>
+
+<div class="master-detail">
+  <section class="card list">
+    <header class="card-head">
+      <h2>Duyurular</h2>
+      @if (unreadCount() > 0) {
+        <a class="see-all" (click)="markAllRead()">Tümünü okundu say ({{ unreadCount() }})</a>
+      }
+    </header>
+    <ul>
+      @for (a of visible(); track a.id) {
+        <li>
+          <button class="item" [class.active]="a.id === selectedId()" (click)="select(a.id)">
+            <div class="item-top">
+              @if (a.pinned) {
+                <span class="tag tag-red"><nz-icon nzType="pushpin" /> Sabit</span>
+              }
+              <span class="tag">{{ a.category }}</span>
+              <span class="muted date">{{ a.date | trDate: 'dayMonth' }}</span>
+            </div>
+            <strong [class.unread]="a.unread">{{ a.title }}</strong>
+            <p class="muted">{{ a.institution }}</p>
+          </button>
+        </li>
+      } @empty {
+        <li class="empty">Aramanıza uygun duyuru yok.</li>
+      }
+    </ul>
+  </section>
+
+  <section class="card detail">
+    @if (selected(); as a) {
+      <div class="detail-top">
+        <span class="tag">{{ a.category }}</span>
+        <span class="muted">{{ a.date | trDate: 'long' }}</span>
+      </div>
+      <h2>{{ a.title }}</h2>
+      <div class="source">
+        <span class="bubble"><nz-icon nzType="bank" /></span>
+        <div>
+          <strong>{{ a.institution }}</strong>
+          <p class="muted">Yayımlayan kurum</p>
+        </div>
+      </div>
+      <p class="lead">{{ a.excerpt }}</p>
+      @for (p of a.body; track $index) {
+        <p class="body">{{ p }}</p>
+      }
+      <footer class="detail-actions">
+        <button class="btn"><nz-icon nzType="share-alt" /> Paylaş</button>
+        <button class="btn"><nz-icon nzType="download" /> PDF</button>
+      </footer>
+    } @else {
+      <p class="empty">Okumak için bir duyuru seçin.</p>
+    }
+  </section>
+</div>

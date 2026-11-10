@@ -232,6 +232,83 @@ button {
   position: relative;
 }
 
+.page-title {
+  position: absolute !important;
+  top: 28px;
+  left: 24px;
+}
+
+.page-title .crumb {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--portal-muted);
+}
+
+.page-title .crumb nz-icon {
+  font-size: 9px;
+}
+
+.page-title h1 {
+  margin: 4px 0 0;
+  font-size: 24px;
+  font-weight: 600;
+}
+
+/* NG-ZORRO'nun mavi ana rengi portalda kırmızıya çekilir (sadece portalda kullanılan bileşenler). */
+:host ::ng-deep .ant-switch-checked,
+:host ::ng-deep .ant-checkbox-checked .ant-checkbox-inner,
+:host ::ng-deep .ant-radio-inner::after,
+:host ::ng-deep .ant-tabs-ink-bar,
+:host ::ng-deep .ant-btn-primary,
+:host ::ng-deep .ant-badge-count {
+  background-color: var(--portal-red);
+}
+
+:host ::ng-deep .ant-btn-primary {
+  border-color: var(--portal-red);
+}
+
+:host ::ng-deep .ant-btn-primary:hover,
+:host ::ng-deep .ant-btn-primary:focus {
+  background-color: #b9141a;
+  border-color: #b9141a;
+}
+
+:host ::ng-deep .ant-checkbox-checked .ant-checkbox-inner,
+:host ::ng-deep .ant-radio-checked .ant-radio-inner,
+:host ::ng-deep .ant-input:hover,
+:host ::ng-deep .ant-input:focus,
+:host ::ng-deep .ant-input-affix-wrapper:hover,
+:host ::ng-deep .ant-input-affix-wrapper-focused,
+:host ::ng-deep .ant-select:not(.ant-select-disabled):hover .ant-select-selector,
+:host ::ng-deep .ant-select-focused .ant-select-selector {
+  border-color: var(--portal-red) !important;
+}
+
+:host ::ng-deep .ant-input:focus,
+:host ::ng-deep .ant-input-affix-wrapper-focused,
+:host ::ng-deep .ant-select-focused .ant-select-selector {
+  box-shadow: 0 0 0 2px rgba(215, 25, 32, 0.12) !important;
+}
+
+:host ::ng-deep .ant-tabs-tab:hover,
+:host ::ng-deep .ant-tabs-tab-active .ant-tabs-tab-btn,
+:host ::ng-deep .ant-collapse-header:hover {
+  color: var(--portal-red) !important;
+}
+
+:host ::ng-deep .ant-radio-button-wrapper-checked:not(.ant-radio-button-wrapper-disabled) {
+  color: var(--portal-red);
+  border-color: var(--portal-red);
+}
+
+:host ::ng-deep .ant-radio-button-wrapper-checked:not(.ant-radio-button-wrapper-disabled)::before {
+  background-color: var(--portal-red);
+}
+
+
 .backdrop {
   display: none;
 }
@@ -282,6 +359,15 @@ button {
 
   .content {
     padding: 80px 16px 16px;
+  }
+
+  .page-title {
+    top: 14px;
+    left: 16px;
+  }
+
+  .page-title h1 {
+    font-size: 20px;
   }
 
   .banner {

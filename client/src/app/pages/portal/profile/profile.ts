@@ -7,7 +7,7 @@ import { INSTITUTIONS, MOCK_PROFILE } from '../portal.mock';
   selector: 'app-profile',
   imports: [NzIconModule],
   templateUrl: './profile.html',
-  styleUrl: './profile.css',
+  styleUrls: ['../portal.css', './profile.css'],
 })
 export default class Profile {
   protected readonly profile = MOCK_PROFILE;

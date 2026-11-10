@@ -55,7 +55,7 @@ com.server
 │                  RestAuthenticationEntryPoint, RestAccessDeniedHandler
 ├─ migration/      DataMigration, DataMigrationRunner
 │  └─ versions/    V001_UniqueIndexes, V002_InitialAdmin, V003_InitialMenus, V004_CategoryModule,
-│                  V005_HierarchicalMenuRoutes
+│                  V005_HierarchicalMenuRoutes, V006_PortalMenus
 └─ modules/
    ├─ auth/        login / refresh / logout / şifre değiştirme, UserSession, LoginAttempt, SessionInfo
    ├─ user/        kullanıcı yönetimi (sadece admin)

@@ -1,54 +1,4 @@
-:host {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-h1,
-h2,
-p,
-dl,
-dd,
-ul {
-  margin: 0;
-}
-
-ul {
-  padding: 0;
-  list-style: none;
-}
-
-.card {
-  padding: 20px 22px;
-  background: #fff;
-  border: 1px solid #ececec;
-  border-radius: 12px;
-}
-
-.card-head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 18px;
-}
-
-.card-head h2 {
-  font-size: 17px;
-  font-weight: 600;
-}
-
-.see-all {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 13px;
-  color: #d71920;
-}
-
-.see-all nz-icon {
-  font-size: 11px;
-}
-
+/* Ortak parçalar (.card, .btn, .bubble...) ../portal.css içindedir. */
 /* Üst kart */
 .hero {
   display: flex;
@@ -75,7 +25,7 @@ ul {
   border-radius: 50%;
 }
 
-.identity-text h1 {
+.identity-text h2 {
   margin-bottom: 8px;
   font-size: 22px;
   font-weight: 600;
@@ -91,25 +41,6 @@ ul {
   font-size: 13px;
   line-height: 22px;
   color: #444;
-}
-
-.primary-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  margin-top: 16px;
-  padding: 8px 14px;
-  font: inherit;
-  font-size: 13px;
-  color: #fff;
-  background: #d71920;
-  border: 0;
-  border-radius: 4px;
-  cursor: pointer;
-}
-
-.primary-btn:hover {
-  background: #b9141a;
 }
 
 .contacts {
@@ -201,17 +132,6 @@ ul {
 
 .timeline li:last-child {
   border-bottom: 0;
-}
-
-.bubble {
-  display: grid;
-  place-items: center;
-  flex: 0 0 48px;
-  height: 48px;
-  font-size: 22px;
-  color: #d71920;
-  background: #f6f6f6;
-  border-radius: 50%;
 }
 
 .timeline strong,
@@ -348,4 +268,8 @@ ul {
     border-right: 0 !important;
     border-bottom: 1px solid #ececec;
   }
+}
+
+.edit-btn {
+  margin-top: 16px;
 }

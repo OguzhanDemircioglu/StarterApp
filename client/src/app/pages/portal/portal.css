@@ -1,0 +1,270 @@
+/*
+ * Portal sayfalarının ortak parçaları. Her portal sayfası bunu kendi stilinden önce yükler:
+ *   styleUrls: ['../portal.css', './sayfa.css']
+ * Renkler portal-layout'ta tanımlı --portal-* değişkenlerinden gelir.
+ */
+:host {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+h1,
+h2,
+h3,
+p,
+dl,
+dd,
+ul,
+ol {
+  margin: 0;
+}
+
+ul,
+ol {
+  padding: 0;
+  list-style: none;
+}
+
+a {
+  color: inherit;
+}
+
+/* Kart */
+.card {
+  padding: 20px 22px;
+  background: #fff;
+  border: 1px solid var(--portal-border);
+  border-radius: 12px;
+}
+
+.card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.card-head h2 {
+  font-size: 17px;
+  font-weight: 600;
+}
+
+.card-head p {
+  margin-top: 2px;
+  font-size: 12px;
+  color: var(--portal-muted);
+}
+
+.see-all {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--portal-red);
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.see-all nz-icon {
+  font-size: 11px;
+}
+
+.muted {
+  font-size: 12px;
+  color: var(--portal-muted);
+}
+
+/* Düğmeler */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 7px 14px;
+  font: inherit;
+  font-size: 13px;
+  line-height: 20px;
+  color: var(--portal-text);
+  white-space: nowrap;
+  background: #fff;
+  border: 1px solid #d9d9d9;
+  border-radius: 4px;
+  cursor: pointer;
+  transition:
+    background 0.15s,
+    border-color 0.15s,
+    color 0.15s;
+}
+
+.btn:hover {
+  color: var(--portal-red);
+  border-color: var(--portal-red);
+}
+
+.btn-primary {
+  color: #fff;
+  background: var(--portal-red);
+  border-color: var(--portal-red);
+}
+
+.btn-primary:hover {
+  color: #fff;
+  background: #b9141a;
+  border-color: #b9141a;
+}
+
+.btn-ghost {
+  border-color: transparent;
+  background: transparent;
+}
+
+.btn-sm {
+  padding: 3px 10px;
+  font-size: 12px;
+}
+
+.btn-block {
+  width: 100%;
+}
+
+.btn:disabled {
+  color: #aaa;
+  background: #f5f5f5;
+  border-color: #e3e3e3;
+  cursor: not-allowed;
+}
+
+/* Etiketler */
+.tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 1px 8px;
+  font-size: 11px;
+  line-height: 18px;
+  white-space: nowrap;
+  border-radius: 10px;
+  background: #f1f1f1;
+  color: #555;
+}
+
+.tag-red {
+  background: #fdecec;
+  color: #b9141a;
+}
+
+.tag-green {
+  background: #e8f6ee;
+  color: #1e7b45;
+}
+
+.tag-amber {
+  background: #fff4e0;
+  color: #9a5b00;
+}
+
+.tag-blue {
+  background: #e9f1fc;
+  color: #1f5aa6;
+}
+
+/* Yuvarlak ikon kutusu */
+.bubble {
+  display: grid;
+  place-items: center;
+  flex: 0 0 44px;
+  width: 44px;
+  height: 44px;
+  font-size: 20px;
+  color: var(--portal-red);
+  background: #f6f6f6;
+  border-radius: 50%;
+}
+
+/* Baş harfli avatar; boyutu --size ile verilir */
+.avatar {
+  --size: 40px;
+  display: grid;
+  place-items: center;
+  flex: 0 0 var(--size);
+  width: var(--size);
+  height: var(--size);
+  font-size: calc(var(--size) * 0.36);
+  font-weight: 600;
+  color: #fff;
+  background: var(--avatar-bg, #6b7785);
+  border-radius: 50%;
+}
+
+/* Filtre çipleri */
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.chip {
+  padding: 5px 14px;
+  font: inherit;
+  font-size: 13px;
+  color: var(--portal-text);
+  background: #fff;
+  border: 1px solid #e3e3e3;
+  border-radius: 16px;
+  cursor: pointer;
+}
+
+.chip:hover {
+  border-color: var(--portal-red);
+}
+
+.chip.active {
+  color: #fff;
+  background: var(--portal-red);
+  border-color: var(--portal-red);
+}
+
+/* Ana içerik + sağ sütun */
+.with-side {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 320px;
+  gap: 16px;
+  align-items: start;
+}
+
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
+}
+
+/* Alt alta liste satırları */
+.rows > li {
+  padding: 14px 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.rows > li:first-child {
+  padding-top: 0;
+}
+
+.rows > li:last-child {
+  padding-bottom: 0;
+  border-bottom: 0;
+}
+
+.empty {
+  padding: 32px 0;
+  font-size: 13px;
+  color: var(--portal-muted);
+  text-align: center;
+}
+
+@media (max-width: 1200px) {
+  .with-side {
+    grid-template-columns: 1fr;
+  }
+}

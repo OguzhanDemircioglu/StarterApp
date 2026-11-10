@@ -1,0 +1,110 @@
+@let f = featured();
+<section class="featured">
+  <div class="featured-text">
+    <span class="tag tag-red">Öne çıkan · {{ f.category }}</span>
+    <h2>{{ f.title }}</h2>
+    <p>{{ f.description }}</p>
+    <ul class="featured-meta">
+      <li><nz-icon nzType="calendar" /> {{ f.date | trDate: 'dayMonthWeekday' }}, {{ f.time }}</li>
+      <li><nz-icon nzType="environment" /> {{ f.place }}</li>
+      <li><nz-icon nzType="team" /> {{ f.attendees }} / {{ f.capacity }} katılımcı</li>
+    </ul>
+    <button class="btn" [class.btn-primary]="!f.going" (click)="toggleGoing(f.id)">
+      @if (f.going) {
+        <nz-icon nzType="check" /> Katılıyorsunuz
+      } @else {
+        Kayıt ol
+      }
+    </button>
+  </div>
+  <div class="featured-date">
+    <strong>{{ f.date | trDate: 'day' }}</strong>
+    <span>{{ f.date | trDate: 'month' }}</span>
+  </div>
+</section>
+
+<div class="chips">
+  @for (item of filters; track item) {
+    <button class="chip" [class.active]="filter() === item" (click)="filter.set(item)">{{ item }}</button>
+  }
+</div>
+
+<div class="with-side">
+  <div class="grid">
+    @for (e of visible(); track e.id) {
+      <article class="card event">
+        <div class="event-top">
+          <span class="date-box">
+            <strong>{{ e.date | trDate: 'day' }}</strong>
+            <span>{{ e.date | trDate: 'month' }}</span>
+          </span>
+          <div>
+            <span class="tag" [class.tag-blue]="e.online">{{ e.online ? 'Çevrimiçi' : e.category }}</span>
+            <h3>{{ e.title }}</h3>
+          </div>
+        </div>
+        <ul class="meta">
+          <li><nz-icon nzType="clock-circle" /> {{ e.date | trDate: 'dayMonthWeekday' }}, {{ e.time }}</li>
+          <li><nz-icon [nzType]="e.online ? 'global' : 'environment'" /> {{ e.place }}</li>
+          <li><nz-icon nzType="bank" /> {{ e.organizer }}</li>
+        </ul>
+        <p class="desc">{{ e.description }}</p>
+        <div class="capacity">
+          <span class="muted">{{ e.attendees }} / {{ e.capacity }} katılımcı</span>
+          <nz-progress
+            [nzPercent]="fill(e)"
+            [nzShowInfo]="false"
+            nzSize="small"
+            [nzStrokeColor]="fill(e) >= 90 ? '#d71920' : '#0d5c73'"
+          />
+        </div>
+        <button class="btn btn-block" [class.btn-primary]="!e.going" (click)="toggleGoing(e.id)">
+          @if (e.going) {
+            <nz-icon nzType="check" /> Katılıyorum
+          } @else {
+            Katılacağım
+          }
+        </button>
+      </article>
+    } @empty {
+      <p class="card empty">Bu kategoride yaklaşan etkinlik yok.</p>
+    }
+  </div>
+
+  <aside class="stack">
+    <section class="card calendar">
+      <header class="cal-head">
+        <button class="btn btn-ghost btn-sm" aria-label="Önceki ay" (click)="shiftMonth(-1)"><nz-icon nzType="left" /></button>
+        <strong>{{ monthLabel() }}</strong>
+        <button class="btn btn-ghost btn-sm" aria-label="Sonraki ay" (click)="shiftMonth(1)"><nz-icon nzType="right" /></button>
+      </header>
+      <div class="cal-grid">
+        @for (w of weekdays; track w) {
+          <span class="cal-weekday">{{ w }}</span>
+        }
+        @for (d of days(); track d.key) {
+          <span class="cal-day" [class.out]="!d.inMonth" [class.today]="d.key === today" [class.has]="d.hasEvent">
+            {{ d.day }}
+          </span>
+        }
+      </div>
+    </section>
+
+    <section class="card">
+      <header class="card-head">
+        <h2>Katılacaklarım</h2>
+        <span class="muted">{{ going().length }} etkinlik</span>
+      </header>
+      <ul class="rows">
+        @for (e of going(); track e.id) {
+          <li class="mine">
+            <strong>{{ e.title }}</strong>
+            <p class="muted">{{ e.date | trDate: 'long' }} · {{ e.time }}</p>
+          </li>
+        } @empty {
+          <li class="empty">Henüz kayıt olduğunuz etkinlik yok.</li>
+        }
+      </ul>
+    </section>
+  </aside>
+</div>
