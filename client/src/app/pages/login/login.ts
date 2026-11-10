@@ -5,6 +5,7 @@ import { TranslatePipe } from '@ngx-translate/core';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzFormModule } from 'ng-zorro-antd/form';
 import { NzIconModule } from 'ng-zorro-antd/icon';
+import { SURFACE } from '../../surface/surface';
 import { SessionActions } from '../../core/auth/session.actions';
 import { sessionFeature } from '../../core/auth/session.state';
 import { maxBytes, validateForm } from '../../shared/forms/form-utils';
@@ -26,6 +27,8 @@ export default class Login {
 
   /** true iken kayıt formu görünür; geçiş animasyonunun tamamı CSS'tedir (.wrapper.active). */
   protected readonly registerMode = signal(false);
+  /** Kapalı ağdaki yönetim paneli build'inde kayıt yoktur (backend de /api/auth/register'ı kapatır). */
+  protected readonly canRegister = SURFACE !== 'internal';
 
   protected readonly form = this.formBuilder.group({
     email: ['', [Validators.required, Validators.email]],
@@ -43,7 +46,7 @@ export default class Login {
       return;
     }
     const { email, password } = this.form.getRawValue();
-    this.store.dispatch(SessionActions.login({ email, password, returnUrl: this.returnUrl() ?? '/' }));
+    this.store.dispatch(SessionActions.login({ email, password, returnUrl: this.returnUrl() ?? '' }));
   }
 
   protected submitRegister(): void {
@@ -51,7 +54,7 @@ export default class Login {
       return;
     }
     const request = this.registerForm.getRawValue();
-    this.store.dispatch(SessionActions.register({ request, returnUrl: this.returnUrl() ?? '/' }));
+    this.store.dispatch(SessionActions.register({ request, returnUrl: this.returnUrl() ?? '' }));
   }
 
   protected showRegister(show: boolean): void {

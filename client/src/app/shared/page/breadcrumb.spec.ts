@@ -6,22 +6,27 @@ import { buildBreadcrumb } from './breadcrumb';
 @Component({ template: '' })
 class Empty {}
 
-// app.routes.ts ile aynı şekil: grup route'u loadChildren yerine children ile.
+// app.routes.ts + admin.routes.ts ile aynı şekil: grup route'ları loadChildren yerine children ile.
 const routes: Routes = [
   {
-    path: '',
-    component: Empty,
+    path: 'admin',
     children: [
-      { path: '', data: { title: 'menu_home' }, component: Empty },
       {
-        path: 'definitions',
-        data: { title: 'menu_definitions' },
+        path: '',
+        component: Empty,
         children: [
-          { path: '', pathMatch: 'full', redirectTo: 'categories' },
+          { path: '', data: { title: 'menu_home' }, component: Empty },
           {
-            path: 'categories',
-            data: { title: 'menu_categories' },
-            children: [{ path: '', component: Empty }],
+            path: 'definitions',
+            data: { title: 'menu_definitions' },
+            children: [
+              { path: '', pathMatch: 'full', redirectTo: 'categories' },
+              {
+                path: 'categories',
+                data: { title: 'menu_categories' },
+                children: [{ path: '', component: Empty }],
+              },
+            ],
           },
         ],
       },
@@ -38,19 +43,19 @@ describe('buildBreadcrumb', () => {
   }
 
   it('follows the route tree and starts from home', async () => {
-    expect(await crumbsFor('/definitions/categories')).toEqual([
-      { titleKey: 'menu_home', url: '/' },
-      { titleKey: 'menu_definitions', url: '/definitions' },
-      { titleKey: 'menu_categories', url: '/definitions/categories' },
+    expect(await crumbsFor('/admin/definitions/categories')).toEqual([
+      { titleKey: 'menu_home', url: '/admin' },
+      { titleKey: 'menu_definitions', url: '/admin/definitions' },
+      { titleKey: 'menu_categories', url: '/admin/definitions/categories' },
     ]);
   });
 
   it('does not repeat a title inherited by an empty-path child', async () => {
-    const crumbs = await crumbsFor('/definitions/categories');
+    const crumbs = await crumbsFor('/admin/definitions/categories');
     expect(crumbs.filter((crumb) => crumb.titleKey === 'menu_categories')).toHaveLength(1);
   });
 
   it('shows only home on the home page', async () => {
-    expect(await crumbsFor('/')).toEqual([{ titleKey: 'menu_home', url: '/' }]);
+    expect(await crumbsFor('/admin')).toEqual([{ titleKey: 'menu_home', url: '/admin' }]);
   });
 });

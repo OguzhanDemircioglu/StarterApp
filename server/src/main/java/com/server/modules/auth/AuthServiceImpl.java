@@ -11,6 +11,7 @@ import com.server.modules.auth.dto.SessionUser;
 import com.server.modules.menu.MenuService;
 import com.server.modules.user.User;
 import com.server.modules.user.UserRepository;
+import com.server.security.SurfacePolicy;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -34,13 +35,14 @@ public class AuthServiceImpl implements AuthService {
     private final AccessTokenIssuer accessTokenIssuer;
     private final PasswordEncoder passwordEncoder;
     private final SessionProperties properties;
+    private final SurfacePolicy surfacePolicy;
     /** Kayıtlı olmayan e-postalarda da şifre kontrolü yapılır; cevap süresinden kullanıcının varlığı anlaşılmasın. */
     private final String dummyPasswordHash;
 
     public AuthServiceImpl(UserRepository userRepository, UserSessionRepository sessionRepository,
                            LoginAttemptService loginAttemptService, MenuService menuService,
                            AccessTokenIssuer accessTokenIssuer, PasswordEncoder passwordEncoder,
-                           SessionProperties properties) {
+                           SessionProperties properties, SurfacePolicy surfacePolicy) {
         this.userRepository = userRepository;
         this.sessionRepository = sessionRepository;
         this.loginAttemptService = loginAttemptService;
@@ -48,6 +50,7 @@ public class AuthServiceImpl implements AuthService {
         this.accessTokenIssuer = accessTokenIssuer;
         this.passwordEncoder = passwordEncoder;
         this.properties = properties;
+        this.surfacePolicy = surfacePolicy;
         this.dummyPasswordHash = passwordEncoder.encode("dummy-password-for-timing");
     }
 
@@ -58,7 +61,10 @@ public class AuthServiceImpl implements AuthService {
 
         Optional<User> user = userRepository.findByEmail(request.email());
         String passwordHash = user.map(User::getPassword).orElse(dummyPasswordHash);
-        if (!passwordEncoder.matches(request.password(), passwordHash) || user.isEmpty()) {
+        // Bu yüzeyde giriş yapamayan rol (ör. dışarıya açık sunucuda ADMIN) yanlış şifreyle aynı cevabı alır:
+        // dışarıdan bakan biri yönetici hesaplarının varlığını öğrenemez.
+        boolean allowedHere = user.map(u -> surfacePolicy.allowsLogin(u.getRole())).orElse(false);
+        if (!passwordEncoder.matches(request.password(), passwordHash) || user.isEmpty() || !allowedHere) {
             loginAttemptService.recordFailure(attemptKey);
             throw new UnauthorizedException(AuthMessages.INVALID_CREDENTIALS);
         }
@@ -72,6 +78,7 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public AuthResult devLogin(String email, ClientInfo client) {
         User user = userRepository.findByEmail(email).filter(User::isActive)
+                .filter(u -> surfacePolicy.allowsLogin(u.getRole()))
                 .orElseThrow(() -> new NotFoundException(GlobalMessages.RECORD_NOT_FOUND));
         return openSession(user, client);
     }
@@ -97,6 +104,10 @@ public class AuthServiceImpl implements AuthService {
         }
 
         User user = userRepository.findById(session.getUserId()).orElse(null);
+        if (user != null && !surfacePolicy.allowsLogin(user.getRole())) {
+            sessionRepository.revoke(session.getId(), now);
+            throw sessionExpired();
+        }
         if (user == null || !user.isActive()) {
             sessionRepository.revoke(session.getId(), now);
             throw new UnauthorizedException(user == null ? AuthMessages.SESSION_EXPIRED : AuthMessages.USER_INACTIVE);

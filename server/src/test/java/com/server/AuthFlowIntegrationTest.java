@@ -30,6 +30,7 @@ import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.aMapWithSize;
+import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.not;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
@@ -75,7 +76,7 @@ class AuthFlowIntegrationTest {
     @Test
     void migrationsAreAppliedOnce() {
         List<Integer> versions = jdbc.queryForList("SELECT version FROM data_migration_history ORDER BY version", Integer.class);
-        assertThat(versions).containsExactly(1, 2, 3, 4, 5, 6);
+        assertThat(versions).containsExactly(1, 2, 3, 4, 5, 6, 7, 8);
     }
 
     @Test
@@ -85,16 +86,18 @@ class AuthFlowIntegrationTest {
                 .andExpect(jsonPath("$", aMapWithSize(4)))
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.data.user.email").value(ADMIN_EMAIL))
-                .andExpect(jsonPath("$.data.user.role").value("ADMIN"))
+                .andExpect(jsonPath("$.data.user.role").value("SUPERADMIN"))
                 .andExpect(jsonPath("$.data.expiresIn").value(900))
                 .andExpect(jsonPath("$.data.menus[*].titleKey", hasItem("menu_administration")))
                 .andExpect(jsonPath("$.data.menus[0].titleKey").value("menu_home"))
-                .andExpect(jsonPath("$.data.menus[0].route").value("/"))
+                .andExpect(jsonPath("$.data.menus[0].route").value("/admin"))
                 .andExpect(jsonPath("$.data.menus[1].titleKey").value("menu_definitions"))
-                .andExpect(jsonPath("$.data.menus[1].route").value("/definitions"))
+                .andExpect(jsonPath("$.data.menus[1].route").value("/admin/definitions"))
                 .andExpect(jsonPath("$.data.menus[1].icon").value("setting"))
                 .andExpect(jsonPath("$.data.menus[1].children[0].titleKey").value("menu_categories"))
-                .andExpect(jsonPath("$.data.menus[1].children[0].route").value("/definitions/categories"))
+                .andExpect(jsonPath("$.data.menus[1].children[0].route").value("/admin/definitions/categories"))
+                // Yönetim kullanıcısı portal menüsünü almaz: mezun gibi davranamaz.
+                .andExpect(jsonPath("$.data.menus[*].titleKey", not(hasItem("menu_portal"))))
                 .andReturn().getResponse();
 
         assertThat(response.getHeader(HttpHeaders.SET_COOKIE)).contains("HttpOnly", "SameSite=Strict", "Path=/api/auth");
@@ -185,17 +188,45 @@ class AuthFlowIntegrationTest {
 
         ResultActions userLogin = login(email, "User12345")
                 .andExpect(jsonPath("$.data.menus[*].titleKey", not(hasItem("menu_administration"))))
-                // USER'ın arayüzü Mezun Portalı'dır: portal grubu ve alt menüleri oturumla gelir (V006).
-                .andExpect(jsonPath("$.data.menus[?(@.route == '/portal')].children[*].route", hasItem("/portal/profile")));
+                // USER'ın arayüzü Mezun Portalı'dır (/user): oturuma sadece portal grubu gelir (V006, V007).
+                .andExpect(jsonPath("$.data.menus[*].route", contains("/user")))
+                .andExpect(jsonPath("$.data.menus[0].children[*].route", hasItem("/user/profile")));
         String userToken = accessToken(userLogin);
 
-        expectError(withToken(get("/api/users"), userToken), 403, GlobalMessages.ACCESS_DENIED);
-        mockMvc.perform(withToken(get("/api/categories"), userToken)).andExpect(status().isOk());
+        expectError(withToken(get("/api/admin/users"), userToken), 403, GlobalMessages.ACCESS_DENIED);
+        expectError(withToken(get("/api/admin/categories"), userToken), 403, GlobalMessages.ACCESS_DENIED);
+    }
+
+    @Test
+    void staffCannotActAsUser() throws Exception {
+        String superadminToken = accessToken(login(ADMIN_EMAIL, ADMIN_PASSWORD));
+        String adminToken = accessToken(login(createUser(superadminToken, "ADMIN"), "User12345"));
+
+        // /api/portal/** sadece USER'a açıktır; ADMIN ve SUPERADMIN orada 403 alır (endpoint olmasa bile önce yetki bakılır).
+        expectError(withToken(get("/api/portal/profile"), superadminToken), 403, GlobalMessages.ACCESS_DENIED);
+        expectError(withToken(get("/api/portal/profile"), adminToken), 403, GlobalMessages.ACCESS_DENIED);
+    }
+
+    @Test
+    void onlySuperadminManagesStaffAccounts() throws Exception {
+        String superadminToken = accessToken(login(ADMIN_EMAIL, ADMIN_PASSWORD));
+        String adminEmail = createUser(superadminToken, "ADMIN");
+        String adminToken = accessToken(login(adminEmail, "User12345")
+                .andExpect(jsonPath("$.data.user.role").value("ADMIN")));
+
+        // ADMIN, USER açabilir ama yönetici hesabı açamaz.
+        createUser(adminToken, "USER");
+        expectError(withToken(post("/api/admin/users"), adminToken)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"email\":\"x-" + UUID.randomUUID() + "@test.local\",\"fullName\":\"X\",\"password\":\"User12345\",\"role\":\"ADMIN\"}"),
+                422, UserMessages.STAFF_SUPERADMIN_ONLY);
+        // SUPERADMIN yönetim API'lerinin hepsini kullanır (RoleHierarchy: SUPERADMIN > ADMIN).
+        mockMvc.perform(withToken(get("/api/admin/categories"), superadminToken)).andExpect(status().isOk());
     }
 
     @Test
     void requestWithoutTokenReturns401InApiFormat() throws Exception {
-        expectError(get("/api/categories"), 401, GlobalMessages.UNAUTHORIZED);
+        expectError(get("/api/admin/categories"), 401, GlobalMessages.UNAUTHORIZED);
     }
 
     @Test
@@ -208,7 +239,7 @@ class AuthFlowIntegrationTest {
         String token = accessToken(login(ADMIN_EMAIL, ADMIN_PASSWORD));
         String name = "Kategori " + UUID.randomUUID();
 
-        String created = mockMvc.perform(withToken(post("/api/categories"), token)
+        String created = mockMvc.perform(withToken(post("/api/admin/categories"), token)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"name\":\"" + name + "\"}"))
                 .andExpect(status().isOk())
@@ -217,22 +248,22 @@ class AuthFlowIntegrationTest {
                 .andReturn().getResponse().getContentAsString();
         Integer id = JsonPath.read(created, "$.data.id");
 
-        expectError(withToken(post("/api/categories"), token)
+        expectError(withToken(post("/api/admin/categories"), token)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("{\"name\":\"" + name + "\"}"), 422, CategoryMessages.NAME_EXISTS);
 
-        mockMvc.perform(withToken(put("/api/categories/" + id), token)
+        mockMvc.perform(withToken(put("/api/admin/categories/" + id), token)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"name\":\"" + name + " v2\",\"version\":0}"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.version").value(1));
 
-        expectError(withToken(put("/api/categories/" + id), token)
+        expectError(withToken(put("/api/admin/categories/" + id), token)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("{\"name\":\"" + name + " v3\",\"version\":0}"), 409, GlobalMessages.RECORD_MODIFIED);
 
-        mockMvc.perform(withToken(delete("/api/categories/" + id), token)).andExpect(status().isOk());
-        expectError(withToken(get("/api/categories/" + id), token), 404, GlobalMessages.RECORD_NOT_FOUND);
+        mockMvc.perform(withToken(delete("/api/admin/categories/" + id), token)).andExpect(status().isOk());
+        expectError(withToken(get("/api/admin/categories/" + id), token), 404, GlobalMessages.RECORD_NOT_FOUND);
 
         Boolean deleted = jdbc.queryForObject("SELECT deleted FROM categories WHERE id = ?", Boolean.class, id);
         assertThat(deleted).isTrue();
@@ -264,7 +295,7 @@ class AuthFlowIntegrationTest {
 
     private String createUser(String adminToken, String role) throws Exception {
         String email = "user-" + UUID.randomUUID() + "@test.local";
-        mockMvc.perform(withToken(post("/api/users"), adminToken)
+        mockMvc.perform(withToken(post("/api/admin/users"), adminToken)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"email\":\"" + email + "\",\"fullName\":\"Test User\",\"password\":\"User12345\",\"role\":\"" + role + "\"}"))
                 .andExpect(status().isOk());

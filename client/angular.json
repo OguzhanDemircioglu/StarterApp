@@ -26,6 +26,7 @@
             ],
             "styles": [
               "node_modules/ng-zorro-antd/ng-zorro-antd.min.css",
+              "src/theme.css",
               "src/styles.css"
             ]
           },
@@ -49,6 +50,22 @@
               "optimization": false,
               "extractLicenses": false,
               "sourceMap": true
+            },
+            "public": {
+              "fileReplacements": [
+                {
+                  "replace": "src/app/surface/surface.ts",
+                  "with": "src/app/surface/surface.public.ts"
+                }
+              ]
+            },
+            "internal": {
+              "fileReplacements": [
+                {
+                  "replace": "src/app/surface/surface.ts",
+                  "with": "src/app/surface/surface.internal.ts"
+                }
+              ]
             }
           },
           "defaultConfiguration": "production"
@@ -64,6 +81,13 @@
             },
             "development": {
               "buildTarget": "client:build:development"
+            },
+            "public": {
+              "buildTarget": "client:build:development,public"
+            },
+            "internal": {
+              "buildTarget": "client:build:development,internal",
+              "port": 4300
             }
           },
           "defaultConfiguration": "development"

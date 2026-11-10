@@ -3,12 +3,20 @@
     class="sider"
     nzCollapsible
     nzBreakpoint="lg"
-    nzWidth="240px"
+    nzWidth="248px"
     [nzCollapsedWidth]="64"
     [nzTrigger]="null"
     [(nzCollapsed)]="collapsed"
   >
-    <a class="brand" routerLink="/">{{ collapsed() ? 'SA' : 'StarterApp' }}</a>
+    <a class="brand" routerLink="/admin">
+      <app-brand-logo [light]="true" [compact]="collapsed()" />
+    </a>
+    @if (!collapsed()) {
+      <div class="sider-title">
+        <span>YÖNETİM PANELİ</span>
+        <strong>Mezun Kart</strong>
+      </div>
+    }
     <app-sidebar-menu [collapsed]="collapsed()" />
   </nz-sider>
 
@@ -17,6 +25,7 @@
       <app-topbar [collapsed]="collapsed()" (toggleSidebar)="collapsed.set(!collapsed())" />
     </nz-header>
     <nz-content class="content">
+      <app-banner />
       <router-outlet />
     </nz-content>
   </nz-layout>

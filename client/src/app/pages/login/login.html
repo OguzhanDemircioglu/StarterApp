@@ -47,10 +47,12 @@
           {{ 'login_submit' | translate }}
         </button>
 
-        <p class="link-text animation" style="--i: 5; --j: 25">
-          {{ 'login_no_account' | translate }}
-          <button class="link" type="button" (click)="showRegister(true)">{{ 'register_submit' | translate }}</button>
-        </p>
+        @if (canRegister) {
+          <p class="link-text animation" style="--i: 5; --j: 25">
+            {{ 'login_no_account' | translate }}
+            <button class="link" type="button" (click)="showRegister(true)">{{ 'register_submit' | translate }}</button>
+          </p>
+        }
       </form>
     </div>
 

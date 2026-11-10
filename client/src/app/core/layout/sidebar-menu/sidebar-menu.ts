@@ -9,6 +9,9 @@ import { NzMenuModule } from 'ng-zorro-antd/menu';
 import { filter, map, startWith } from 'rxjs';
 import { sessionFeature } from '../../auth/session.state';
 
+/** Yönetim panelinin anasayfası; her adresin başında olduğu için "içinde" sayılmaz. */
+const ADMIN_HOME = '/admin';
+
 /**
  * Menü ağacı backend'den (SessionInfo.menus) gelir; burada sadece çizilir.
  * ADMIN'e özel menüleri backend zaten süzmüş olarak gönderir. Alt menüsü olan düğümler grup olur,
@@ -36,6 +39,6 @@ export class SidebarMenu {
 
   /** Açık sayfanın üst grubu açık gelir. */
   protected isInside(route: string | null): boolean {
-    return !!route && route !== '/' && this.currentUrl().startsWith(route);
+    return !!route && route !== ADMIN_HOME && this.currentUrl().startsWith(route);
   }
 }

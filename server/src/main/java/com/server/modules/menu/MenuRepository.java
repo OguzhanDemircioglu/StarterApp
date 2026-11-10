@@ -6,7 +6,7 @@ import java.util.List;
 
 public interface MenuRepository extends JpaRepository<Menu, Long> {
 
-    List<Menu> findAllByOrderBySortOrderAsc();
+    List<Menu> findAllByAdminOnlyTrueOrderBySortOrderAsc();
 
     List<Menu> findAllByAdminOnlyFalseOrderBySortOrderAsc();
 }

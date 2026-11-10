@@ -55,7 +55,7 @@ com.server
 │                  RestAuthenticationEntryPoint, RestAccessDeniedHandler
 ├─ migration/      DataMigration, DataMigrationRunner
 │  └─ versions/    V001_UniqueIndexes, V002_InitialAdmin, V003_InitialMenus, V004_CategoryModule,
-│                  V005_HierarchicalMenuRoutes, V006_PortalMenus
+│                  V005_HierarchicalMenuRoutes, V006_PortalMenus, V007_RoleAreaRoutes, V008_SuperadminRole
 └─ modules/
    ├─ auth/        login / refresh / logout / şifre değiştirme, UserSession, LoginAttempt, SessionInfo
    ├─ user/        kullanıcı yönetimi (sadece admin)
@@ -176,7 +176,7 @@ Amaç: İki kullanıcı aynı kaydı aynı anda düzenlerse, sonra kaydedenin ö
 
 ```java
 @RestController
-@RequestMapping("/api/categories")
+@RequestMapping("/api/admin/categories")
 @RequiredArgsConstructor
 public class CategoryController {
     private final CategoryService service;
@@ -489,14 +489,22 @@ public class CurrentUser {
 
 ## 9. Yetkilendirme
 
-- **Roller:** Yalnızca `ADMIN` ve `USER` vardır. Kodda enum olarak tanımlıdır. Her kullanıcının tek rolü olur ve `users.role` kolonunda tutulur. Rol tablosu yoktur.
-- **Varsayılan kural:** Giriş yapmış herkes endpoint'lere erişebilir.
-- **Admin'e özel endpoint'ler:** `@PreAuthorize("hasRole('ADMIN')")` ile işaretlenir.
-  - Controller'ın tamamı admin'e özelse işaret sınıfın üstüne konur.
-  - Herkes okuyabilip sadece admin değiştirebiliyorsa, işaret yalnızca create, update ve delete metotlarına konur.
-- **Herkese açık endpoint'ler** config'te beyaz listededir: `/api/auth/login`, `/api/auth/register`, `/api/auth/dev-login` (sadece geliştirmede var), `/api/auth/refresh`, `/api/auth/logout`, `/actuator/health/**`. Swagger sadece dev profilinde açılır.
+- **Roller** (`security/Role.java`): `SUPERADMIN`, `ADMIN`, `USER`. Her kullanıcının tek rolü olur ve `users.role` kolonunda tutulur. Rol tablosu yoktur.
+  - **Hiyerarşi:** SUPERADMIN, ADMIN'in bütün yetkilerini taşır (Spring `RoleHierarchy` bean'i, `SecurityConfig`).
+  - **USER ayrıdır:** ADMIN ve SUPERADMIN bilerek USER yetkisi taşımaz. Yönetim kullanıcıları portala giremez, mezun gibi davranamaz.
+  - **Hesap yönetimi:** ADMIN sadece USER hesaplarını açar, düzenler ve siler. ADMIN ve SUPERADMIN hesaplarına sadece SUPERADMIN dokunur (`user_staff_superadmin_only`); son aktif SUPERADMIN korunur (`user_last_admin`). İlk yönetici (V002) V008 ile SUPERADMIN olur.
+- **Yol kuralları** (`SecurityConfig`):
+  - `/api/admin/**`: yönetim paneli API'si, `hasRole('ADMIN')` (SUPERADMIN de geçer). Controller'lar ayrıca `@PreAuthorize("hasRole('ADMIN')")` taşır.
+  - `/api/portal/**`: Mezun Portalı API'si, `hasRole('USER')`.
+  - Geri kalan her şey: giriş yapmış olmak yeterli (ör. `/api/auth/change-password`).
+- **Yüzey (`APP_SURFACE`, `security/Surface.java`):** Aynı uygulama iki ayrı sunucuda iki modda çalışır (deploy/README.md):
+  - `public` (dışarıya açık): sadece USER giriş yapar, kayıt açıktır; `/api/admin/**` tamamen kapalıdır.
+  - `internal` (kapalı ağ): sadece ADMIN ve SUPERADMIN giriş yapar; `/api/auth/register` ve `/api/portal/**` kapalıdır.
+  - `all`: sadece geliştirme ve testler. Prod profilinde `APP_SURFACE` zorunludur ve `all` olamaz; uygulama açılmaz.
+  - Yüzeyde giriş yapamayan bir rol (ör. dışarıda ADMIN), doğru şifreyle bile yanlış şifreyle aynı cevabı alır (`auth_invalid_credentials`); refresh'te oturum kapatılır.
+- **Herkese açık endpoint'ler** config'te beyaz listededir: `/api/auth/login`, `/api/auth/register` (sadece public/all), `/api/auth/dev-login` (sadece geliştirmede var), `/api/auth/refresh`, `/api/auth/logout`, `/actuator/health/**`. Swagger sadece dev profilinde açılır.
 - DB'de endpoint ya da yetki tablosu **yoktur**.
-- **Menü görünürlüğü güvenlik değildir.** Bir menüyü gizlemek arkasındaki endpoint'i korumaz; asıl koruma `@PreAuthorize`'dır.
+- **Menü görünürlüğü güvenlik değildir.** Bir menüyü gizlemek arkasındaki endpoint'i korumaz; asıl koruma yol kuralları ve `@PreAuthorize`'dır.
 
 ---
 
@@ -553,7 +561,7 @@ public class CurrentUser {
 
 ### 10.6 Yerel geliştirmede H2
 
-- Dev profili, `DB_URL` verilmezse kurulum gerektirmeyen gömülü H2 ile açılır. Veri `server/data/` klasöründe kalıcıdır (git'e girmez). Compose'daki server bunu `h2data` volume'ünde tutar; IDE'den çalıştırmayla aynı dosyayı paylaşmaz.
+- Dev profili, `DB_URL` verilmezse kurulum gerektirmeyen gömülü H2 ile açılır. Veri `server/data/` klasöründe kalıcıdır (git'e girmez). Compose'daki iki server (iki yüzey) aynı veritabanını kullandığı için orada H2 değil PostgreSQL vardır (§16).
 - Prod ve Testcontainers testleri PostgreSQL 18'de kalır. H2 birden çok replica'yı desteklemediği için prod'da kullanılmaz; `DB_URL` prod'da zorunludur ve varsayılanı yoktur.
 - URL'deki `MODE=PostgreSQL` ve `DATABASE_TO_LOWER=TRUE` aynı SQL'in iki veritabanında da çalışmasını sağlar. Uyumluluk tam değildir; SQL yazılırken iki veritabanında ortak olan söz dizimi kullanılır:
 
@@ -638,10 +646,11 @@ Tablo: `menus` (BaseEntity alanları + aşağıdakiler)
 | `route` | Frontend rotası; alt menüsü olan grup menülerinde `null` |
 | `icon` | Ant Design ikon adı (`home`, `setting`, `tag`, `team`); frontend `nz-icon` ile çizer. Yeni bir ikon frontend'de de kayıt edilmelidir (Frontend_Architecture.md §11) |
 | `sort_order` | Aynı seviyedeki menüler arasındaki sıra |
-| `admin_only` | `true` ise sadece ADMIN görür |
+| `admin_only` | `true`: yönetim paneli menüsü (ADMIN, SUPERADMIN); `false`: Mezun Portalı menüsü (USER) |
 
 **Kurallar:**
-- **Kim ne görür:** ADMIN bütün menüleri görür. USER sadece `admin_only = false` olanları görür.
+- **Kim ne görür:** ADMIN ve SUPERADMIN sadece `admin_only = true` (yönetim paneli) menülerini, USER sadece `admin_only = false` (portal) menülerini görür. Yönetim kullanıcılarına portal menüsü gelmez.
+- **Route ön ekleri arayüzü belirler** (Frontend_Architecture.md §3): yönetim paneli menüleri `/admin/...` ve `admin_only = true`, Mezun Portalı menüleri `/user/...` (V007_RoleAreaRoutes).
 - **Ağaç nasıl kurulur:** Tek bir sorgu yeterlidir. Kayıtlar `sort_order`'a göre çekilir, ağaç Java'da `parentId` üzerinden kurulur. Recursive SQL ya da `@OneToMany` self-ilişki kullanılmaz (lazy loading, N+1 sorgu ve JSON döngüsü sorunlarını önlemek için).
 - **Gizli üst menü:** Görünmeyen bir menünün alt menüleri de görünmez.
 - Menü ağacı `SessionInfo.menus` içinde döner (§8.6).
@@ -707,12 +716,13 @@ Dosyalar: `application.yml` (ortak), `application-dev.yml`, `application-prod.ym
 
 | Environment variable | Açıklama |
 |---|---|
+| `APP_SURFACE` | `public` (dışarıya açık: USER, kayıt) ya da `internal` (kapalı ağ: ADMIN, SUPERADMIN). Prod'da zorunlu, `all` olamaz; dev ve testlerde varsayılan `all` (§9) |
 | `SPRING_PROFILES_ACTIVE` | `dev` ya da `prod`. **Varsayılan profil yoktur**: unutulursa uygulama dev ayarlarıyla (güvensiz cookie, bilinen admin şifresi) açılmaz, eksik değişkenler yüzünden hiç açılmaz |
 | `DB_URL`, `DB_USERNAME`, `DB_PASSWORD` | PostgreSQL bağlantısı (dev profilinde verilmezse H2, §10.6) |
 | `DB_SCHEMA` | **Zorunlu.** Uygulamanın şeması, küçük harf (§10.2) |
 | `JWT_PRIVATE_KEY_PATH`, `JWT_PUBLIC_KEY_PATH`, `JWT_KEY_ID` | Aktif RSA anahtarı |
 | `JWT_PREVIOUS_PUBLIC_KEY_PATH`, `JWT_PREVIOUS_KEY_ID` | İsteğe bağlı; anahtar değişimi sırasında bir önceki public key |
-| `ADMIN_EMAIL`, `ADMIN_PASSWORD` | Sadece ilk admin oluşturulurken kullanılır (`V002_InitialAdmin`) |
+| `ADMIN_EMAIL`, `ADMIN_PASSWORD` | Sadece ilk yönetici oluşturulurken kullanılır (`V002_InitialAdmin`); bu hesap SUPERADMIN olur (`V008_SuperadminRole`) |
 | `CORS_ALLOWED_ORIGINS` | Virgülle ayrılmış origin listesi |
 | `COOKIE_SECURE` | dev: `false`, prod: `true` |
 | `FORWARD_HEADERS_STRATEGY` | `none` (varsayılan) ya da proxy arkasındaysa `native` |
@@ -734,7 +744,8 @@ Dosyalar: `application.yml` (ortak), `application-dev.yml`, `application-prod.ym
   - Container belleğine uyum için `-XX:MaxRAMPercentage=75` verilir.
 - **Healthcheck:** Docker container'a belirli aralıklarla "hazır mısın?" diye sorar. Bunun için `/actuator/health/readiness` kullanılır. Bu endpoint, Hibernate şemayı oluşturup bütün migration'lar bittikten **sonra** "hazırım" der. Swarm rolling update'te yeni sürüm "hazırım" demeden eski sürümü kapatmaz ve yeni sürüme trafik göndermez; böylece güncelleme sırasında kullanıcılar hata görmez. Actuator'da sadece `health` dışarı açılır ve health probe'ları açık olur.
 - **Graceful shutdown:** Boot'ta varsayılan olarak açıktır. `spring.lifecycle.timeout-per-shutdown-phase=30s` ayarlanır; Swarm'daki `stop_grace_period` bundan uzun olmalıdır.
-- **Geliştirme ortamı:** Repo kökündeki `docker-compose.yml`'de `app` profili server'ı ve client'ı çalıştırır. Server, admin bilgilerini ve varsa `DB_URL`'i IDE'den çalıştırmayla aynı `server/.env` dosyasından (`env_file`) alır; `DB_URL` yoksa H2'yi `h2data` volume'ünde tutar (§10.6). İsteğe bağlı yerel PostgreSQL 18 `db` profilindedir; PostgreSQL 18'de volume `/var/lib/postgresql` yoluna bağlanır.
+- **İki yüzey, iki kurulum:** Aynı server imajı `APP_SURFACE=public` (dışarıya açık sunucu) ve `APP_SURFACE=internal` (kapalı ağ sunucusu) ile çalışır; client imajı `SURFACE` build argümanıyla iki ayrı imaj olur. Gerçek kurulum `deploy/internal` ve `deploy/public` compose dosyalarıyla yapılır; veritabanı kapalı ağdadır, public server ona güvenlik duvarındaki tek izinle bağlanır. Her yüzeyin kendi JWT anahtar çifti vardır. Ayrıntı: `deploy/README.md`.
+- **Geliştirme ortamı:** Repo kökündeki `docker-compose.yml`'de `app` profili iki yüzeyi yan yana kurar: PostgreSQL, `server-internal`, `server-public`, `client-public` (4200) ve `client-internal` (4300). İki server aynı veritabanını kullandığı için burada H2 yoktur; admin bilgileri `server/.env`'den gelir. Yalnız PostgreSQL `db` profilindedir; PostgreSQL 18'de volume `/var/lib/postgresql` yoluna bağlanır.
 
 **Stateless kontrol listesi** (Swarm'da her replica eşit olmalı):
 

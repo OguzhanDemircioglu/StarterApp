@@ -13,6 +13,7 @@ public final class UserMessages {
     public static final String ROLE_REQUIRED = "user_role_required";
     public static final String ACTIVE_REQUIRED = "user_active_required";
     public static final String LAST_ADMIN = "user_last_admin";
+    public static final String STAFF_SUPERADMIN_ONLY = "user_staff_superadmin_only";
 
     private UserMessages() {
     }

@@ -7,6 +7,7 @@ import com.server.modules.user.dto.UserCreateRequest;
 import com.server.modules.user.dto.UserPasswordResetRequest;
 import com.server.modules.user.dto.UserResponse;
 import com.server.modules.user.dto.UserUpdateRequest;
+import com.server.security.CurrentUser;
 import com.server.security.Role;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -21,13 +22,16 @@ public class UserServiceImpl extends BaseServiceImpl<User, UserCreateRequest, Us
     private final UserRepository userRepository;
     private final UserSessionRepository sessionRepository;
     private final PasswordEncoder passwordEncoder;
+    private final CurrentUser currentUser;
 
     public UserServiceImpl(UserRepository repository, UserMapper mapper,
-                           UserSessionRepository sessionRepository, PasswordEncoder passwordEncoder) {
+                           UserSessionRepository sessionRepository, PasswordEncoder passwordEncoder,
+                           CurrentUser currentUser) {
         super(repository, mapper);
         this.userRepository = repository;
         this.sessionRepository = sessionRepository;
         this.passwordEncoder = passwordEncoder;
+        this.currentUser = currentUser;
     }
 
     @Override
@@ -60,6 +64,10 @@ public class UserServiceImpl extends BaseServiceImpl<User, UserCreateRequest, Us
         if (userRepository.existsByEmail(request.email())) {
             throw new BusinessException(UserMessages.EMAIL_EXISTS);
         }
+        // Kayıt (register) her zaman USER oluşturur ve giriş gerektirmez; yönetici hesabı açmak SUPERADMIN işidir.
+        if (request.role().isStaff()) {
+            requireSuperadmin();
+        }
     }
 
     @Override
@@ -72,22 +80,35 @@ public class UserServiceImpl extends BaseServiceImpl<User, UserCreateRequest, Us
         if (userRepository.existsByEmailAndIdNot(request.email(), entity.getId())) {
             throw new BusinessException(UserMessages.EMAIL_EXISTS);
         }
-        boolean losesAdminRights = request.role() != Role.ADMIN || !request.active();
-        if (isLastActiveAdmin(entity) && losesAdminRights) {
+        if (entity.getRole().isStaff() || request.role().isStaff()) {
+            requireSuperadmin();
+        }
+        boolean losesSuperadminRights = request.role() != Role.SUPERADMIN || !request.active();
+        if (isLastActiveSuperadmin(entity) && losesSuperadminRights) {
             throw new BusinessException(UserMessages.LAST_ADMIN);
         }
     }
 
     @Override
     protected void validateDelete(User entity) {
-        if (isLastActiveAdmin(entity)) {
+        if (entity.getRole().isStaff()) {
+            requireSuperadmin();
+        }
+        if (isLastActiveSuperadmin(entity)) {
             throw new BusinessException(UserMessages.LAST_ADMIN);
         }
     }
 
-    /** Sistemde admin kalmazsa kimse kullanıcı yönetemez; son aktif admin korunur. */
-    private boolean isLastActiveAdmin(User user) {
-        return user.getRole() == Role.ADMIN && user.isActive()
-                && userRepository.countByRoleAndActiveTrue(Role.ADMIN) <= 1;
+    /** Sistemde süper yönetici kalmazsa kimse yönetici hesabı yönetemez; son aktif SUPERADMIN korunur. */
+    private boolean isLastActiveSuperadmin(User user) {
+        return user.getRole() == Role.SUPERADMIN && user.isActive()
+                && userRepository.countByRoleAndActiveTrue(Role.SUPERADMIN) <= 1;
+    }
+
+    /** ADMIN sadece USER hesaplarını yönetir; ADMIN ve SUPERADMIN hesaplarına sadece SUPERADMIN dokunur. */
+    private void requireSuperadmin() {
+        if (currentUser.findId().isEmpty() || currentUser.role() != Role.SUPERADMIN) {
+            throw new BusinessException(UserMessages.STAFF_SUPERADMIN_ONLY);
+        }
     }
 }

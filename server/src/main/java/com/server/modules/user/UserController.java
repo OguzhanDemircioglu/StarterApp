@@ -21,10 +21,11 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 /**
- * Kullanıcı yönetimi: controller'ın tamamı sadece ADMIN'e açık.
+ * Kullanıcı yönetimi (yönetim paneli): ADMIN ve SUPERADMIN. ADMIN sadece USER hesaplarını yönetir; yönetici hesaplarını
+ * sadece SUPERADMIN yönetir (UserServiceImpl).
  */
 @RestController
-@RequestMapping("/api/users")
+@RequestMapping("/api/admin/users")
 @PreAuthorize("hasRole('ADMIN')")
 @RequiredArgsConstructor
 public class UserController {

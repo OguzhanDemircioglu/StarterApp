@@ -1,0 +1,103 @@
+<section class="card hero">
+  <div class="identity">
+    <div class="photo" aria-label="Profil fotoğrafı">{{ profile.initials }}</div>
+    <div class="identity-text">
+      <h2>{{ profile.fullName }}</h2>
+      <p class="department">{{ profile.department }}</p>
+      <p class="meta">{{ profile.university }}</p>
+      <p class="meta">{{ profile.graduation }}</p>
+      <p class="meta">{{ profile.city }}</p>
+      <button class="btn btn-primary edit-btn"><nz-icon nzType="edit" /> Profili Düzenle</button>
+    </div>
+  </div>
+
+  <dl class="contacts">
+    @for (c of profile.contacts; track c.label) {
+      <div class="contact">
+        <nz-icon [nzType]="c.icon" />
+        <div>
+          <dt>{{ c.label }}</dt>
+          <dd>{{ c.value }}</dd>
+        </div>
+      </div>
+    }
+  </dl>
+</section>
+
+<div class="grid">
+  <section class="card">
+    <header class="card-head"><h2>Profil Özeti</h2></header>
+    <p class="summary">{{ profile.summary }}</p>
+    <ul class="facts">
+      <li>
+        <nz-icon nzType="tool" />
+        <div><span>Uzmanlık Alanları</span>{{ profile.expertise }}</div>
+      </li>
+      <li>
+        <nz-icon nzType="edit" />
+        <div><span>İlgi Alanları</span>{{ profile.interests }}</div>
+      </li>
+      <li>
+        <nz-icon nzType="translation" />
+        <div><span>Yabancı Diller</span>{{ profile.languages }}</div>
+      </li>
+    </ul>
+  </section>
+
+  <section class="card">
+    <header class="card-head">
+      <h2>Deneyimler</h2>
+      <a class="see-all">Tümünü Gör <nz-icon nzType="right" /></a>
+    </header>
+    <ul class="timeline">
+      @for (e of profile.experiences; track e.title) {
+        <li>
+          <span class="bubble"><nz-icon [nzType]="e.icon" /></span>
+          <div>
+            <strong>{{ e.title }}</strong>
+            <p>{{ e.organization }}</p>
+            <p>{{ e.period }}</p>
+          </div>
+        </li>
+      }
+    </ul>
+  </section>
+
+  <section class="card">
+    <header class="card-head">
+      <h2>Eğitim Bilgileri</h2>
+      <a class="see-all">Tümünü Gör <nz-icon nzType="right" /></a>
+    </header>
+    @for (ed of profile.educations; track ed.school) {
+      <div class="education">
+        <span class="seal">{{ ed.schoolShort }}</span>
+        <div>
+          <strong>{{ ed.school }}</strong>
+          <p>{{ ed.department }}</p>
+          <p>{{ ed.period }}</p>
+          <p>{{ ed.degree }}</p>
+        </div>
+      </div>
+    }
+  </section>
+</div>
+
+<section class="card">
+  <header class="card-head">
+    <h2>Kurumlar</h2>
+    <a class="see-all">Tümünü Gör <nz-icon nzType="right" /></a>
+  </header>
+  <div class="strip-wrap">
+    <div class="strip" #strip>
+      @for (inst of institutions; track inst.name) {
+        <div class="institution">
+          <app-institution-emblem [kind]="inst.emblem" />
+          <span>{{ inst.name }}</span>
+        </div>
+      }
+    </div>
+    <button class="strip-next" aria-label="Sonraki kurumlar" (click)="scrollInstitutions(1)">
+      <nz-icon nzType="right" />
+    </button>
+  </div>
+</section>

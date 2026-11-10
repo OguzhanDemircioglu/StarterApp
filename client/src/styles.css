@@ -1,4 +1,4 @@
-/* Sadece genel ayarlar; component stilleri kendi .css dosyalarındadır. NG-ZORRO stilleri angular.json'dan gelir. */
+/* Sadece genel ayarlar; component stilleri kendi .css dosyalarındadır. NG-ZORRO ve ortak tema (theme.css) angular.json'dan gelir. */
 html,
 body {
   height: 100%;
@@ -6,7 +6,7 @@ body {
 }
 
 body {
-  background: #f5f5f5;
+  background: var(--mk-bg);
 }
 
 /* app-section'ın sağ üstündeki düğme grubu (arama, yenile, ekle) */

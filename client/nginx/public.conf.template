@@ -1,0 +1,57 @@
+# DIŞARIYA AÇIK yüzey (SURFACE=public): public tanıtım sayfası + Mezun Portalı.
+# Angular dosyalarını sunar ve /api isteklerini aynı yüzeydeki server'a (APP_SURFACE=public) iletir.
+# Yönetim API'si (/api/admin/) burada hiç dışarı verilmez; server da aynı yolları kapatır (iki katmanlı koruma).
+# ${API_UPSTREAM} container açılırken ortam değişkeninden doldurulur (nginx imajının templates özelliği).
+server {
+    listen 80;
+    root /usr/share/nginx/html;
+    index index.html;
+    server_tokens off;
+
+    gzip on;
+    gzip_types text/css application/javascript application/json image/svg+xml;
+
+    add_header X-Content-Type-Options "nosniff" always;
+    add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+    add_header X-Frame-Options "DENY" always;
+
+    # Bu yüzeyde olmayan ve sadece geliştirmede kullanılan yollar.
+    location /api/admin/ {
+        return 404;
+    }
+
+    location = /api/auth/dev-login {
+        return 404;
+    }
+
+    location /api/ {
+        proxy_pass http://${API_UPSTREAM};
+        proxy_set_header Host $host;
+        # Gerçek istemci IP'si: brute-force koruması IP_email anahtarını kullanır (server: FORWARD_HEADERS_STRATEGY=native).
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    # Uygulama ve çeviri dosyaları her zaman güncel gelsin.
+    location = /index.html {
+        add_header Cache-Control "no-cache";
+        add_header X-Content-Type-Options "nosniff" always;
+        add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+        add_header X-Frame-Options "DENY" always;
+    }
+
+    location /i18n/ {
+        add_header Cache-Control "no-cache";
+    }
+
+    # Build çıktısındaki JS/CSS dosyalarının adında içerik hash'i var; uzun süre önbelleğe alınabilir.
+    location ~* \.(?:js|css)$ {
+        add_header Cache-Control "public, max-age=31536000, immutable";
+        try_files $uri =404;
+    }
+
+    # SPA: bilinmeyen her yol index.html'e düşer (ör. /user/profile sayfasında F5).
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
+}

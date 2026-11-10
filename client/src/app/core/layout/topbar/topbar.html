@@ -10,11 +10,18 @@
 
   <div class="actions">
     @if (user(); as user) {
-      <button nz-button nzType="text" nz-dropdown [nzDropdownMenu]="userMenu" nzTrigger="click">
-        <nz-icon nzType="user" />
+      <button
+        nz-button
+        nzType="text"
+        class="user"
+        nz-dropdown
+        [nzDropdownMenu]="userMenu"
+        nzTrigger="click"
+      >
+        <span class="avatar">{{ initials() }}</span>
         {{ user.fullName }}
-        <nz-tag [nzColor]="user.role === 'ADMIN' ? 'gold' : 'blue'">
-          {{ (user.role === 'ADMIN' ? 'role_admin' : 'role_user') | translate }}
+        <nz-tag [nzColor]="roleColor(user.role)">
+          {{ roleKey(user.role) | translate }}
         </nz-tag>
       </button>
       <nz-dropdown-menu #userMenu="nzDropdownMenu">

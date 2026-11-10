@@ -22,8 +22,8 @@ class MenuServiceImplTest {
     private MenuServiceImpl service;
 
     @Test
-    void adminGetsFullTreeInSortOrder() {
-        when(repository.findAllByOrderBySortOrderAsc()).thenReturn(List.of(
+    void staffGetsAdminMenusInSortOrder() {
+        when(repository.findAllByAdminOnlyTrueOrderBySortOrderAsc()).thenReturn(List.of(
                 menu(1L, null, "menu_definitions", 1, false),
                 menu(3L, 1L, "menu_categories", 1, false),
                 menu(4L, 1L, "menu_products", 2, false),
@@ -31,6 +31,9 @@ class MenuServiceImplTest {
                 menu(5L, 2L, "menu_users", 1, true)));
 
         List<MenuNode> tree = service.getMenuTree(Role.ADMIN);
+        // SUPERADMIN de aynı (yönetim) menülerini alır.
+        assertThat(service.getMenuTree(Role.SUPERADMIN)).extracting(MenuNode::titleKey)
+                .containsExactly("menu_definitions", "menu_administration");
 
         assertThat(tree).extracting(MenuNode::titleKey).containsExactly("menu_definitions", "menu_administration");
         assertThat(tree.getFirst().children()).extracting(MenuNode::titleKey)

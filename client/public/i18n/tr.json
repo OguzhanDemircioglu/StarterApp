@@ -37,7 +37,8 @@
   "user_password_too_long": "Şifre çok uzun",
   "user_role_required": "Rol seçilmelidir",
   "user_active_required": "Aktiflik durumu seçilmelidir",
-  "user_last_admin": "Sistemdeki son aktif yönetici silinemez, pasife alınamaz ve rolü değiştirilemez",
+  "user_last_admin": "Sistemdeki son aktif süper yönetici silinemez, pasife alınamaz ve rolü değiştirilemez",
+  "user_staff_superadmin_only": "Yönetici hesaplarını sadece süper yönetici yönetebilir",
 
   "category_name_required": "Kategori adı zorunludur",
   "category_name_too_long": "Kategori adı en fazla 100 karakter olabilir",
@@ -78,6 +79,7 @@
   "layout_change_password": "Şifremi değiştir",
   "layout_logout": "Çıkış",
 
+  "role_superadmin": "Süper yönetici",
   "role_admin": "Yönetici",
   "role_user": "Kullanıcı",
 

@@ -1,11 +1,38 @@
-# StarterApp geliştirme ortamı (repo kökünden çalıştırılır).
-#   docker compose --profile app up -d  → server + client → http://localhost:4200
-#                                         Ayarlar server/.env'den gelir (ADMIN_EMAIL...). .env'de DB_URL yoksa veritabanı
-#                                         h2data volume'ündeki H2'dir (IDE'den çalıştırmanın server/data/'sından ayrıdır).
-#   docker compose --profile db up -d   → sadece yerel PostgreSQL 18 (localhost:5433); .env'de DB_URL buna çevrilirse kullanılır
+# StarterApp yerel geliştirme ortamı (repo kökünden çalıştırılır). Gerçek kurulum için deploy/README.md.
+#
+#   docker compose --profile app up -d  → iki yüzey yan yana, gerçek kurulumdaki gibi ayrı server'larla:
+#                                           http://localhost:4200  dışarıya açık yüzey (public sayfa + Mezun Portalı)
+#                                           http://localhost:4300  kapalı ağ yüzeyi (yönetim paneli)
+#                                         İki server aynı veritabanını kullandığı için burada H2 değil PostgreSQL vardır.
+#                                         ADMIN_EMAIL / ADMIN_PASSWORD server/.env'den gelir; DB ayarları aşağıda sabittir.
+#   docker compose --profile db up -d   → sadece yerel PostgreSQL 18 (localhost:5433); IDE'den çalışan server'ı
+#                                         buna bağlamak için server/.env'de DB_URL=jdbc:postgresql://localhost:5433/starterapp
+x-server: &server
+  build: ./server
+  # ADMIN_EMAIL, ADMIN_PASSWORD gibi ayarlar IDE'den çalıştırmayla aynı dosyadan. (.env imaja girmez; .dockerignore'da.)
+  env_file: ./server/.env
+  depends_on:
+    postgres:
+      condition: service_healthy
+  volumes:
+    - ./server/keys:/app/keys:ro
+
+x-server-env: &server-env
+  SPRING_PROFILES_ACTIVE: dev
+  DEV_LOGIN_ENABLED: "false"
+  DB_URL: jdbc:postgresql://postgres:5432/starterapp
+  DB_USERNAME: starterapp
+  DB_PASSWORD: starterapp
+  DB_SCHEMA: starterapp
+  JWT_PRIVATE_KEY_PATH: /app/keys/private.pem
+  JWT_PUBLIC_KEY_PATH: /app/keys/public.pem
+  # Client aynı adresten (nginx) geldiği için CORS gerekmez; gerçek istemci IP'si nginx'in X-Forwarded-For'undan.
+  CORS_ALLOWED_ORIGINS: ""
+  FORWARD_HEADERS_STRATEGY: native
+
 services:
   postgres:
-    profiles: ["db"]
+    profiles: ["db", "app"]
     image: postgres:18
     environment:
       POSTGRES_DB: starterapp
@@ -23,36 +50,52 @@ services:
       timeout: 3s
       retries: 10
 
-  server:
+  # Kapalı ağ yüzeyi: sadece ADMIN ve SUPERADMIN girer, /api/admin/** burada.
+  server-internal:
+    <<: *server
     profiles: ["app"]
-    build: ./server
-    # DB_URL, DB_USERNAME, DB_PASSWORD, DB_SCHEMA, ADMIN_EMAIL, ADMIN_PASSWORD: IDE'den çalıştırmayla aynı dosya.
-    # (.env imaja girmez; .dockerignore'da.)
-    env_file: ./server/.env
     environment:
-      SPRING_PROFILES_ACTIVE: dev
-      DEV_LOGIN_ENABLED: "false"
-      JWT_PRIVATE_KEY_PATH: /app/keys/private.pem
-      JWT_PUBLIC_KEY_PATH: /app/keys/public.pem
-      # Client aynı adresten (nginx) geldiği için CORS gerekmez; gerçek istemci IP'si nginx'in X-Forwarded-For'undan.
-      CORS_ALLOWED_ORIGINS: ""
-      FORWARD_HEADERS_STRATEGY: native
-    volumes:
-      - ./server/keys:/app/keys:ro
-      - h2data:/app/data
-    ports:
-      # Swagger ve doğrudan API denemeleri için; tarayıcı uygulaması API'ye client üzerinden ulaşır.
-      - "8080:8080"
+      <<: *server-env
+      APP_SURFACE: internal
 
-  client:
+  # Dışarıya açık yüzey: sadece USER girer, kayıt burada. Şema işlerini önce internal yapsın diye ondan sonra açılır.
+  server-public:
+    <<: *server
     profiles: ["app"]
-    build: ./client
     depends_on:
-      server:
+      server-internal:
+        condition: service_healthy
+    environment:
+      <<: *server-env
+      APP_SURFACE: public
+
+  client-public:
+    profiles: ["app"]
+    build:
+      context: ./client
+      args:
+        SURFACE: public
+    environment:
+      API_UPSTREAM: server-public:8080
+    depends_on:
+      server-public:
         condition: service_healthy
     ports:
       - "4200:80"
 
+  client-internal:
+    profiles: ["app"]
+    build:
+      context: ./client
+      args:
+        SURFACE: internal
+    environment:
+      API_UPSTREAM: server-internal:8080
+    depends_on:
+      server-internal:
+        condition: service_healthy
+    ports:
+      - "4300:80"
+
 volumes:
   pgdata:
-  h2data:

@@ -98,7 +98,7 @@ export const APP_ICONS = [
   PlusOutline,
   ReloadOutline,
   SearchOutline,
-  // Mezun Portalı sayfaları (pages/portal)
+  // Mezun Portalı sayfaları (pages/user)
   AuditOutline,
   BankOutline,
   BellOutline,

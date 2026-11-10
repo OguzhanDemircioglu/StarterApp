@@ -3,6 +3,7 @@ package com.server.modules.user;
 import com.server.common.exception.BusinessException;
 import com.server.modules.auth.UserSessionRepository;
 import com.server.modules.user.dto.UserUpdateRequest;
+import com.server.security.CurrentUser;
 import com.server.security.Role;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -30,28 +31,45 @@ class UserServiceImplTest {
     private UserSessionRepository sessionRepository;
     @Mock
     private PasswordEncoder passwordEncoder;
+    @Mock
+    private CurrentUser currentUser;
 
     private UserServiceImpl service;
 
     @BeforeEach
     void setUp() {
-        service = new UserServiceImpl(repository, new UserMapperImpl(), sessionRepository, passwordEncoder);
+        service = new UserServiceImpl(repository, new UserMapperImpl(), sessionRepository, passwordEncoder, currentUser);
     }
 
     @Test
-    void lastActiveAdminCannotBeDeactivated() {
-        when(repository.findById(1L)).thenReturn(Optional.of(user(1L, Role.ADMIN, true)));
-        when(repository.countByRoleAndActiveTrue(Role.ADMIN)).thenReturn(1L);
+    void lastActiveSuperadminCannotBeDeactivated() {
+        actingAs(Role.SUPERADMIN);
+        when(repository.findById(1L)).thenReturn(Optional.of(user(1L, Role.SUPERADMIN, true)));
+        when(repository.countByRoleAndActiveTrue(Role.SUPERADMIN)).thenReturn(1L);
 
-        assertThatThrownBy(() -> service.update(1L, new UserUpdateRequest("admin@firma.com", "Admin", Role.ADMIN, false, 0L)))
+        assertThatThrownBy(() -> service.update(1L, new UserUpdateRequest("admin@firma.com", "Admin", Role.SUPERADMIN, false, 0L)))
                 .isInstanceOf(BusinessException.class)
                 .hasMessage(UserMessages.LAST_ADMIN);
     }
 
     @Test
-    void lastActiveAdminCannotBeDeleted() {
+    void adminCannotManageStaffAccounts() {
+        actingAs(Role.ADMIN);
         when(repository.findById(1L)).thenReturn(Optional.of(user(1L, Role.ADMIN, true)));
-        when(repository.countByRoleAndActiveTrue(Role.ADMIN)).thenReturn(1L);
+
+        assertThatThrownBy(() -> service.update(1L, new UserUpdateRequest("admin2@firma.com", "Admin", Role.ADMIN, true, 0L)))
+                .isInstanceOf(BusinessException.class)
+                .hasMessage(UserMessages.STAFF_SUPERADMIN_ONLY);
+        assertThatThrownBy(() -> service.delete(1L))
+                .isInstanceOf(BusinessException.class)
+                .hasMessage(UserMessages.STAFF_SUPERADMIN_ONLY);
+    }
+
+    @Test
+    void lastActiveSuperadminCannotBeDeleted() {
+        actingAs(Role.SUPERADMIN);
+        when(repository.findById(1L)).thenReturn(Optional.of(user(1L, Role.SUPERADMIN, true)));
+        when(repository.countByRoleAndActiveTrue(Role.SUPERADMIN)).thenReturn(1L);
 
         assertThatThrownBy(() -> service.delete(1L))
                 .isInstanceOf(BusinessException.class)
@@ -92,5 +110,10 @@ class UserServiceImplTest {
         user.setActive(active);
         user.setVersion(0L);
         return user;
+    }
+
+    private void actingAs(Role role) {
+        when(currentUser.findId()).thenReturn(Optional.of(99L));
+        when(currentUser.role()).thenReturn(role);
     }
 }

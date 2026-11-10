@@ -14,7 +14,7 @@
           </ul>
         </li>
       } @else {
-        <li nz-menu-item nzMatchRouter [nzMatchRouterExact]="node.route === '/'" [routerLink]="node.route">
+        <li nz-menu-item nzMatchRouter [nzMatchRouterExact]="node.route === '/admin'" [routerLink]="node.route">
           @if (node.icon) {
             <nz-icon [nzType]="node.icon" />
           }

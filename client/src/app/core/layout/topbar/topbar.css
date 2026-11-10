@@ -15,3 +15,22 @@ nz-tag {
   margin-left: 8px;
   margin-right: 0;
 }
+
+.user {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.avatar {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #fff;
+  background: var(--mk-red);
+  border-radius: 50%;
+}
+

@@ -3,6 +3,7 @@ import { Store } from '@ngrx/store';
 import { finalize, firstValueFrom, Observable, shareReplay, tap } from 'rxjs';
 import { AuthApi } from './auth-api';
 import { SessionActions } from './session.actions';
+import { SURFACE } from '../../surface/surface';
 import { SessionInfo } from './session.model';
 
 /**
@@ -45,7 +46,8 @@ export class TokenRefresher {
 
   /** `npm start` ile çalışırken login ekranı atlanır; /login adresi açıkça istenirse ekran görünür. */
   private async devLogin(): Promise<SessionInfo | null> {
-    if (location.pathname === '/login') {
+    // Dev girişi yönetici hesabıyladır; dışarıya açık (public) yüzeyde yönetici giremez.
+    if (location.pathname === '/login' || SURFACE === 'public') {
       return null;
     }
     try {

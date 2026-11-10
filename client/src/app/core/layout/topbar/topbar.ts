@@ -1,4 +1,4 @@
-import { Component, inject, input, output, signal } from '@angular/core';
+import { Component, computed, inject, input, output, signal } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { TranslatePipe } from '@ngx-translate/core';
 import { NzButtonModule } from 'ng-zorro-antd/button';
@@ -7,12 +7,21 @@ import { NzIconModule } from 'ng-zorro-antd/icon';
 import { NzMenuModule } from 'ng-zorro-antd/menu';
 import { NzTagModule } from 'ng-zorro-antd/tag';
 import { ChangePassword } from '../../auth/change-password/change-password';
+import { roleColor, roleKey } from '../../auth/roles';
 import { SessionActions } from '../../auth/session.actions';
 import { sessionFeature } from '../../auth/session.state';
 
 @Component({
   selector: 'app-topbar',
-  imports: [TranslatePipe, NzButtonModule, NzDropdownModule, NzIconModule, NzMenuModule, NzTagModule, ChangePassword],
+  imports: [
+    TranslatePipe,
+    NzButtonModule,
+    NzDropdownModule,
+    NzIconModule,
+    NzMenuModule,
+    NzTagModule,
+    ChangePassword,
+  ],
   templateUrl: './topbar.html',
   styleUrl: './topbar.css',
 })
@@ -24,6 +33,18 @@ export class Topbar {
 
   protected readonly user = this.store.selectSignal(sessionFeature.selectUser);
   protected readonly changePasswordOpen = signal(false);
+  protected readonly roleKey = roleKey;
+  protected readonly roleColor = roleColor;
+
+  /** "Sistem Yöneticisi" → "SY" */
+  protected readonly initials = computed(() =>
+    (this.user()?.fullName ?? '')
+      .split(' ')
+      .filter(Boolean)
+      .slice(0, 2)
+      .map((part) => part[0].toLocaleUpperCase('tr'))
+      .join(''),
+  );
 
   protected logout(): void {
     this.store.dispatch(SessionActions.logout());

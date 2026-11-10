@@ -1,6 +1,7 @@
 package com.server;
 
 import com.server.modules.auth.LoginAttempt;
+import com.server.migration.versions.V008_SuperadminRole;
 import com.server.modules.auth.LoginAttemptRepository;
 import com.server.support.TestJwtKeys;
 import org.junit.jupiter.api.Test;
@@ -8,9 +9,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.datasource.SingleConnectionDataSource;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 
+import javax.sql.DataSource;
+import java.sql.Connection;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
@@ -46,10 +50,42 @@ class H2IntegrationTest {
     @Autowired
     private LoginAttemptRepository attempts;
 
+    @Autowired
+    private DataSource dataSource;
+
+    /**
+     * Eski bir dev H2 veritabanında Hibernate role kolonunu yerel ENUM('ADMIN', 'USER') tipiyle kurmuştur; V008 bunu da
+     * yükseltebilmelidir. Ayrı bir şemada eski tablo kurulur ve migration tek bir bağlantı üzerinde çalıştırılır.
+     */
+    @Test
+    void v008UpgradesAnOldH2EnumRoleColumn() throws Exception {
+        try (Connection connection = dataSource.getConnection()) {
+            JdbcTemplate legacy = new JdbcTemplate(new SingleConnectionDataSource(connection, true));
+            legacy.execute("CREATE SCHEMA IF NOT EXISTS legacy_v008");
+            legacy.execute("SET SCHEMA legacy_v008");
+            try {
+                legacy.execute("""
+                        CREATE TABLE users (id BIGINT PRIMARY KEY, role ENUM('ADMIN', 'USER') NOT NULL,
+                                            version BIGINT NOT NULL, deleted BOOLEAN NOT NULL,
+                                            updated_at TIMESTAMP WITH TIME ZONE)""");
+                legacy.update("INSERT INTO users (id, role, version, deleted) VALUES (1, 'ADMIN', 0, false), (2, 'USER', 0, false)");
+
+                new V008_SuperadminRole().migrate(legacy);
+
+                assertThat(legacy.queryForList("SELECT role FROM users ORDER BY id", String.class))
+                        .containsExactly("SUPERADMIN", "USER");
+                assertThatThrownBy(() -> legacy.update("UPDATE users SET role = 'OWNER' WHERE id = 2"))
+                        .isInstanceOf(org.springframework.dao.DataIntegrityViolationException.class);
+            } finally {
+                legacy.execute("SET SCHEMA starterapp");
+            }
+        }
+    }
+
     @Test
     void migrationsAreApplied() {
         List<Integer> versions = jdbc.queryForList("SELECT version FROM data_migration_history ORDER BY version", Integer.class);
-        assertThat(versions).containsExactly(1, 2, 3, 4, 5, 6);
+        assertThat(versions).containsExactly(1, 2, 3, 4, 5, 6, 7, 8);
     }
 
     @Test

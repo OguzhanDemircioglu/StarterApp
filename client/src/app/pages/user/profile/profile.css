@@ -1,0 +1,275 @@
+/* Ortak parçalar (.card, .btn, .bubble...) global temadadır: src/theme.css */
+/* Üst kart */
+.hero {
+  display: flex;
+  gap: 32px;
+  padding: 22px 36px;
+}
+
+.identity {
+  display: flex;
+  gap: 36px;
+  padding-right: 32px;
+  border-right: 1px solid #ececec;
+}
+
+.photo {
+  display: grid;
+  place-items: center;
+  flex: 0 0 164px;
+  height: 164px;
+  font-size: 48px;
+  font-weight: 600;
+  color: #b4545a;
+  background: linear-gradient(135deg, #fde6e2, #f6cfc9);
+  border-radius: 50%;
+}
+
+.identity-text h2 {
+  margin-bottom: 8px;
+  font-size: 22px;
+  font-weight: 600;
+}
+
+.department {
+  margin-bottom: 14px;
+  font-size: 17px;
+  color: #333;
+}
+
+.meta {
+  font-size: 13px;
+  line-height: 22px;
+  color: #444;
+}
+
+.contacts {
+  display: grid;
+  flex: 1;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-content: center;
+}
+
+.contact {
+  display: flex;
+  gap: 18px;
+  align-items: flex-start;
+  padding: 22px 12px;
+  border-bottom: 1px solid #ececec;
+}
+
+.contact:nth-child(n + 4) {
+  border-bottom: 0;
+}
+
+.contact:not(:nth-child(3n)) {
+  border-right: 1px solid #ececec;
+}
+
+.contact nz-icon {
+  font-size: 22px;
+  color: #333;
+}
+
+.contact dt {
+  font-size: 12px;
+  color: #444;
+}
+
+.contact dd {
+  margin-top: 4px;
+  font-size: 12px;
+  color: #222;
+  overflow-wrap: anywhere;
+}
+
+/* Üç sütun */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.summary {
+  margin-bottom: 18px;
+  font-size: 13px;
+  line-height: 20px;
+  color: #333;
+}
+
+.facts li,
+.timeline li,
+.education {
+  display: flex;
+  gap: 16px;
+}
+
+.facts li {
+  margin-bottom: 14px;
+  font-size: 12px;
+  line-height: 19px;
+  color: #333;
+}
+
+.facts nz-icon {
+  margin-top: 6px;
+  font-size: 16px;
+}
+
+.facts span {
+  display: block;
+  color: #555;
+}
+
+.timeline li {
+  padding: 14px 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.timeline li:first-child {
+  padding-top: 0;
+}
+
+.timeline li:last-child {
+  border-bottom: 0;
+}
+
+.timeline strong,
+.education strong {
+  display: block;
+  margin-bottom: 4px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.timeline p,
+.education p {
+  font-size: 12px;
+  line-height: 20px;
+  color: #444;
+}
+
+.education {
+  align-items: center;
+  gap: 20px;
+  padding-top: 24px;
+}
+
+.education p {
+  font-size: 13px;
+  line-height: 22px;
+}
+
+.seal {
+  display: grid;
+  place-items: center;
+  flex: 0 0 96px;
+  height: 96px;
+  font-family: Georgia, serif;
+  font-size: 28px;
+  font-style: italic;
+  color: #fff;
+  background: radial-gradient(circle, #2b5aa8 0 52%, #fff 53% 57%, #1f3f7a 58%);
+  border-radius: 50%;
+}
+
+/* Kurumlar şeridi */
+.strip-wrap {
+  position: relative;
+}
+
+.strip {
+  display: flex;
+  gap: 16px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+}
+
+.institution {
+  display: flex;
+  flex: 0 0 150px;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 10px 16px;
+  font-size: 13px;
+  line-height: 19px;
+  text-align: center;
+  border: 1px solid #ececec;
+  border-radius: 8px;
+  scroll-snap-align: start;
+}
+
+.institution app-institution-emblem {
+  width: 64px;
+  height: 64px;
+}
+
+.strip-next {
+  position: absolute;
+  top: 50%;
+  right: -8px;
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  background: #fff;
+  border: 1px solid #e3e3e3;
+  border-radius: 50%;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+  transform: translateY(-50%);
+  cursor: pointer;
+}
+
+@media (max-width: 1280px) {
+  .hero {
+    flex-direction: column;
+  }
+
+  .identity {
+    padding-right: 0;
+    padding-bottom: 20px;
+    border-right: 0;
+    border-bottom: 1px solid #ececec;
+  }
+}
+
+@media (max-width: 1100px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .hero {
+    padding: 20px 16px;
+  }
+
+  .identity {
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    text-align: center;
+  }
+
+  .photo {
+    flex-basis: 120px;
+    width: 120px;
+    height: 120px;
+  }
+
+  .contacts {
+    grid-template-columns: 1fr;
+  }
+
+  .contact,
+  .contact:nth-child(n + 4) {
+    border-right: 0 !important;
+    border-bottom: 1px solid #ececec;
+  }
+}
+
+.edit-btn {
+  margin-top: 16px;
+}

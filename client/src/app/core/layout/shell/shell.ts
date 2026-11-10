@@ -1,16 +1,18 @@
 import { Component, signal } from '@angular/core';
 import { RouterLink, RouterOutlet } from '@angular/router';
 import { NzLayoutModule } from 'ng-zorro-antd/layout';
+import { Banner } from '../../../shared/theme/banner';
+import { BrandLogo } from '../../../shared/theme/brand-logo';
 import { SidebarMenu } from '../sidebar-menu/sidebar-menu';
 import { Topbar } from '../topbar/topbar';
 
 /**
- * Giriş gerektiren bütün sayfaların kabuğu: solda menü, üstte topbar, ortada sayfa (router-outlet).
- * Login ve 404 dışındaki her sayfa bunun çocuğudur (app.routes.ts).
+ * Yönetim panelinin (/admin) kabuğu: solda DB'den gelen menü, üstte topbar, ortada sayfa (router-outlet).
+ * Tema Mezun Portalı ile aynıdır (src/theme.css); route'lar pages/admin/admin.routes.ts'te.
  */
 @Component({
   selector: 'app-shell',
-  imports: [RouterOutlet, RouterLink, NzLayoutModule, SidebarMenu, Topbar],
+  imports: [RouterOutlet, RouterLink, NzLayoutModule, SidebarMenu, Topbar, Banner, BrandLogo],
   templateUrl: './shell.html',
   styleUrl: './shell.css',
 })

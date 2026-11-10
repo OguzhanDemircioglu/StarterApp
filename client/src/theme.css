@@ -1,0 +1,370 @@
+/*
+ * Uygulamanın ortak teması (Göç İdaresi kırmızısı + lacivert). angular.json'da NG-ZORRO'dan sonra yüklenir.
+ * Public (/), Mezun Portalı (/user) ve yönetim paneli (/admin) aynı tokenları ve parçaları kullanır.
+ * Sayfa component'leri host'a 'mk-page' sınıfı verir: host: { class: 'mk-page' }.
+ */
+html {
+  scroll-behavior: smooth;
+}
+
+:root {
+  --mk-red: #d71920;
+  --mk-red-dark: #b9141a;
+  --mk-red-soft: #fdecec;
+  --mk-navy: #1b222b;
+  --mk-teal: #0d5c73;
+  --mk-text: #1f1f1f;
+  --mk-muted: #5c5c5c;
+  --mk-border: #ececec;
+  --mk-bg: #f7f7f8;
+}
+
+a {
+  color: var(--mk-red);
+}
+
+a:hover {
+  color: var(--mk-red-dark);
+}
+
+/* Sayfa: dikey yığın ve sayfa içi sıfırlamalar */
+.mk-page {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.mk-page :where(h1, h2, h3, p, dl, dd, ul, ol) {
+  margin: 0;
+}
+
+.mk-page :where(ul, ol) {
+  padding: 0;
+  list-style: none;
+}
+
+.mk-page :where(a) {
+  color: inherit;
+}
+
+/* Kart */
+.card {
+  padding: 20px 22px;
+  background: #fff;
+  border: 1px solid var(--mk-border);
+  border-radius: 12px;
+}
+
+.card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.card-head h2 {
+  font-size: 17px;
+  font-weight: 600;
+}
+
+.card-head p {
+  margin-top: 2px;
+  font-size: 12px;
+  color: var(--mk-muted);
+}
+
+.see-all {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--mk-red);
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.see-all nz-icon {
+  font-size: 11px;
+}
+
+.muted {
+  font-size: 12px;
+  color: var(--mk-muted);
+}
+
+/* Düğmeler */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 7px 14px;
+  font: inherit;
+  font-size: 13px;
+  line-height: 20px;
+  color: var(--mk-text);
+  white-space: nowrap;
+  background: #fff;
+  border: 1px solid #d9d9d9;
+  border-radius: 4px;
+  cursor: pointer;
+  transition:
+    background 0.15s,
+    border-color 0.15s,
+    color 0.15s;
+}
+
+.btn:hover {
+  color: var(--mk-red);
+  border-color: var(--mk-red);
+}
+
+.btn-primary {
+  color: #fff;
+  background: var(--mk-red);
+  border-color: var(--mk-red);
+}
+
+.btn-primary:hover {
+  color: #fff;
+  background: #b9141a;
+  border-color: #b9141a;
+}
+
+.btn-ghost {
+  border-color: transparent;
+  background: transparent;
+}
+
+.btn-sm {
+  padding: 3px 10px;
+  font-size: 12px;
+}
+
+.btn-block {
+  width: 100%;
+}
+
+.btn:disabled {
+  color: #aaa;
+  background: #f5f5f5;
+  border-color: #e3e3e3;
+  cursor: not-allowed;
+}
+
+/* Etiketler */
+.tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 1px 8px;
+  font-size: 11px;
+  line-height: 18px;
+  white-space: nowrap;
+  border-radius: 10px;
+  background: #f1f1f1;
+  color: #555;
+}
+
+.tag-red {
+  background: #fdecec;
+  color: #b9141a;
+}
+
+.tag-green {
+  background: #e8f6ee;
+  color: #1e7b45;
+}
+
+.tag-amber {
+  background: #fff4e0;
+  color: #9a5b00;
+}
+
+.tag-blue {
+  background: #e9f1fc;
+  color: #1f5aa6;
+}
+
+/* Yuvarlak ikon kutusu */
+.bubble {
+  display: grid;
+  place-items: center;
+  flex: 0 0 44px;
+  width: 44px;
+  height: 44px;
+  font-size: 20px;
+  color: var(--mk-red);
+  background: #f6f6f6;
+  border-radius: 50%;
+}
+
+/* Baş harfli avatar; boyutu --size ile verilir */
+.avatar {
+  --size: 40px;
+  display: grid;
+  place-items: center;
+  flex: 0 0 var(--size);
+  width: var(--size);
+  height: var(--size);
+  font-size: calc(var(--size) * 0.36);
+  font-weight: 600;
+  color: #fff;
+  background: var(--avatar-bg, #6b7785);
+  border-radius: 50%;
+}
+
+/* Filtre çipleri */
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.chip {
+  padding: 5px 14px;
+  font: inherit;
+  font-size: 13px;
+  color: var(--mk-text);
+  background: #fff;
+  border: 1px solid #e3e3e3;
+  border-radius: 16px;
+  cursor: pointer;
+}
+
+.chip:hover {
+  border-color: var(--mk-red);
+}
+
+.chip.active {
+  color: #fff;
+  background: var(--mk-red);
+  border-color: var(--mk-red);
+}
+
+/* Ana içerik + sağ sütun */
+.with-side {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 320px;
+  gap: 16px;
+  align-items: start;
+}
+
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
+}
+
+/* Alt alta liste satırları */
+.rows > li {
+  padding: 14px 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.rows > li:first-child {
+  padding-top: 0;
+}
+
+.rows > li:last-child {
+  padding-bottom: 0;
+  border-bottom: 0;
+}
+
+.empty {
+  padding: 32px 0;
+  font-size: 13px;
+  color: var(--mk-muted);
+  text-align: center;
+}
+
+@media (max-width: 1200px) {
+  .with-side {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* NG-ZORRO'nun mavi ana rengi bütün uygulamada kırmızıya çekilir. */
+.ant-switch-checked,
+.ant-checkbox-checked .ant-checkbox-inner,
+.ant-radio-inner::after,
+.ant-tabs-ink-bar,
+.ant-btn-primary,
+.ant-badge-count {
+  background-color: var(--mk-red);
+}
+
+.ant-btn-primary {
+  border-color: var(--mk-red);
+}
+
+.ant-btn-primary:hover,
+.ant-btn-primary:focus {
+  background-color: #b9141a;
+  border-color: #b9141a;
+}
+
+.ant-checkbox-checked .ant-checkbox-inner,
+.ant-radio-checked .ant-radio-inner,
+.ant-input:hover,
+.ant-input:focus,
+.ant-input-affix-wrapper:hover,
+.ant-input-affix-wrapper-focused,
+.ant-select:not(.ant-select-disabled):hover .ant-select-selector,
+.ant-select-focused .ant-select-selector {
+  border-color: var(--mk-red) !important;
+}
+
+.ant-input:focus,
+.ant-input-affix-wrapper-focused,
+.ant-select-focused .ant-select-selector {
+  box-shadow: 0 0 0 2px rgba(215, 25, 32, 0.12) !important;
+}
+
+.ant-tabs-tab:hover,
+.ant-tabs-tab-active .ant-tabs-tab-btn,
+.ant-collapse-header:hover {
+  color: var(--mk-red) !important;
+}
+
+.ant-radio-button-wrapper-checked:not(.ant-radio-button-wrapper-disabled) {
+  color: var(--mk-red);
+  border-color: var(--mk-red);
+}
+
+.ant-radio-button-wrapper-checked:not(.ant-radio-button-wrapper-disabled)::before {
+  background-color: var(--mk-red);
+}
+
+.backdrop {
+  display: none;
+}
+
+/* Public sayfa bölümü: ortalanmış genişlik, başlık ve açıklama */
+.mk-section {
+  max-width: 1192px;
+  margin: 0 auto;
+  padding: 64px 24px 0;
+  /* Sabit üst barın altında kalmasın (#haklar gibi bağlantılar) */
+  scroll-margin-top: 72px;
+}
+
+.mk-section > h2 {
+  margin: 0 0 8px;
+  font-size: 28px;
+  color: var(--mk-navy);
+}
+
+.mk-section > .lead {
+  margin: 0 0 28px;
+  font-size: 15px;
+  color: var(--mk-muted);
+}
+
+@media (max-width: 900px) {
+  .mk-section {
+    padding: 40px 16px 0;
+  }
+}

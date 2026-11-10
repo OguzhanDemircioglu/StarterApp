@@ -35,17 +35,35 @@ ErpStockTracer'dan **taşınmayanlar:** jQuery, AdminLTE, Bootstrap JS, SweetAle
 
 **Klasör ağacı, URL ağacı ve menü ağacı aynıdır.** Birine bakan diğer ikisini bilir.
 
+Uygulamada üç arayüz vardır; her biri URL'nin ilk parçası ve `pages/` altında bir klasördür. Arayüzler iki ayrı **yüzeyde**
+çalışır: dışarıya açık sunucu ve kapalı ağdaki sunucu (deploy/README.md).
+
+| Arayüz | URL | Klasör | Kimler | Yüzey (build) |
+|---|---|---|---|---|
+| Public | `/` | `pages/public/` | Herkes, giriş gerekmez: Mezun Kart tanıtım sayfası | `public` |
+| Mezun Portalı | `/user` | `pages/user/` | Sadece USER | `public` |
+| Yönetim paneli | `/admin` | `pages/admin/` | ADMIN ve SUPERADMIN | `internal` |
+
+- **Yüzey build zamanında seçilir** (`src/app/surface/`): `surface.ts` geliştirme içindir (`all`, üç arayüz birlikte);
+  `angular.json`'daki `public` ve `internal` yapılandırmaları onu `surface.public.ts` ya da `surface.internal.ts` ile
+  değiştirir (`fileReplacements`). Her dosya kendi route listesini taşır; böylece dışarıya açık build'e yönetim panelinin
+  kodu hiç girmez, kapalı ağ build'inde de public sayfa ve portal yoktur. Kapalı ağ build'inde kayıt bağlantısı gösterilmez.
+- **Yönetim kullanıcıları mezun gibi davranamaz:** `userGuard` portalı sadece USER'a açar; ADMIN ve SUPERADMIN'e portal
+  menüsü gelmez (backend de `/api/portal/**`'ı reddeder).
+- Girişten sonra herkes kendi arayüzüne gider (`homeFor(role)`: ADMIN ve SUPERADMIN → `/admin`, USER → `/user`). Rollerin
+  tek tanımı `core/auth/roles.ts`'tedir (`isStaff`, `roleKey`, `roleColor`).
+
 | Menü (DB) | URL | Klasör |
 |---|---|---|
-| Anasayfa (`menu_home`) | `/` | `pages/home/` |
-| Tanımlar (`menu_definitions`) | `/definitions` | `pages/definitions/` |
-| └ Kategoriler (`menu_categories`) | `/definitions/categories` | `pages/definitions/categories/` |
-| Yönetim (`menu_administration`) | `/administration` | `pages/administration/` |
-| └ Kullanıcılar (`menu_users`) | `/administration/users` | `pages/administration/users/` |
-| Mezun Portalı (`menu_portal`, USER arayüzü) | `/portal` | `pages/portal/` |
-| └ Ana Sayfa, Profilim, Hizmetler, Staj / Kariyer, Etkinlikler, Duyurular, Mesajlar, Ayarlar, Yardım (`menu_portal_*`) | `/portal/home`, `/portal/profile` … | `pages/portal/home/`, `pages/portal/profile/` … |
+| Anasayfa (`menu_home`) | `/admin` | `pages/admin/home/` |
+| Tanımlar (`menu_definitions`) | `/admin/definitions` | `pages/admin/definitions/` |
+| └ Kategoriler (`menu_categories`) | `/admin/definitions/categories` | `pages/admin/definitions/categories/` |
+| Yönetim (`menu_administration`) | `/admin/administration` | `pages/admin/administration/` |
+| └ Kullanıcılar (`menu_users`) | `/admin/administration/users` | `pages/admin/administration/users/` |
+| Mezun Portalı (`menu_portal`) | `/user` | `pages/user/` |
+| └ Ana Sayfa, Profilim, Hizmetler, Staj / Kariyer, Etkinlikler, Duyurular, Mesajlar, Ayarlar, Yardım (`menu_portal_*`) | `/user/home`, `/user/profile` … | `pages/user/home/`, `pages/user/profile/` … |
 
-- Menü kayıtları backend'de migration class'larıyla tutulur (`V005_HierarchicalMenuRoutes`); `route` değerleri bu tabloya uyar.
+- Menü kayıtları backend'de migration class'larıyla tutulur (`V005_HierarchicalMenuRoutes`, `V006_PortalMenus`, `V007_RoleAreaRoutes`); `route` değerleri bu tabloya uyar. Yönetim menüleri `admin_only`'dir; USER'ın oturumuna sadece portal grubu gelir.
 - Yeni bir sayfa eklenirken üçü birlikte eklenir: klasör, route ve menü kaydı.
 
 ---
@@ -58,45 +76,53 @@ client/
 │  └─ i18n/                            tr.json (§10)
 ├─ src/
 │  ├─ main.ts, index.html, styles.css
+│  ├─ theme.css                        ortak tema: --mk-* renkleri, .card/.btn/.tag…, NG-ZORRO kırmızı ana renk (§11)
 │  └─ app/
 │     ├─ app.ts                        kök component (sadece <router-outlet />)
 │     ├─ app.config.ts                 provider'lar: router, http + interceptor'lar, NgRx, çeviri, NG-ZORRO
-│     ├─ app.routes.ts                 en üst iskelet: login + shell + modül grupları (§5)
+│     ├─ app.routes.ts                 en üst iskelet: yüzeyin route listesi (§5)
+│     ├─ surface/                      yüzey: surface.ts (all), surface.public.ts, surface.internal.ts (§3)
 │     │
 │     ├─ core/                         uygulamada tek olan şeyler
 │     │  ├─ api/                       ApiResponse tipi, unwrap(), API_URL
 │     │  ├─ auth/                      oturum: NgRx store, effects, guard'lar, authInterceptor,
 │     │  │                             TokenRefresher (tek uçuş refresh), şifre değiştirme dialog'u
-│     │  ├─ layout/                    shell, sidebar-menu (DB'den), topbar
+│     │  ├─ layout/                    yönetim paneli kabuğu: shell, sidebar-menu (DB'den), topbar
 │     │  ├─ notify/                    Notifier (bildirimler), errorInterceptor
 │     │  └─ icons.ts                   kayıtlı ikonlar (§11)
 │     │
 │     ├─ shared/                       sayfaların ortak kullandığı parçalar
 │     │  ├─ page/                      Page (başlık + otomatik breadcrumb), Section (kart)
 │     │  ├─ forms/                     validateForm, maxBytes, sameAs
-│     │  └─ pages/                     forbidden (403), not-found (404)
+│     │  ├─ pages/                     forbidden (403), not-found (404)
+│     │  ├─ theme/                     brand-logo, banner (kırmızı yaylar), institution-emblem, graduate-card (dijital kart)
+│     │  ├─ program/                   Mezun Kart ortak verisi (geçici): haklar, kurumlar, çıktılar, duyurular, etkinlikler
+│     │  └─ format/                    trDate / trNumber pipe'ları (Intl; Angular tr locale verisi kayıtlı değil)
 │     │
 │     └─ pages/                        URL'nin birebir aynası
+│        ├─ public/                    /         public tanıtım sayfası (giriş gerekmez)
+│        │  ├─ public.ts / .html / .css  program, imkânlar, başvuru adımları, çıktılar
+│        │  ├─ public-header/ public-hero/ public-rights/ public-news/ public-footer/
+│        │  └─ public.mock.ts          sayfa metinleri
 │        ├─ login/                     /login
-│        ├─ home/                      /            (yönetim anasayfası: karşılama)
-│        ├─ definitions/               /definitions
-│        │  ├─ definitions.routes.ts
-│        │  └─ categories/             /definitions/categories   ← REFERANS MODÜL
-│        │     ├─ categories.routes.ts
-│        │     ├─ category-list/       liste sayfası
-│        │     ├─ category-form/       ekleme/düzenleme dialog'u
-│        │     ├─ category-api.ts      HTTP servisi
-│        │     └─ category.model.ts    backend DTO'larının tipleri
-│        ├─ administration/            /administration (sadece ADMIN)
-│        │  ├─ administration.routes.ts
-│        │  └─ users/                  /administration/users
-│        └─ portal/                    /portal: USER rolünün arayüzü (Mezun Portalı), kendi iskeleti
-│           ├─ portal.routes.ts        sayfalar; path ve data.title backend menüleriyle aynı (V006_PortalMenus)
+│        ├─ admin/                     /admin    yönetim paneli (sadece ADMIN)
+│        │  ├─ admin.routes.ts         Shell + çocukları; 403 ve 404 de burada
+│        │  ├─ home/                   /admin    pano: KPI, bekleyen başvurular, dağılımlar (CSS çubukları), duyuru, etkinlik, işlem kaydı
+│        │  ├─ definitions/            /admin/definitions
+│        │  │  ├─ definitions.routes.ts
+│        │  │  └─ categories/          /admin/definitions/categories   ← REFERANS MODÜL
+│        │  │     ├─ categories.routes.ts
+│        │  │     ├─ category-list/    liste sayfası
+│        │  │     ├─ category-form/    ekleme/düzenleme dialog'u
+│        │  │     ├─ category-api.ts   HTTP servisi
+│        │  │     └─ category.model.ts backend DTO'larının tipleri
+│        │  └─ administration/         /admin/administration
+│        │     ├─ administration.routes.ts
+│        │     └─ users/               /admin/administration/users
+│        └─ user/                      /user     USER rolünün arayüzü (Mezun Portalı), kendi iskeleti
+│           ├─ user.routes.ts          sayfalar; path ve data.title backend menüleriyle aynı (V006, V007)
 │           ├─ portal-layout/          üst bar + sol menü (oturumdaki menu_portal grubunun çocukları) + banner başlığı
-│           ├─ portal.css              portal sayfalarının ortak parçaları (.card, .btn, .tag, .chip, .with-side…)
-│           ├─ portal.mock.ts          birden fazla sayfanın kullandığı geçici veriler (profil, kart, haklar, kurumlar)
-│           ├─ portal-pipes.ts         trDate / trNumber (Intl ile; Angular tr locale verisi kayıtlı değil)
-│           ├─ graduate-card/          dijital Mezun Kartı (Ana Sayfa ve Hizmetler)
+│           ├─ portal.mock.ts          mezunun profil ve kart verisi (geçici)
 │           └─ home/ profile/ services/ career/ events/ announcements/ messages/ settings/ help/
 │                                      her sayfa: component + kendi *.mock.ts verisi (API gelince servis + model ile değişir)
 ├─ proxy.conf.json                     dev: /api → http://localhost:8080
@@ -118,28 +144,40 @@ client/
 ### 5.1 Her seviye sadece kendi çocuklarını bilir
 
 ```ts
-// app.routes.ts: ilk bakışta bütün iskelet
-export const routes: Routes = [
-  { path: 'login', canActivate: [guestGuard], loadComponent: () => import('./pages/login/login') },
-  {
-    path: '',
-    component: Shell,
-    canActivate: [authGuard],
-    children: [
-      { path: '', data: { title: 'menu_home' }, loadComponent: () => import('./pages/home/home') },
-      { path: 'definitions', data: { title: 'menu_definitions' },
-        loadChildren: () => import('./pages/definitions/definitions.routes') },
-      { path: 'administration', data: { title: 'menu_administration' }, canActivate: [adminGuard],
-        loadChildren: () => import('./pages/administration/administration.routes') },
-      { path: 'forbidden', data: { title: 'page_forbidden_title' }, loadComponent: () => import('./shared/pages/forbidden') },
-      { path: '**', data: { title: 'page_not_found_title' }, loadComponent: () => import('./shared/pages/not-found') },
-    ],
-  },
+// surface/surface.ts (geliştirme, all): ilk bakışta bütün iskelet; public/internal dosyaları bunun alt kümesidir
+export const SURFACE_ROUTES: Routes = [
+  { path: '', pathMatch: 'full', loadComponent: () => import('../pages/public/public') },
+  { path: 'login', canActivate: [guestGuard], loadComponent: () => import('../pages/login/login') },
+  { path: 'user', canActivate: [authGuard, userGuard], loadChildren: () => import('../pages/user/user.routes') },
+  { path: 'admin', canActivate: [authGuard, adminGuard], loadChildren: () => import('../pages/admin/admin.routes') },
+  { path: '**', redirectTo: '' },
 ];
+
+// app.routes.ts
+export const routes: Routes = SURFACE_ROUTES;
 ```
 
 ```ts
-// pages/definitions/definitions.routes.ts
+// pages/admin/admin.routes.ts: yönetim panelinin iskeleti
+export default [
+  {
+    path: '',
+    component: Shell,
+    children: [
+      { path: '', data: { title: 'menu_home' }, loadComponent: () => import('./home/home') },
+      { path: 'definitions', data: { title: 'menu_definitions' },
+        loadChildren: () => import('./definitions/definitions.routes') },
+      { path: 'administration', data: { title: 'menu_administration' },
+        loadChildren: () => import('./administration/administration.routes') },
+      { path: 'forbidden', data: { title: 'page_forbidden_title' }, loadComponent: () => import('../../shared/pages/forbidden') },
+      { path: '**', data: { title: 'page_not_found_title' }, loadComponent: () => import('../../shared/pages/not-found') },
+    ],
+  },
+] satisfies Routes;
+```
+
+```ts
+// pages/admin/definitions/definitions.routes.ts
 export default [
   { path: '', pathMatch: 'full', redirectTo: 'categories' },
   { path: 'categories', data: { title: 'menu_categories' },
@@ -149,17 +187,18 @@ export default [
 
 ### 5.2 Kurallar
 
-- **Path'ler kebab-case ve küçük harf:** `/definitions/categories`.
+- **Path'ler kebab-case ve küçük harf:** `/admin/definitions/categories`.
 - **Lazy loading:** Her sayfa `loadComponent`, her grup `loadChildren` ile yüklenir. Lazy yüklenen dosyalar `export default` kullanır.
 - **`data.title`:** Her route'un başlığı bir çeviri anahtarıdır, menüdeki `title_key` ile aynıdır. Sayfa başlığı ve breadcrumb buradan **otomatik** üretilir (`shared/page/breadcrumb.ts`); sayfalarda elle breadcrumb yazılmaz.
 - **Guard'lar** (`core/auth/auth.guards.ts`):
-  - `authGuard` **tek yerde**, shell'de durur ve bütün iç sayfaları korur. Giriş yoksa `returnUrl` ile login'e gönderir; girişten sonra o sayfaya dönülür.
-  - `adminGuard` yönetim grubunda durur; yetkisiz kullanıcıyı `/forbidden`'a gönderir.
-  - `guestGuard` login sayfasında durur; giriş yapmış kullanıcıyı anasayfaya gönderir.
-  - `staffGuard` shell'de durur; USER rolünü `/portal`'a gönderir (admin arayüzünü sadece ADMIN görür).
+  - `authGuard` `/admin` ve `/user`'da durur ve altındaki bütün sayfaları korur. Giriş yoksa `returnUrl` ile login'e gönderir; girişten sonra o sayfaya, dönüş adresi yoksa rolün arayüzüne (`homeFor`) gidilir.
+  - `adminGuard` `/admin`'de durur; USER'ı `/user`'a gönderir.
+  - `userGuard` `/user`'da durur; ADMIN ve SUPERADMIN'i `/admin`'e gönderir (yönetim kullanıcıları portala giremez).
+  - `guestGuard` login sayfasında durur; giriş yapmış kullanıcıyı kendi arayüzüne gönderir.
+  - Public arayüz (`/`) guard'sızdır.
   - Guard'lar sadece kullanıcı deneyimi içindir. Asıl güvenlik backend'dedir (`@PreAuthorize`).
-- **Shell'in dışında sadece login ve `/portal` vardır.** Portal USER rolünün kendi iskeletidir (`authGuard` ile korunur, admin de önizleme için açabilir; admin sidebar'ında `Mezun Portalı` grubu görünür). Portal sayfaları `styleUrls: ['../portal.css', './sayfa.css']` ile ortak stili yükler; NG-ZORRO'nun ana rengi portalda `portal-layout.css` içinde kırmızıya çekilir. 404 ve 403 sayfaları shell içindedir; kullanıcı menüyü kaybetmez.
-- **Detay sayfaları** ana sayfanın altında yer alır: `/definitions/categories/:id`. Route parametreleri component'e `input()` olarak gelir (`withComponentInputBinding`).
+- **Her arayüzün kendi iskeleti vardır:** `/admin` Shell'i (DB menülü sidebar + topbar), `/user` portal iskeleti (`portal-layout`); `/` ve `/login` iskeletsizdir. Yönetim kullanıcıları portalı açamaz; admin sidebar'ında portal menüsü yoktur. Üç arayüz aynı temayı kullanır (§11). Yönetim panelinin 404 ve 403 sayfaları shell içindedir (`/admin/...`); kullanıcı menüyü kaybetmez. Üst seviyede bilinmeyen adresler public anasayfaya düşer.
+- **Detay sayfaları** ana sayfanın altında yer alır: `/admin/definitions/categories/:id`. Route parametreleri component'e `input()` olarak gelir (`withComponentInputBinding`).
 
 ---
 
@@ -186,7 +225,7 @@ export default [
 </app-page>
 ```
 
-### 7.2 CRUD ekranı kalıbı (referans: `pages/definitions/categories`)
+### 7.2 CRUD ekranı kalıbı (referans: `pages/admin/definitions/categories`)
 
 - **Liste (`category-list`):**
   - `nz-table`: sıralama sütun başlığında (`nzSortFn`), sayfalama tablonun kendisinde.
@@ -289,12 +328,19 @@ Ekranlar sadece başarılı durumu yazar (`notifier.success('record_created')`).
 
 ## 11. Görünüm ve ikonlar
 
-- NG-ZORRO'nun varsayılan Ant Design teması; stiller `angular.json`'dan yüklenir.
-- **Shell:** solda koyu sidebar (DB'den gelen menü ağacı, dar ekranda otomatik daralır), üstte topbar (menüyü daralt, dil, kullanıcı adı ve rolü, şifre değiştir, çıkış), ortada sayfa.
+- **Tema (`src/theme.css`):** Göç İdaresi kırmızısı ve lacivert. `angular.json`'da NG-ZORRO'dan sonra yüklenir; public, Mezun Portalı ve yönetim paneli aynı tema ile çalışır.
+  - Renkler `:root`'ta `--mk-*` değişkenleridir (`--mk-red`, `--mk-navy`, `--mk-teal`, `--mk-border`…).
+  - Ortak parçalar global sınıflardır: `.card`, `.card-head`, `.btn` (`-primary`, `-sm`, `-ghost`), `.tag` (`-red`, `-green`, `-amber`, `-blue`), `.bubble`, `.avatar`, `.chip`, `.with-side`, `.rows`, `.mk-section`.
+  - Sayfa component'leri host'a `mk-page` sınıfı verir (`host: { class: 'mk-page' }`): dikey 16px aralıklı yığın ve sayfa içi başlık/liste sıfırlamaları.
+  - NG-ZORRO'nun mavi ana rengi bütün uygulamada kırmızıya çekilir (buton, switch, checkbox, sekme, odaklanan input).
+  - Logo, banner, kurum amblemi ve dijital kart `shared/theme/` altındaki bileşenlerdir.
+- **Grafik yoktur:** dağılımlar CSS çubuklarıyla gösterilir (§12).
+- **Yönetim paneli kabuğu (Shell):** solda lacivert sidebar (logo, DB'den gelen menü ağacı, seçili menü kırmızı, dar ekranda otomatik daralır), üstte topbar (menüyü daralt, baş harfli avatar ve rol etiketi, şifre değiştir, çıkış; public site başka ağda olduğu için ona bağlantı yoktur), içerikte kırmızı yaylar ve sayfa.
+- **Mezun Portalı kabuğu (`portal-layout`):** üstte kurumsal bar, solda lacivert portal menüsü, banner'da sayfa başlığı.
 - **Login:** Temanın tek istisnası. Giriş ve kayıt formu aynı sayfadadır (`/login`); aralarındaki eğik panel geçişi tamamen `login.css`'tedir (`.wrapper.active`), görünmeyen form `inert` ile devre dışıdır. Geçişte iki form da sıfırlanır; `autocomplete` kapalıdır, formlar açılışta boş gelir. Dar ekranda eğik paneller gizlenir, sadece seçili form görünür. Doğrulama ve hata metinleri yine NG-ZORRO'nun form bileşenleridir.
 - **İkonlar:** Sadece `core/icons.ts`'te listelenen ikonlar pakete girer. Backend'deki menüye (`menus.icon`) yeni bir ikon eklenirse buraya da eklenmelidir; ikon adları Ant Design adlarıdır (`home`, `setting`, `tag`, `team`).
-- `styles.css` sadece genel ayarları içerir; component stilleri kendi `.css` dosyasındadır.
-- **Paket boyutu:** İlk yükleme yaklaşık 1.4 MB ham, **~260 kB sıkıştırılmış**. Bunun büyük kısmı NG-ZORRO'nun CSS'idir. Bütçe `angular.json`'da 1.6 MB uyarı / 2 MB hata olarak ayarlıdır.
+- `styles.css` sadece genel ayarları içerir; ortak tema `theme.css`'tedir; component'e özel stiller kendi `.css` dosyasındadır. Component stil bütçesi dosya başına 4 kB uyarı / 8 kB hatadır; büyük sayfalar bölümlere ayrılır (ör. `pages/public/public-*`).
+- **Paket boyutu:** İlk yükleme yaklaşık 1.2 MB ham, **~217 kB sıkıştırılmış** (yönetim paneli ve portal lazy yüklenir). Bunun büyük kısmı NG-ZORRO'nun CSS'idir. Bütçe `angular.json`'da 1.6 MB uyarı / 2 MB hata olarak ayarlıdır.
 
 ---
 
@@ -308,38 +354,51 @@ Bu dalda (`mezun-portal`) grafik yoktur: anasayfa panosu, `shared/charts/`, ECha
 
 | Ekran | URL | Kimler |
 |---|---|---|
+| Public | `/` | Herkes: tanıtım sayfası (program, haklar, kurumlar, duyurular) |
 | Login | `/login` | Herkes |
-| Anasayfa | `/` | ADMIN: karşılama (USER `/portal`a yönlenir) |
-| Kategoriler (referans CRUD) | `/definitions/categories` | Giriş yapmış herkes |
-| Kullanıcılar | `/administration/users` | ADMIN: liste, ekleme, düzenleme (rol, aktif/pasif), şifre sıfırlama, silme |
+| Mezun Portalı | `/user/...` | Sadece USER (dışarıya açık yüzey) |
+| Yönetim anasayfası | `/admin` | ADMIN: karşılama |
+| Kategoriler (referans CRUD) | `/admin/definitions/categories` | ADMIN |
+| Kullanıcılar | `/admin/administration/users` | ADMIN: liste, ekleme, düzenleme (rol, aktif/pasif), şifre sıfırlama, silme |
 | Şifremi değiştir | topbar'dan dialog | Giriş yapmış herkes |
-| 403 / 404 | `/forbidden`, bilinmeyen adresler | |
+| 403 / 404 | `/admin/forbidden`, `/admin` altında bilinmeyen adresler | |
 
 ---
 
 ## 14. Docker
 
-- **Multi-stage Dockerfile:** `node:26-alpine` imajında `ng build` yapılır, çıkan dosyalar `nginx:1.30-alpine` imajına kopyalanır.
-- Container'daki nginx **sadece dosya sunucusu ve yönlendirici** olarak çalışır (`client/nginx.conf`):
-  - Bilinmeyen yollar `index.html`'e düşer; böylece `/definitions/categories` sayfasında F5'e basınca 404 alınmaz.
-  - `/api/` istekleri `server:8080` adresine yönlendirilir. Tarayıcı frontend ve backend'i aynı adreste görür: CORS gerekmez, `SameSite=Strict` cookie sorunsuz çalışır.
-  - Gerçek istemci IP'si `X-Forwarded-For` ile iletilir. Compose'da server'a `FORWARD_HEADERS_STRATEGY=native` verilir; brute-force anahtarı (`IP_email`) doğru IP'yi kullanır.
-  - Hash'li JS ve CSS dosyaları 1 yıl önbelleğe alınır; `index.html` ve çeviri dosyaları alınmaz.
-- Repo kökündeki `docker-compose.yml`'deki `client` servisi `app` profilindedir: `docker compose --profile app up -d` → `http://localhost:4200`.
+- **Multi-stage Dockerfile, iki imaj:** `node:26-alpine` imajında `ng build -c production,<SURFACE>` yapılır, çıkan dosyalar
+  `nginx:1.30-alpine` imajına kopyalanır. Yüzey `SURFACE` build argümanıyla seçilir (`public` ya da `internal`); verilmezse
+  build durur.
+- Container'daki nginx **sadece dosya sunucusu ve yönlendirici** olarak çalışır (`client/nginx/<surface>.conf.template`):
+  - `/api/` istekleri aynı yüzeydeki server'a gider; adres `API_UPSTREAM` ortam değişkenidir (varsayılan `server:8080`).
+    Tarayıcı frontend ve backend'i aynı adreste görür: CORS gerekmez, `SameSite=Strict` cookie sorunsuz çalışır.
+  - Yüzeyde olmayan yollar nginx'te 404'tür: public'te `/api/admin/`, internal'da `/api/auth/register` ve `/api/portal/`;
+    ikisinde de `/api/auth/dev-login`. Server da aynı yolları kapatır (iki katmanlı koruma).
+  - Bilinmeyen yollar `index.html`'e düşer; böylece `/admin/definitions/categories` sayfasında F5'e basınca 404 alınmaz.
+  - Gerçek istemci IP'si `X-Forwarded-For` ile iletilir. Server'a `FORWARD_HEADERS_STRATEGY=native` verilir; brute-force anahtarı
+    (`IP_email`) doğru IP'yi kullanır.
+  - Hash'li JS ve CSS dosyaları 1 yıl önbelleğe alınır; `index.html` ve çeviri dosyaları alınmaz. Temel güvenlik başlıkları
+    (`nosniff`, `Referrer-Policy`, `X-Frame-Options`) eklenir.
+- Repo kökündeki `docker-compose.yml` iki yüzeyi yan yana kurar: `docker compose --profile app up -d` → `http://localhost:4200`
+  (public) ve `http://localhost:4300` (internal). Gerçek kurulum: `deploy/`.
 
 ---
 
 ## 15. Geliştirme ortamı
 
-- `npm start` (`ng serve`) `proxy.conf.json` ile çalışır; `/api` istekleri `http://localhost:8080`'e gider.
-- Backend dev profilinde çalışırken frontend `http://localhost:4200` adresinden açılır.
+- `npm start` (`ng serve`) `proxy.conf.json` ile çalışır; `/api` istekleri `http://localhost:8080`'e gider. Yüzey `all`'dur:
+  public, portal ve yönetim paneli birlikte (`http://localhost:4200`). Dev girişi (otomatik ADMIN) sadece `all` ve `internal`'da yapılır.
+- Gerçek build'ler gibi tek yüzey: `npm run start:public` (4200) ve `npm run start:internal` (4300). Backend `APP_SURFACE`
+  verilmeden (`all`) çalışırken ikisi de aynı server'a bağlanır.
+- Build: `npm run build:public`, `npm run build:internal` (`npm run build` = public).
 - Testler: `npx ng test --watch=false` (Vitest).
 
 ---
 
 ## 16. Yeni sayfa ekleme (özet)
 
-1. **Klasör:** `pages/definitions/categories` kopyalanıp yeni ada göre değiştirilir (ör. `pages/definitions/products`).
+1. **Klasör:** `pages/admin/definitions/categories` kopyalanıp yeni ada göre değiştirilir (ör. `pages/admin/definitions/products`).
 2. **Route:** Üst seviyedeki `xxx.routes.ts` dosyasına yeni çocuk eklenir; `data.title` olarak menüdeki `title_key` verilir.
 3. **Model ve servis:** Backend DTO'larına göre güncellenir.
 4. **Form doğrulaması:** Backend'deki `@NotBlank`/`@Size` kurallarıyla aynı validator'lar ve aynı mesaj anahtarları kullanılır.

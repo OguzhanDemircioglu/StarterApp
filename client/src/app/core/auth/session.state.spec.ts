@@ -1,7 +1,7 @@
 import { SessionActions } from './session.actions';
 import { SessionInfo } from './session.model';
 import { initialSessionState, sessionFeature } from './session.state';
-import { safeReturnUrl } from './session.effects';
+import { afterLoginUrl } from './session.effects';
 
 const info: SessionInfo = {
   accessToken: 'token',
@@ -41,11 +41,16 @@ describe('session state', () => {
   });
 });
 
-describe('safeReturnUrl', () => {
+describe('afterLoginUrl', () => {
   it('allows only in-app addresses', () => {
-    expect(safeReturnUrl('/definitions/categories')).toBe('/definitions/categories');
-    expect(safeReturnUrl('//evil.example.com')).toBe('/');
-    expect(safeReturnUrl('https://evil.example.com')).toBe('/');
-    expect(safeReturnUrl(undefined)).toBe('/');
+    expect(afterLoginUrl('/admin/definitions/categories', 'ADMIN')).toBe('/admin/definitions/categories');
+    expect(afterLoginUrl('//evil.example.com', 'ADMIN')).toBe('/admin');
+    expect(afterLoginUrl('https://evil.example.com', 'USER')).toBe('/user');
+  });
+
+  it('sends each role to its own interface when there is no return address', () => {
+    expect(afterLoginUrl(undefined, 'ADMIN')).toBe('/admin');
+    expect(afterLoginUrl('', 'USER')).toBe('/user');
+    expect(afterLoginUrl('/', 'USER')).toBe('/user');
   });
 });

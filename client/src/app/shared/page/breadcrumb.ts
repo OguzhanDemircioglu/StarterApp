@@ -6,7 +6,8 @@ export interface Crumb {
   url: string;
 }
 
-const HOME: Crumb = { titleKey: 'menu_home', url: '/' };
+/** Yönetim panelinin anasayfası (/admin); breadcrumb sadece shell içinde kullanılır. */
+const HOME: Crumb = { titleKey: 'menu_home', url: '/admin' };
 
 /**
  * Breadcrumb route ağacından üretilir; sayfalarda elle yazılmaz.

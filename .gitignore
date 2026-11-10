@@ -31,3 +31,7 @@ replay_pid*
 # İşletim sistemi dosyaları
 .DS_Store
 Thumbs.db
+
+# Kurulum (deploy/): sunucuya özel ayarlar ve JWT anahtarları git'e girmez
+deploy/*/.env
+deploy/*/keys/

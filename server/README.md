@@ -47,15 +47,18 @@ ADMIN_PASSWORD=...
 - `DB_SCHEMA` küçük harf olmalıdır. Uygulamanın bütün tabloları bu şemada durur; şema yoksa ilk açılışta oluşturulur.
   Başka projelerle paylaşılan bir veritabanında diğer şemalara (ör. `public`) dokunulmaz. Dev profilinde varsayılanı
   `starterapp`'tir; prod'da **zorunludur**.
-- Aynı `.env`'yi `docker compose --profile app` da kullanır (server container'ına `env_file` ile verilir). `DB_URL`
-  verilmişse IDE'den ve Docker'dan çalıştırınca aynı veritabanına bağlanılır; verilmemişse Docker'daki H2 `h2data`
-  volume'ünde, IDE'deki `server/data/` klasöründe durur ve bu iki veri birbirinden ayrıdır.
+- `docker compose --profile app` admin bilgilerini aynı `.env`'den alır, ama veritabanı olarak her zaman compose'daki
+  PostgreSQL'i kullanır (iki yüzeyin iki server'ı aynı veritabanını paylaşır; bkz. "Docker").
 - Docker ile yerel bir PostgreSQL için repo kökünde `docker compose --profile db up -d` → PostgreSQL 18, `localhost:5433`
   (`DB_URL=jdbc:postgresql://localhost:5433/starterapp`, kullanıcı/şifre `starterapp`). Bu adres sadece IDE'den
   çalıştırırken geçerlidir; compose'daki server container'ı için `jdbc:postgresql://host.docker.internal:5433/starterapp` yazılır.
 
 Tablolar ilk açılışta Hibernate tarafından (`ddl-auto=update`), başlangıç verileri migration class'larıyla oluşturulur.
-`ADMIN_EMAIL`/`ADMIN_PASSWORD` verilmezse dev profilinde `admin@starterapp.local` / `Admin12345` kullanılır.
+`ADMIN_EMAIL`/`ADMIN_PASSWORD` verilmezse dev profilinde `admin@starterapp.local` / `Admin12345` kullanılır. Bu ilk hesap
+SUPERADMIN'dir.
+
+`APP_SURFACE` verilmezse dev profilinde `all` kullanılır: iki yüzey birlikte (USER da ADMIN da girer). Tek bir yüzeyi
+denemek için `.env`'ye `APP_SURFACE=public` ya da `APP_SURFACE=internal` yazılır. Prod'da zorunludur (bkz. `deploy/README.md`).
 
 ### 3. Çalıştırma
 
@@ -78,7 +81,7 @@ yapın (`.env` ve `keys/` bu dizine göre aranır).
 |---|---|
 | API | http://localhost:8080 |
 | Swagger UI | http://localhost:8080/swagger-ui.html |
-| İlk admin | `.env`'deki `ADMIN_EMAIL` / `ADMIN_PASSWORD` (yoksa `admin@starterapp.local` / `Admin12345`) |
+| İlk yönetici (SUPERADMIN) | `.env`'deki `ADMIN_EMAIL` / `ADMIN_PASSWORD` (yoksa `admin@starterapp.local` / `Admin12345`) |
 | CORS | `http://localhost:4200` |
 
 ## Testler
@@ -88,20 +91,23 @@ yapın (`.env` ve `keys/` bu dizine göre aranır).
 ```
 
 - Unit ve kontrat testleri her yerde çalışır.
-- `H2IntegrationTest` uygulamayı bellekteki H2 ile açar; Docker gerektirmez.
+- `H2IntegrationTest`, `PublicSurfaceIntegrationTest` ve `InternalSurfaceIntegrationTest` uygulamayı bellekteki H2 ile açar;
+  Docker gerektirmez. Yüzey testleri dışarıya açık ve kapalı ağ sunucusunun kurallarını ayrı ayrı sınar.
 - `AuthFlowIntegrationTest`, `SchemaIsolationIntegrationTest` ve `FirewallIntegrationTest` gerçek bir PostgreSQL 18'i
   Testcontainers ile açar; **Docker yoksa otomatik atlanır**.
 
 ## Docker
 
-Server ve client'ı birlikte çalıştıran [docker-compose.yml](../docker-compose.yml) repo kökündedir:
+Yerelde iki yüzeyi yan yana kuran [docker-compose.yml](../docker-compose.yml) repo kökündedir (PostgreSQL + iki server +
+iki client):
 
 ```bash
 # repo kökünde; server/.env ve server/keys/ hazır olmalı
 docker compose --profile app up -d
 ```
 
-Admin bilgileri ve varsa `DB_URL` `server/.env`'den okunur (bkz. "İlk kurulum").
+`http://localhost:4200` dışarıya açık yüzey, `http://localhost:4300` kapalı ağ yüzeyi. Admin bilgileri `server/.env`'den
+okunur. Gerçek kurulum (iki sunucu, iki ağ): [deploy/README.md](../deploy/README.md).
 
 Sadece server imajı için (`server/` klasöründe): `docker build -t starterapp-server .`
 

@@ -1,0 +1,143 @@
+<app-page>
+  <div class="mk-page">
+    <p class="muted greet">
+      Hoş geldiniz {{ user()?.fullName }}. Mezun Kart programının bugünkü durumu:
+    </p>
+
+    <div class="kpis">
+      @for (k of kpis; track k.label) {
+        <article class="card kpi">
+          <span class="bubble"><nz-icon [nzType]="k.icon" /></span>
+          <div>
+            <span class="muted">{{ k.label }}</span>
+            <strong>{{ k.value }}</strong>
+            <span class="note" [class.up]="k.trend === 'up'">
+              @if (k.trend === 'up') {
+                <nz-icon nzType="rise" />
+              }
+              {{ k.note }}
+            </span>
+          </div>
+        </article>
+      }
+    </div>
+
+    <div class="with-side">
+      <section class="card">
+        <header class="card-head">
+          <div>
+            <h2>Bekleyen Başvurular</h2>
+            <p>İkamet, vize ve çalışma izni başvuruları</p>
+          </div>
+          <a class="see-all">Tümünü gör <nz-icon nzType="right" /></a>
+        </header>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Mezun</th>
+                <th>Hizmet</th>
+                <th>Grup</th>
+                <th>Tarih</th>
+                <th>Durum</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (a of pending; track a.id) {
+                <tr>
+                  <td>
+                    <div class="who">
+                      <span class="avatar" style="--size: 32px" [style.--avatar-bg]="a.color">{{
+                        a.initials
+                      }}</span>
+                      <div>
+                        <strong>{{ a.name }}</strong>
+                        <span class="muted">{{ a.nationality }} · {{ a.id }}</span>
+                      </div>
+                    </div>
+                  </td>
+                  <td>{{ a.service }}</td>
+                  <td>
+                    <span class="tag">Grup {{ a.group }}</span>
+                  </td>
+                  <td class="muted">{{ a.date }}</td>
+                  <td>
+                    <span class="tag" [class]="statusTag(a.status)">{{ a.status }}</span>
+                  </td>
+                  <td class="row-actions">
+                    <button
+                      class="btn btn-sm"
+                      aria-label="İncele"
+                      title="İncele"
+                      (click)="act(a, 'İncele')"
+                    >
+                      <nz-icon nzType="eye" />
+                    </button>
+                    <button class="btn btn-primary btn-sm" (click)="act(a, 'Onayla')">
+                      Onayla
+                    </button>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <app-home-insights />
+    </div>
+
+    <div class="trio">
+      <section class="card">
+        <header class="card-head">
+          <h2>Son Duyurular</h2>
+          <button class="btn btn-primary btn-sm"><nz-icon nzType="plus" /> Yeni duyuru</button>
+        </header>
+        <ul class="rows">
+          @for (n of announcements; track n.id) {
+            <li class="line">
+              <strong>{{ n.title }}</strong>
+              <span class="muted">{{ n.institution }} · {{ n.date | trDate: 'dayMonth' }}</span>
+            </li>
+          }
+        </ul>
+      </section>
+
+      <section class="card">
+        <header class="card-head">
+          <h2>Yaklaşan Etkinlikler</h2>
+          <button class="btn btn-sm"><nz-icon nzType="plus" /> Etkinlik</button>
+        </header>
+        <ul class="rows">
+          @for (e of events; track e.id) {
+            <li class="line">
+              <strong>{{ e.title }}</strong>
+              <span class="muted"
+                >{{ e.date | trDate: 'dayMonth' }} · {{ e.attendees | trNumber }} /
+                {{ e.capacity | trNumber }} kayıt</span
+              >
+              <span class="bar"><span [style.width.%]="fill(e.attendees, e.capacity)"></span></span>
+            </li>
+          }
+        </ul>
+      </section>
+
+      <section class="card">
+        <header class="card-head"><h2>Son İşlemler</h2></header>
+        <ul class="rows">
+          @for (x of audit; track x.what) {
+            <li class="audit">
+              <span class="bubble"><nz-icon [nzType]="x.icon" /></span>
+              <div>
+                <strong>{{ x.who }}</strong>
+                <p>{{ x.what }}</p>
+                <span class="muted">{{ x.when }}</span>
+              </div>
+            </li>
+          }
+        </ul>
+      </section>
+    </div>
+  </div>
+</app-page>

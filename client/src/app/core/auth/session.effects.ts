@@ -3,6 +3,8 @@ import { Router } from '@angular/router';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { catchError, EMPTY, exhaustMap, ignoreElements, map, of, switchMap, tap, timer } from 'rxjs';
 import { AuthApi } from './auth-api';
+import { homeFor } from './auth.guards';
+import { Role } from './session.model';
 import { SessionActions } from './session.actions';
 import { TokenRefresher } from './token-refresher';
 
@@ -46,7 +48,7 @@ export class SessionEffects {
     () =>
       this.actions$.pipe(
         ofType(SessionActions.loginSucceeded),
-        tap(({ returnUrl }) => this.router.navigateByUrl(safeReturnUrl(returnUrl))),
+        tap(({ info, returnUrl }) => this.router.navigateByUrl(afterLoginUrl(returnUrl, info.user.role))),
       ),
     { dispatch: false },
   );
@@ -95,7 +97,11 @@ export class SessionEffects {
   );
 }
 
-/** Sadece uygulama içi adreslere dönülür; başka sitelere yönlendirme (open redirect) engellenir. */
-export function safeReturnUrl(returnUrl: string | null | undefined): string {
-  return returnUrl && returnUrl.startsWith('/') && !returnUrl.startsWith('//') ? returnUrl : '/';
+/**
+ * Girişten sonra gidilecek adres. Sadece uygulama içi adreslere dönülür; başka sitelere yönlendirme (open redirect)
+ * engellenir. Dönüş adresi yoksa (ya da public anasayfaysa) kullanıcı rolünün arayüzüne gider.
+ */
+export function afterLoginUrl(returnUrl: string | null | undefined, role: Role): string {
+  const inApp = !!returnUrl && returnUrl.startsWith('/') && !returnUrl.startsWith('//');
+  return inApp && returnUrl !== '/' ? returnUrl : homeFor(role);
 }

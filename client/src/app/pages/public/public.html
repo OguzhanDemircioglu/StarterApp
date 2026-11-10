@@ -1,0 +1,80 @@
+<app-public-header [nav]="nav" />
+<app-public-hero />
+
+<section id="program" class="mk-section">
+  <h2>Program Hakkında</h2>
+  <p class="lead">Mezunlarla uzun vadeli ve sürdürülebilir bağlar için.</p>
+  <div class="about">
+    <article class="card">
+      <span class="bubble"><nz-icon nzType="flag" /></span>
+      <h3>Program Amacı</h3>
+      <ul class="checks">
+        @for (p of about.purpose; track p) {
+          <li><nz-icon nzType="check" /> {{ p }}</li>
+        }
+      </ul>
+    </article>
+    <article class="card">
+      <span class="bubble"><nz-icon nzType="rise" /></span>
+      <h3>Program Gerekçesi</h3>
+      <p>{{ about.rationale }}</p>
+      <blockquote>“{{ about.quote }}”</blockquote>
+    </article>
+  </div>
+</section>
+
+<section id="imkanlar" class="mk-section">
+  <h2>Mezun Dijital Platformu</h2>
+  <p class="lead">Mezun Portalı’nda sizi neler bekliyor?</p>
+  <div class="features">
+    @for (f of features; track f.title) {
+      <article class="card feature">
+        <span class="bubble"><nz-icon [nzType]="f.icon" /></span>
+        <h3>{{ f.title }}</h3>
+        <p>{{ f.text }}</p>
+      </article>
+    }
+  </div>
+</section>
+
+<section class="mk-section">
+  <h2>Nasıl Başvurulur?</h2>
+  <p class="lead">Dört adımda Mezun Kart sahibi olun.</p>
+  <ol class="steps">
+    @for (s of steps; track s.title; let i = $index) {
+      <li>
+        <span class="num">{{ i + 1 }}</span>
+        <h3>{{ s.title }}</h3>
+        <p>{{ s.text }}</p>
+      </li>
+    }
+  </ol>
+</section>
+
+<app-public-rights />
+
+<section class="mk-section">
+  <h2>Öngörülen Çıktılar</h2>
+  <p class="lead">Program dört alanda kalıcı etki hedefler.</p>
+  <div class="outcomes">
+    @for (o of outcomes; track o.title) {
+      <article class="card">
+        <span class="bubble"><nz-icon [nzType]="o.icon" /></span>
+        <h3>{{ o.title }}</h3>
+        <ul class="checks">
+          @for (i of o.items; track i) {
+            <li><nz-icon nzType="check" /> {{ i }}</li>
+          }
+        </ul>
+      </article>
+    }
+  </div>
+  <ol class="roadmap">
+    @for (r of roadmap; track r.title) {
+      <li [class.done]="r.done">{{ r.title }}</li>
+    }
+  </ol>
+</section>
+
+<app-public-news />
+<app-public-footer />

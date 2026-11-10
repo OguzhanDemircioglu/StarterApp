@@ -16,13 +16,16 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import org.springframework.security.access.prepost.PreAuthorize;
+
 import java.util.List;
 
 /**
- * Referans CRUD modülü: giriş yapmış her kullanıcı erişir (@PreAuthorize yok).
+ * Referans CRUD modülü (yönetim paneli tanımları): sadece ADMIN ve SUPERADMIN. Yol kuralı da /api/admin/** için ADMIN ister.
  */
 @RestController
-@RequestMapping("/api/categories")
+@RequestMapping("/api/admin/categories")
+@PreAuthorize("hasRole('ADMIN')")
 @RequiredArgsConstructor
 public class CategoryController {
 

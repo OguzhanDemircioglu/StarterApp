@@ -19,8 +19,9 @@ public class MenuServiceImpl implements MenuService {
 
     @Override
     public List<MenuNode> getMenuTree(Role role) {
-        List<Menu> menus = role == Role.ADMIN
-                ? repository.findAllByOrderBySortOrderAsc()
+        // Yönetim kullanıcıları sadece yönetim paneli menülerini (admin_only), USER sadece portal menülerini görür.
+        List<Menu> menus = role.isStaff()
+                ? repository.findAllByAdminOnlyTrueOrderBySortOrderAsc()
                 : repository.findAllByAdminOnlyFalseOrderBySortOrderAsc();
 
         Map<Long, List<Menu>> childrenByParent = new HashMap<>();

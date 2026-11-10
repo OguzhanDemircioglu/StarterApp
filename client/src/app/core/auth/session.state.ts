@@ -1,5 +1,6 @@
 import { createFeature, createReducer, createSelector, on } from '@ngrx/store';
 import { SessionActions } from './session.actions';
+import { isStaff } from './roles';
 import { MenuNode, SessionUser } from './session.model';
 
 /**
@@ -48,6 +49,7 @@ export const sessionFeature = createFeature({
   ),
   extraSelectors: ({ selectStatus, selectUser }) => ({
     selectIsAuthenticated: createSelector(selectStatus, (status) => status === 'authenticated'),
-    selectIsAdmin: createSelector(selectUser, (user) => user?.role === 'ADMIN'),
+    // Yönetim paneli kullanıcısı: ADMIN ya da onu kapsayan SUPERADMIN.
+    selectIsAdmin: createSelector(selectUser, (user) => isStaff(user?.role)),
   }),
 });

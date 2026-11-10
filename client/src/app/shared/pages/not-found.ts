@@ -9,7 +9,7 @@ import { NzResultModule } from 'ng-zorro-antd/result';
   template: `
     <nz-result nzStatus="404" [nzTitle]="'page_not_found_title' | translate" [nzSubTitle]="'page_not_found_text' | translate">
       <div nz-result-extra>
-        <a nz-button nzType="primary" routerLink="/">{{ 'common_back_home' | translate }}</a>
+        <a nz-button nzType="primary" routerLink="/admin">{{ 'common_back_home' | translate }}</a>
       </div>
     </nz-result>
   `,

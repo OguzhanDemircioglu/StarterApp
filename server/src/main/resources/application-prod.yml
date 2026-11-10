@@ -3,3 +3,7 @@ logging:
   structured:
     format:
       console: logstash
+
+app:
+  # Zorunlu: public ya da internal. Verilmezse uygulama açılmaz (yanlışlıkla iki yüzeyi birden açmamak için).
+  surface: ${APP_SURFACE}

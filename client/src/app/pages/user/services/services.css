@@ -1,0 +1,207 @@
+.top {
+  display: grid;
+  grid-template-columns: 400px minmax(0, 1fr);
+  gap: 16px;
+  align-items: start;
+}
+
+.card-facts {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  margin: 16px 0;
+  text-align: center;
+}
+
+.card-facts div + div {
+  border-left: 1px solid #f0f0f0;
+}
+
+.card-facts dt {
+  font-size: 11px;
+  color: var(--mk-muted);
+}
+
+.card-facts dd {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.card-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.rights {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px 20px;
+  font-size: 13px;
+}
+
+.rights li {
+  display: flex;
+  gap: 8px;
+}
+
+.rights nz-icon {
+  margin-top: 3px;
+  color: #1e7b45;
+}
+
+.apps-head {
+  margin-top: 28px;
+  padding-top: 20px;
+  border-top: 1px solid #f0f0f0;
+}
+
+.app-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.app-head strong {
+  font-size: 14px;
+}
+
+.app-note {
+  margin-top: 8px;
+  font-size: 12px;
+  color: var(--mk-muted);
+}
+
+.app-note.warn {
+  color: #b9141a;
+}
+
+/* Katalog */
+.catalog {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+  gap: 14px;
+}
+
+.service {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 16px;
+  border: 1px solid #ececec;
+  border-radius: 10px;
+  transition:
+    border-color 0.15s,
+    box-shadow 0.15s;
+}
+
+.service:hover {
+  border-color: #f3b8bb;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.05);
+}
+
+.service h3 {
+  margin-top: 6px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.service .desc {
+  flex: 1;
+  font-size: 12px;
+  line-height: 18px;
+  color: #444;
+}
+
+.service-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 8px;
+}
+
+.service.locked {
+  background: #fafafa;
+}
+
+.service.locked .bubble {
+  color: #999;
+}
+
+/* Gruplar */
+.groups {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.group {
+  overflow: hidden;
+  border: 1px solid #ececec;
+  border-radius: 10px;
+}
+
+.group header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 16px;
+  font-weight: 600;
+  color: #fff;
+  background: #0d5c73;
+}
+
+.group.mine {
+  border-color: var(--mk-red);
+}
+
+.group.mine header {
+  background: var(--mk-red);
+}
+
+.group.mine header .tag {
+  background: #fff;
+}
+
+.who {
+  padding: 12px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  background: #f5f8fa;
+}
+
+.who li::before {
+  content: '◆ ';
+  color: #0d5c73;
+}
+
+.group-rights {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 14px 16px 16px;
+  font-size: 13px;
+}
+
+.group-rights li {
+  display: flex;
+  gap: 8px;
+}
+
+.group-rights nz-icon {
+  margin-top: 4px;
+  color: #0d5c73;
+}
+
+@media (max-width: 1200px) {
+  .top {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 900px) {
+  .groups,
+  .rights {
+    grid-template-columns: 1fr;
+  }
+}

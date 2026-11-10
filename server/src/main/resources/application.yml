@@ -43,6 +43,9 @@ springdoc:
     enabled: false
 
 app:
+  # Hangi yüzey: public (dışarıya açık, USER), internal (kapalı ağ, ADMIN/SUPERADMIN), all (sadece geliştirme ve test).
+  # Prod profilinde varsayılan yoktur, APP_SURFACE verilmelidir (application-prod.yml).
+  surface: ${APP_SURFACE:all}
   jwt:
     issuer: starterapp
     access-token-ttl: 15m
