@@ -2,8 +2,6 @@ package com.server;
 
 import com.server.modules.auth.LoginAttempt;
 import com.server.modules.auth.LoginAttemptRepository;
-import com.server.modules.report.PeriodValue;
-import com.server.modules.report.ReportService;
 import com.server.support.TestJwtKeys;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,8 +12,6 @@ import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 
 import java.time.Instant;
-import java.time.LocalDate;
-import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 
@@ -49,9 +45,6 @@ class H2IntegrationTest {
 
     @Autowired
     private LoginAttemptRepository attempts;
-
-    @Autowired
-    private ReportService reports;
 
     @Test
     void migrationsAreApplied() {
@@ -88,20 +81,6 @@ class H2IntegrationTest {
         assertThat(attempt(key).isBlocked(afterBlock)).isFalse();
         assertThat(jdbc.queryForObject("SELECT fail_count FROM login_attempts WHERE attempt_key = ?", Integer.class, key))
                 .isEqualTo(1);
-    }
-
-    @Test
-    void reportReturnsEveryDayAndCountsToday() {
-        insertCategory("Rapor Kategorisi");
-
-        List<PeriodValue> values = reports.categoriesCreatedPerDay(7);
-
-        LocalDate today = LocalDate.now(ZoneId.of("Europe/Istanbul"));
-        assertThat(values).hasSize(7);
-        assertThat(values.getFirst().period()).isEqualTo(today.minusDays(6).toString());
-        assertThat(values.getFirst().value()).isZero();
-        assertThat(values.getLast().period()).isEqualTo(today.toString());
-        assertThat(values.getLast().value()).isPositive();
     }
 
     private LoginAttempt attempt(String key) {

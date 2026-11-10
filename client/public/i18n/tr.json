@@ -44,8 +44,6 @@
   "category_name_exists": "Bu isimde bir kategori zaten var",
   "category_description_too_long": "Açıklama en fazla 500 karakter olabilir",
 
-  "report_days_invalid": "Gün sayısı 1 ile 365 arasında olmalıdır",
-
   "menu_home": "Anasayfa",
   "menu_definitions": "Tanımlar",
   "menu_categories": "Kategoriler",

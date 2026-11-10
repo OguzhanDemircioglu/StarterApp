@@ -104,7 +104,7 @@ Her biri sebep ister, step-up ister ve audit'e yazılır:
 
 - Sistem metrikleri: Spring Actuator + Micrometer (JVM bellek, HTTP gecikmesi p95, 5xx oranı, DB bağlantı havuzu).
   Actuator dışarıya değil ayrı iç porta açılır (`management.server.port`); panel veriyi backend üzerinden alır.
-- İş metrikleri: mevcut rapor kalıbıyla native SQL (kullanıcı sayıları, aktif oturum, başarısız giriş, engellenen
+- İş metrikleri: rapor kalıbıyla (Backend_Architecture §5.5) native SQL (kullanıcı sayıları, aktif oturum, başarısız giriş, engellenen
   IP/hesap, audit işlem sayıları, son hatalar).
 - Panel sadece okur; işlemler kendi ekranlarından yapılır. Paneli görüntülemek de audit'e yazılır.
 

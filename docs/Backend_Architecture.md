@@ -60,7 +60,6 @@ com.server
    ├─ auth/        login / refresh / logout / şifre değiştirme, UserSession, LoginAttempt, SessionInfo
    ├─ user/        kullanıcı yönetimi (sadece admin)
    ├─ menu/        menü ağacı
-   ├─ report/      grafikleri besleyen özet endpoint'ler (§5.5)
    └─ category/    referans CRUD modülü (yeni modül açarken kopyalanır)
 ```
 
@@ -280,10 +279,10 @@ Formatın korunduğu **kontrat testleriyle** garanti edilir: §5.2'deki her stat
 
 ### 5.5 Rapor ve grafik endpoint'leri
 
-Frontend'de çok sayıda grafik olacak. Grafikler ham kayıtlarla değil, backend'in hazırladığı **özet verilerle** beslenir.
+Grafikler ham kayıtlarla değil, backend'in hazırladığı **özet verilerle** beslenir. Bu dalda (`mezun-portal`) grafik ve rapor endpoint'i yoktur; aşağıdaki kurallar ilk rapor yazıldığında uygulanır. Örnek uygulama (`modules/report/`, `categories-created` endpoint'i ve H2 testi) şablon dalındadır (`cray61`).
 
 - **Yol:** `GET /api/reports/{rapor-adi}`, filtreler query parametresiyle verilir. Örnek:
-  `GET /api/reports/categories-created?days=30` → `data: [ { "period": "2026-10-01", "value": 3 }, ... ]`
+  `GET /api/reports/{rapor-adi}?days=30` → `data: [ { "period": "2026-10-01", "value": 3 }, ... ]`
 - **Toplama SQL'de yapılır** (`GROUP BY`, `COUNT`, `SUM`). Ham satırlar frontend'e çekilip orada toplanmaz. Bu sayede rapor endpoint'leri az satır döner ve "sayfalama yok" kuralıyla çelişmez.
 - **Gün, hafta ve ay gruplaması Türkiye saatine göre yapılır.** Tarihler UTC saklandığı için düz `date_trunc('day', created_at)` gece 00:00–03:00 arasındaki kayıtları bir önceki güne yazar. Doğrusu:
   `date_trunc('day', created_at AT TIME ZONE 'Europe/Istanbul')`
@@ -761,7 +760,7 @@ Dosyalar: `application.yml` (ortak), `application-dev.yml`, `application-prod.ym
 |---|---|
 | Unit (Mockito) | ServiceImpl iş kuralları, menü ağacı kurma |
 | Entegrasyon (Testcontainers + PostgreSQL 18) | Login, refresh rotation, 30 saniyelik pencere, çalınma tespiti, logout; brute-force; soft delete; version çakışması (409); data migration runner |
-| Entegrasyon (bellekte H2) | Migration'lar, silinmemiş kayıtlara özel unique index, yanlış deneme sayacı, rapor sorgusu |
+| Entegrasyon (bellekte H2) | Migration'lar, silinmemiş kayıtlara özel unique index, yanlış deneme sayacı |
 | Kontrat | §5.2'deki her status için response'ta dört alanın bulunduğu ve tiplerinin doğru olduğu kontrol edilir. Formatı bozan bir değişiklik build'i kırar |
 
 - Entegrasyon testi Docker yoksa otomatik olarak atlanır (`@Testcontainers(disabledWithoutDocker = true)`).

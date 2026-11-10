@@ -199,24 +199,6 @@ class AuthFlowIntegrationTest {
     }
 
     @Test
-    void categoriesCreatedReportReturnsEveryDayIncludingToday() throws Exception {
-        String token = accessToken(login(ADMIN_EMAIL, ADMIN_PASSWORD));
-        mockMvc.perform(withToken(post("/api/categories"), token)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"name\":\"Rapor " + UUID.randomUUID() + "\"}"))
-                .andExpect(status().isOk());
-        String today = java.time.LocalDate.now(java.time.ZoneId.of("Europe/Istanbul")).toString();
-
-        mockMvc.perform(withToken(get("/api/reports/categories-created").param("days", "7"), token))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.length()").value(7))
-                .andExpect(jsonPath("$.data[6].period").value(today))
-                .andExpect(jsonPath("$.data[6].value").value(org.hamcrest.Matchers.greaterThanOrEqualTo(1)));
-
-        expectError(withToken(get("/api/reports/categories-created").param("days", "0"), token), 400, "report_days_invalid");
-    }
-
-    @Test
     void readinessEndpointIsPublic() throws Exception {
         mockMvc.perform(get("/actuator/health/readiness")).andExpect(status().isOk());
     }
