@@ -6,7 +6,7 @@ Yeni bir projeye bu repo kopyalanarak başlanır.
 | Klasör / dosya | İçerik |
 |---|---|
 | [server/](server/README.md) | Spring Boot 4.1, Java 25, PostgreSQL (yerelde H2). Kurulum ve çalıştırma: [server/README.md](server/README.md) |
-| [client/](client/README.md) | Angular 22, NG-ZORRO, ECharts, NgRx. Kurulum ve çalıştırma: [client/README.md](client/README.md) |
+| [client/](client/README.md) | Angular 22, NG-ZORRO, NgRx. Kurulum ve çalıştırma: [client/README.md](client/README.md) |
 | [docs/Backend_Architecture.md](docs/Backend_Architecture.md) | Backend'in bağlayıcı kuralları ve tasarım kararları |
 | [docs/Frontend_Architecture.md](docs/Frontend_Architecture.md) | Frontend'in bağlayıcı kuralları ve tasarım kararları |
 | [docs/Security_Roadmap.md](docs/Security_Roadmap.md) | Taslak: süperadmin rolü, audit, 2FA ve güvenlik sertleştirme yol haritası (henüz uygulanmadı) |

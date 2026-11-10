@@ -8,7 +8,7 @@
 
 ## 1. Amaç ve öncelik
 
-- Yeni projelerin önyüzü bu iskeletten başlar. Hedeflenen uygulama tipi: tablo, form ve grafik ağırlıklı, veri gösterip güncelleyen kurumsal ekranlar.
+- Yeni projelerin önyüzü bu iskeletten başlar. Hedeflenen uygulama tipi: tablo ve form ağırlıklı, veri gösterip güncelleyen kurumsal ekranlar.
 - Projede birden fazla kişi çalışacak. Bu yüzden **en önemli ölçüt okunabilirlik**: kod tabanına ilk kez bakan biri hangi sayfanın hangisinin altında olduğunu, bir ekranın hangi dosyalardan oluştuğunu tahmin etmeden görebilmeli.
 
 ---
@@ -21,7 +21,6 @@
 | Node.js | 26 LTS (en az 22.22.3 / 24.15) | Angular 22'nin minimum gereksinimi |
 | UI kütüphanesi | NG-ZORRO 22 (Ant Design) | **MIT**, şirket büyüklüğünden bağımsız ücretsiz |
 | İkonlar | `@ant-design/icons-angular` (NG-ZORRO ile gelir) | Sadece kayıtlı ikonlar pakete girer (§11) |
-| Grafikler | Apache ECharts 6 + `ngx-echarts` 22 | Apache 2.0 / MIT, ücretsiz (§12) |
 | State | NgRx 22 (`store`, `effects`, `store-devtools`) | Sadece oturum (§8) |
 | Metinler | ngx-translate 18 + http-loader | Sadece Türkçe (§10) |
 | Test | Vitest (Angular CLI'ın varsayılanı) | `npx ng test` |
@@ -74,13 +73,12 @@ client/
 │     │
 │     ├─ shared/                       sayfaların ortak kullandığı parçalar
 │     │  ├─ page/                      Page (başlık + otomatik breadcrumb), Section (kart)
-│     │  ├─ charts/                    Chart sarmalayıcısı, ECharts kurulumu, biçimlendirme (§12)
 │     │  ├─ forms/                     validateForm, maxBytes, sameAs
 │     │  └─ pages/                     forbidden (403), not-found (404)
 │     │
 │     └─ pages/                        URL'nin birebir aynası
 │        ├─ login/                     /login
-│        ├─ home/                      /            (örnek grafik + rapor servisi)
+│        ├─ home/                      /            (yönetim anasayfası: karşılama)
 │        ├─ definitions/               /definitions
 │        │  ├─ definitions.routes.ts
 │        │  └─ categories/             /definitions/categories   ← REFERANS MODÜL
@@ -282,7 +280,7 @@ Ekranlar sadece başarılı durumu yazar (`notifier.success('record_created')`).
 
 ## 10. Çeviri (i18n)
 
-- Uygulama sadece Türkçedir, dil seçimi yoktur. Bütün metinler `public/i18n/tr.json`'dadır; ngx-translate bu dosyayı açılışta yükler. Backend mesajları anahtar olarak gönderdiği için anahtar yapısı korunur. NG-ZORRO `tr_TR`, ECharts `TR` yerel ayarıyla çalışır.
+- Uygulama sadece Türkçedir, dil seçimi yoktur. Bütün metinler `public/i18n/tr.json`'dadır; ngx-translate bu dosyayı açılışta yükler. Backend mesajları anahtar olarak gönderdiği için anahtar yapısı korunur. NG-ZORRO `tr_TR` yerel ayarıyla çalışır.
 - **Backend'in gönderdiği bütün anahtarlar** (`category_name_exists`, `auth_login_blocked`, menülerdeki `menu_categories`...) bu dosyalarda bulunmalıdır.
 - Arayüz metinleri de anahtarla yazılır; HTML'de sabit Türkçe metin bulunmaz. Yazım backend'le aynıdır: düz, snake_case, ekran adıyla başlayan anahtarlar (`category_list_title`, `common_save`).
 - Testle korunur: iki dosya aynı anahtarları içermeli ve her anahtar snake_case olmalı (`core/i18n/translations.spec.ts`).
@@ -302,24 +300,7 @@ Ekranlar sadece başarılı durumu yazar (`notifier.success('record_created')`).
 
 ## 12. Grafikler
 
-Uygulamalarda çok sayıda grafik kullanılacak. Bu yüzden grafikler için tek bir kütüphane ve tek bir kalıp vardır.
-
-- **Kütüphane:** Apache ECharts (`ngx-echarts`). Projede ikinci bir grafik kütüphanesi bulunmaz.
-- **Ortak sarmalayıcı (`shared/charts/chart.ts`):** Sayfalar ECharts'ı doğrudan değil, `<app-chart>` üzerinden kullanır:
-  - Ortak renk paleti (`chart-colors.ts`, renk körlüğü kontrolünden geçmiş sırayla) ve kenar boşlukları.
-  - Türkçe sayı biçimi (tooltip ve sayısal eksenler).
-  - Gösterge varsayılan olarak üsttedir; ECharts 6'nın alt varsayılanı eksen etiketleriyle çakışır.
-  - "Yükleniyor" (`nz-spin`) ve "veri yok" (`nz-empty`) durumları.
-  - Pencere boyutu değişince otomatik yeniden boyutlandırma.
-- Sayfa sadece grafiğin kendi ayarlarını (seriler, eksenler) verir.
-- **Paket boyutu:** `echarts-setup.ts` kullanılan grafik türlerini ve bileşenleri kaydeder. Anasayfa demosu ECharts'ın 23 türünün hepsini kullandığı için şu an hepsi kayıtlıdır; demo kaldırılınca kullanılmayanlar silinir. ECharts sadece grafiğin olduğu sayfa açılınca yüklenir.
-- **Eklentiler (`echarts-extensions.ts`):** `echarts-gl` (3B/WebGL), `echarts-wordcloud` ve `echarts-liquidfill` ana pakette değildir. npm üzerinden derlenemezler: kaynakları ECharts 6'nın iç dosyalarına ulaşamaz, `dist/` dosyaları paketlenince ECharts'ın ayrı bir kopyasına kayıt olur. Bu yüzden `angular.json` onları `/vendor` altına kopyalar, `loadEchartsExtensions()` script olarak yükler ve `window.echarts` üzerinden uygulamadaki ECharts'a bağlar. İlk yüklemeye girmezler, sadece çağıran ekran indirir. `wordcloud` ve `liquidfill` ECharts 5 ister; `package.json`'daki `overrides` bunu ECharts 6'ya bağlar (paketleri 2022'den beri güncellenmedi, ECharts yükseltilince tekrar denenmeli).
-- **Bilinen `echarts-gl` sınırları (ECharts 6):** `linesGL` haritada çizmiyor, kartezyen eksende `polyline: true` ve 1px genişlikle çalışıyor. `polygons3D` küre üzerinde çizilmiyor, `geo3D`'de kaydırma gerekiyor (`FLOOR_OFFSET`). WebGL serileri `zlevel` ile kendi katmanına alınır.
-- **Veri:** Grafikler backend'in özet döndüren rapor endpoint'leriyle beslenir (backend §5.5). Frontend'de toplama yapılmaz; günler `formatDay` ile Türkçe gösterilir.
-- **Canlı örnek:** Anasayfanın "Canlı veri" sekmesindeki "son 30 günde eklenen kategoriler" grafiği (`pages/home/home.ts`) backend'e bağlı grafik için referans kalıptır.
-- **Mock pano:** Anasayfanın diğer sekmeleri "Üç Zeytin" adlı hayali lokantanın panosudur, `pages/home/dashboard/` altındadır. Bütün rakamlar `restaurant.mock.ts`'tedir ve birbirinden hesaplanır; sekmeler `*.charts.ts` dosyalarında `ChartCard` listesi olarak tanımlanır. "Galeri" sekmesi görünüm çeşitlerini ve bileşenleri (timeline, toolbox, brush, matrix, thumbnail, aria, dataset transform), "3B ve eklentiler" sekmesi eklenti türlerini gösterir. ekran metinleri `dash_` önekiyle `tr.json`'dadır. "Haritalar" sekmesi 12 deck.gl katmanını gösterir. "Diğer çeşitler" sekmesi yaygın görünümleri (lolipop, keman, Gantt, Marimekko gibi) ECharts ile gösterir (`more.charts.ts`). "Rotalar" sekmesi bir noktadan diğerine gidişin çizim seçeneklerini gösterir: 19 ECharts kartı (`routes.charts.ts`), 1 ECharts GL ve 10 deck.gl kartı (`routes.maps.ts`). `courier-streets.json` gerçek yol geometrisidir: OpenStreetMap verisi (ODbL, kaynak gösterilmeli), OSRM ile bir kez hesaplandı. 3B kamyon `PolygonLayer` ile koddan çizilir, solan iz parçalı `LineLayer`'dır: `TripsLayer` ve model katmanları `geo-layers`/`mesh-layers` paketlerini ve onların güvenlik uyarılarını getirirdi. Her kartın sağ üstünde çizen kütüphane yazar (`ChartCard.library`). Gerçek projede `dashboard/` klasörü, `home.html`'deki sekmeler, `dash_` anahtarları ve kullanılmıyorsa eklenti paketleri silinir.
-- **Harita üstü grafikler (`shared/charts/deck-map.ts`):** Sokak ölçeğindeki haritalar için bilinçli istisnadır, ECharts'ın bu türleri yoktur. Altlık MapLibre GL JS, katmanlar deck.gl'dir; altlık görseller OpenFreeMap'ten gelir, bu yüzden internet gerekir ve yoğun üretim kullanımı için kendi barındırmanız gerekebilir. İl ve bölge haritası için `<app-chart>` yeterlidir. deck.gl'in sadece gereken parçaları kuruludur: `deck.gl` şemsiye paketi React ve ArcGIS çeker, `geo-layers` (`TripsLayer`) npm audit uyarıları getirir. MapLibre 6 için `@deck.gl/mapbox` değil `@deck.gl/maplibre` kullanılır; worker ve CSS dosyalarını `angular.json` `/vendor` altına kopyalar. Bir sekmede en fazla ~16 WebGL bağlamı açılabildiği için `nz-tabs` görünmeyen sekmeyi kaldırır.
-- **Türkiye haritası:** `dashboard/turkey-provinces.json` 81 ilin sınırlarını içerir. Kaynak Natural Earth (kamu malı), `datamaps` paketinden (MIT) çıkarıldı, il adları düzeltildi; sınırlar basitleştirilmiştir.
+Bu dalda (`mezun-portal`) grafik yoktur: anasayfa panosu, `shared/charts/`, ECharts / ECharts GL / MapLibre / deck.gl paketleri ve `dash_` çevirileri kaldırıldı. Grafik gerekirse kalıp şablon dalında (`cray61`) durur: `shared/charts/` klasörü, `package.json` paketleri, `angular.json` `/vendor` kopyaları ve bu bölümün eski hâli oradan alınır.
 
 ---
 
@@ -328,7 +309,7 @@ Uygulamalarda çok sayıda grafik kullanılacak. Bu yüzden grafikler için tek 
 | Ekran | URL | Kimler |
 |---|---|---|
 | Login | `/login` | Herkes |
-| Anasayfa | `/` | Giriş yapmış herkes: karşılama, mock restoran panosu (sekmeli), canlı örnek grafik |
+| Anasayfa | `/` | ADMIN: karşılama (USER `/portal`a yönlenir) |
 | Kategoriler (referans CRUD) | `/definitions/categories` | Giriş yapmış herkes |
 | Kullanıcılar | `/administration/users` | ADMIN: liste, ekleme, düzenleme (rol, aktif/pasif), şifre sıfırlama, silme |
 | Şifremi değiştir | topbar'dan dialog | Giriş yapmış herkes |
@@ -370,6 +351,6 @@ Uygulamalarda çok sayıda grafik kullanılacak. Bu yüzden grafikler için tek 
 ## 17. Kapsam dışı / sonraya bırakılanlar
 
 - Sayfalama (backend'le birlikte)
-- Gerçek dashboard içerikleri (iskelette sadece bir örnek grafik var)
+- Gerçek dashboard içerikleri
 - Karanlık tema seçimi
 - E2E testler

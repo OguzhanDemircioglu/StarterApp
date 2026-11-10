@@ -7,7 +7,6 @@ StarterApp'in Angular önyüzü. Bağlayıcı kurallar ve tasarım kararları:
 |---|---|
 | Angular | 22 (standalone, signal'ler, zoneless) |
 | UI | NG-ZORRO 22 (Ant Design, MIT) |
-| Grafikler | Apache ECharts 6 (`ngx-echarts`) |
 | State | NgRx 22 (sadece oturum) |
 | Metinler | ngx-translate (sadece Türkçe) |
 | Node.js | 26 LTS (en az 22.22.3) |
@@ -36,7 +35,7 @@ npx ng build
 ```
 src/app/
 ├─ core/      oturum (NgRx), interceptor'lar, layout, bildirimler, dil, ikonlar
-├─ shared/    page + section iskeleti, grafik sarmalayıcısı, form yardımcıları, 403/404
+├─ shared/    page + section iskeleti, form yardımcıları, 403/404
 └─ pages/     URL'nin aynası: login, home, definitions/categories, administration/users, portal (USER arayüzü)
 ```
 

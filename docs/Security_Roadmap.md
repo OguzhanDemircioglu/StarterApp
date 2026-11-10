@@ -97,8 +97,8 @@ Her biri sebep ister, step-up ister ve audit'e yazılır:
   başlıkları var, ama uygulamayı sunan nginx'te yok.
 - nginx'e eklenecekler: `Content-Security-Policy` (`frame-ancestors 'none'` dahil), `Strict-Transport-Security`,
   `X-Content-Type-Options: nosniff`, `Referrer-Policy: strict-origin-when-cross-origin`, `Permissions-Policy`.
-- CSP, anasayfadaki ECharts, ECharts GL, MapLibre ve deck.gl (worker'lar, `/vendor` scriptleri, OpenFreeMap) ve
-  NG-ZORRO'nun inline stilleriyle birlikte tarayıcıda test edilmelidir.
+- CSP, NG-ZORRO'nun inline stilleriyle birlikte tarayıcıda test edilmelidir (şablon dalındaki ECharts, MapLibre ve
+  deck.gl panosu `mezun-portal` dalında yoktur).
 
 ### 4.9 Süperadmin metrik paneli
 
