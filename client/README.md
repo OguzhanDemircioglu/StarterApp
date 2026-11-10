@@ -37,7 +37,7 @@ npx ng build
 src/app/
 ├─ core/      oturum (NgRx), interceptor'lar, layout, bildirimler, dil, ikonlar
 ├─ shared/    page + section iskeleti, grafik sarmalayıcısı, form yardımcıları, 403/404
-└─ pages/     URL'nin aynası: login, home, definitions/categories, administration/users
+└─ pages/     URL'nin aynası: login, home, definitions/categories, administration/users, portal (USER arayüzü)
 ```
 
 ## Yeni sayfa ekleme

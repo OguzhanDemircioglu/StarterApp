@@ -1,0 +1,82 @@
+<header class="topbar">
+  <button class="menu-toggle" aria-label="Menüyü aç/kapat" (click)="menuOpen.set(!menuOpen())">
+    <nz-icon nzType="menu" />
+  </button>
+
+  <a class="brand" routerLink="/portal">
+    <svg class="brand-mark" viewBox="0 0 48 40" aria-hidden="true">
+      <circle cx="18" cy="23" r="15" fill="#d71920" />
+      <circle cx="23" cy="21" r="12" fill="#fff" />
+      <path d="M22 30c8-2 16-8 24-16-4 9-10 15-17 18z" fill="#d71920" />
+      <polygon points="9,4 10.6,8.2 15,8.2 11.5,10.8 12.8,15 9,12.4 5.2,15 6.5,10.8 3,8.2 7.4,8.2" fill="#d71920" />
+    </svg>
+    <span class="brand-text">
+      <small>T.C.</small>
+      <strong>GÖÇ İDARESİ</strong>
+      <small class="spaced">BAŞKANLIĞI</small>
+    </span>
+    <span class="brand-bar"></span>
+  </a>
+
+  <nav class="site-links">
+    @for (link of siteLinks; track link) {
+      <span class="site-link" [class.active]="link === 'Dijital Platform'">{{ link }}</span>
+    }
+  </nav>
+
+  <div class="top-actions">
+    <button class="icon-btn" aria-label="Ara"><nz-icon nzType="search" /></button>
+    <span class="divider"></span>
+    <button class="lang">TR <nz-icon nzType="down" /></button>
+    <span class="divider"></span>
+    <button class="user" nz-dropdown [nzDropdownMenu]="userMenu" nzTrigger="click" nzPlacement="bottomRight">
+      <span class="avatar">{{ profile.initials }}</span>
+      <span class="user-name">{{ profile.fullName }}</span>
+      <nz-icon nzType="down" />
+    </button>
+    <nz-dropdown-menu #userMenu="nzDropdownMenu">
+      <ul nz-menu>
+        <li nz-menu-item routerLink="/portal/profile"><nz-icon nzType="user" /> Profilim</li>
+        @if (isAdmin()) {
+          <li nz-menu-item routerLink="/"><nz-icon nzType="setting" /> Yönetim paneli</li>
+        }
+        <li nz-menu-divider></li>
+        <li nz-menu-item (click)="logout()"><nz-icon nzType="logout" /> Çıkış</li>
+      </ul>
+    </nz-dropdown-menu>
+  </div>
+</header>
+
+<div class="body">
+  <aside class="sider" [class.open]="menuOpen()">
+    <div class="sider-title">
+      <span>DİJİTAL PLATFORM</span>
+      <strong>Mezun Portalı</strong>
+    </div>
+    <nav>
+      @for (item of menu; track item.route) {
+        <a class="nav-item" [routerLink]="item.route" routerLinkActive="active">
+          <nz-icon [nzType]="item.icon" />
+          <span>{{ item.label }}</span>
+        </a>
+      }
+    </nav>
+  </aside>
+  @if (menuOpen()) {
+    <div class="backdrop" (click)="menuOpen.set(false)"></div>
+  }
+
+  <main class="content">
+    <div class="banner" aria-hidden="true">
+      <svg viewBox="0 0 640 120" preserveAspectRatio="xMaxYMin slice">
+        <path d="M150 120C210 60 300 10 420 0h40C350 18 270 62 215 120z" fill="#d71920" />
+        <path d="M330 120c40-40 110-70 190-72l-6 22c-60 4-112 22-150 50z" fill="#d71920" />
+        <path
+          d="M500 30c30 4 52 10 70 18 14-14 34-26 62-36-18 16-30 30-38 44 10 6 22 16 34 30-16-8-30-12-44-12-10 10-26 16-44 16 10-6 16-14 18-22-20-14-38-26-58-38z"
+          fill="#d71920"
+        />
+      </svg>
+    </div>
+    <router-outlet />
+  </main>
+</div>

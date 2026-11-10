@@ -1,5 +1,5 @@
 import { Routes } from '@angular/router';
-import { adminGuard, authGuard, guestGuard } from './core/auth/auth.guards';
+import { adminGuard, authGuard, guestGuard, staffGuard } from './core/auth/auth.guards';
 import { Shell } from './core/layout/shell/shell';
 
 /**
@@ -8,10 +8,12 @@ import { Shell } from './core/layout/shell/shell';
  */
 export const routes: Routes = [
   { path: 'login', canActivate: [guestGuard], loadComponent: () => import('./pages/login/login') },
+  // USER rolünün arayüzü: kendi iskeleti olan Mezun Portalı. Admin de önizleme için açabilir.
+  { path: 'portal', canActivate: [authGuard], loadChildren: () => import('./pages/portal/portal.routes') },
   {
     path: '',
     component: Shell,
-    canActivate: [authGuard],
+    canActivate: [authGuard, staffGuard],
     children: [
       { path: '', data: { title: 'menu_home' }, loadComponent: () => import('./pages/home/home') },
       {

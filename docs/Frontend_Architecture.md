@@ -43,6 +43,7 @@ ErpStockTracer'dan **taşınmayanlar:** jQuery, AdminLTE, Bootstrap JS, SweetAle
 | └ Kategoriler (`menu_categories`) | `/definitions/categories` | `pages/definitions/categories/` |
 | Yönetim (`menu_administration`) | `/administration` | `pages/administration/` |
 | └ Kullanıcılar (`menu_users`) | `/administration/users` | `pages/administration/users/` |
+| Mezun Portalı (USER arayüzü, menüsü şimdilik client'ta) | `/portal/profile` … | `pages/portal/` |
 
 - Menü kayıtları backend'de migration class'larıyla tutulur (`V005_HierarchicalMenuRoutes`); `route` değerleri bu tabloya uyar.
 - Yeni bir sayfa eklenirken üçü birlikte eklenir: klasör, route ve menü kaydı.
@@ -87,9 +88,15 @@ client/
 │        │     ├─ category-form/       ekleme/düzenleme dialog'u
 │        │     ├─ category-api.ts      HTTP servisi
 │        │     └─ category.model.ts    backend DTO'larının tipleri
-│        └─ administration/            /administration (sadece ADMIN)
-│           ├─ administration.routes.ts
-│           └─ users/                  /administration/users
+│        ├─ administration/            /administration (sadece ADMIN)
+│        │  ├─ administration.routes.ts
+│        │  └─ users/                  /administration/users
+│        └─ portal/                    /portal: USER rolünün arayüzü (Mezun Portalı), kendi iskeleti
+│           ├─ portal.routes.ts
+│           ├─ portal.mock.ts          geçici veriler (API gelince servis + model ile değişir)
+│           ├─ portal-layout/          üst bar + sol menü
+│           ├─ profile/                /portal/profile
+│           └─ coming-soon/            içeriği henüz olmayan menüler
 ├─ proxy.conf.json                     dev: /api → http://localhost:8080
 ├─ nginx.conf                          Docker: SPA + /api yönlendirmesi (§14)
 ├─ Dockerfile
@@ -147,8 +154,9 @@ export default [
   - `authGuard` **tek yerde**, shell'de durur ve bütün iç sayfaları korur. Giriş yoksa `returnUrl` ile login'e gönderir; girişten sonra o sayfaya dönülür.
   - `adminGuard` yönetim grubunda durur; yetkisiz kullanıcıyı `/forbidden`'a gönderir.
   - `guestGuard` login sayfasında durur; giriş yapmış kullanıcıyı anasayfaya gönderir.
+  - `staffGuard` shell'de durur; USER rolünü `/portal`'a gönderir (admin arayüzünü sadece ADMIN görür).
   - Guard'lar sadece kullanıcı deneyimi içindir. Asıl güvenlik backend'dedir (`@PreAuthorize`).
-- **Shell'in dışında sadece login vardır.** 404 ve 403 sayfaları da shell içindedir; kullanıcı menüyü kaybetmez.
+- **Shell'in dışında sadece login ve `/portal` vardır.** Portal USER rolünün kendi iskeletidir (`authGuard` ile korunur, admin de önizleme için açabilir). 404 ve 403 sayfaları shell içindedir; kullanıcı menüyü kaybetmez.
 - **Detay sayfaları** ana sayfanın altında yer alır: `/definitions/categories/:id`. Route parametreleri component'e `input()` olarak gelir (`withComponentInputBinding`).
 
 ---

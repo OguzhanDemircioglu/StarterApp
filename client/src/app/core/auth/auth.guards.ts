@@ -20,6 +20,12 @@ export const adminGuard: CanActivateFn = () => {
   return isAdmin || inject(Router).createUrlTree(['/forbidden']);
 };
 
+/** Shell'de durur: USER rolü admin arayüzünü değil Mezun Portalı'nı (/portal) görür. */
+export const staffGuard: CanActivateFn = () => {
+  const isAdmin = inject(Store).selectSignal(sessionFeature.selectIsAdmin)();
+  return isAdmin || inject(Router).createUrlTree(['/portal']);
+};
+
 /** Login sayfasında durur: zaten giriş yapmış kullanıcı anasayfaya gider. */
 export const guestGuard: CanActivateFn = () => {
   const isAuthenticated = inject(Store).selectSignal(sessionFeature.selectIsAuthenticated)();
