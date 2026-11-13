@@ -1,0 +1,42 @@
+<section class="card intro">
+  <span class="bubble"><nz-icon nzType="team" /></span>
+  <div>
+    <h2>Kurumlar Arası İş Birliği</h2>
+    <p>
+      Mezun Kart Programı, Göç İdaresi Başkanlığı koordinasyonunda {{ total }} kurum ve kuruluşun imzaladığı protokollerle
+      yürütülür. Her kurum, kendi alanındaki hak ve hizmetlerden sorumludur; mezun tüm işlemlerini Dijital Platform
+      üzerinden tek noktadan takip eder.
+    </p>
+  </div>
+</section>
+
+<div class="chips">
+  @for (a of areas; track a) {
+    <button class="chip" [class.active]="area() === a" (click)="area.set(a)">{{ a }}</button>
+  }
+</div>
+
+<div class="grid">
+  @for (inst of visible(); track inst.name) {
+    <article class="card institution">
+      <header>
+        <app-institution-emblem class="emblem" [kind]="inst.emblem" />
+        <div>
+          <h3>{{ inst.name }}</h3>
+          <span class="tag" [class.tag-red]="inst.area === 'Koordinasyon'">{{ inst.area }}</span>
+        </div>
+      </header>
+      <p class="summary">{{ inst.summary }}</p>
+      <ul class="duties">
+        @for (d of inst.duties; track d) {
+          <li><nz-icon nzType="check" /> {{ d }}</li>
+        }
+      </ul>
+      <a class="site" [href]="inst.website" target="_blank" rel="noopener noreferrer">
+        <nz-icon nzType="global" /> {{ inst.website.replace('https://', '') }}
+      </a>
+    </article>
+  } @empty {
+    <p class="empty">Bu alanda kurum yok.</p>
+  }
+</div>

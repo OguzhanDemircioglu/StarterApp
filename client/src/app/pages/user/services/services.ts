@@ -5,7 +5,8 @@ import { NzStepsModule } from 'ng-zorro-antd/steps';
 import { GraduateCard } from '../../../shared/theme/graduate-card';
 import { RIGHT_GROUPS } from '../../../shared/program/program.mock';
 import { MOCK_CARD } from '../portal.mock';
-import { PortalService, SERVICE_APPLICATIONS, SERVICES } from './services.mock';
+import { PortalService, SERVICES } from '../../../shared/program/services.mock';
+import { SERVICE_APPLICATIONS } from './services.mock';
 
 /** /user/services: Mezun Kartı, haklar, başvurular ve hizmet kataloğu. */
 @Component({

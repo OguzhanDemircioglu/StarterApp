@@ -1,0 +1,83 @@
+.intro {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+}
+
+.intro h2 {
+  font-size: 17px;
+  font-weight: 600;
+}
+
+.intro p {
+  margin-top: 6px;
+  font-size: 14px;
+  line-height: 1.7;
+  color: var(--mk-muted);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 16px;
+}
+
+.institution {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.institution header {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.emblem {
+  --emblem-size: 48px;
+  flex: 0 0 48px;
+}
+
+.institution h3 {
+  margin-bottom: 4px;
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.summary {
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.duties li {
+  display: flex;
+  gap: 8px;
+  padding: 3px 0;
+  font-size: 13px;
+  color: var(--mk-muted);
+}
+
+.duties nz-icon {
+  margin-top: 4px;
+  color: var(--mk-red);
+}
+
+.site {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: auto;
+  padding-top: 10px;
+  font-size: 13px;
+  border-top: 1px solid #f0f0f0;
+}
+
+.site:hover {
+  color: var(--mk-red);
+}
+
+.empty {
+  grid-column: 1 / -1;
+}

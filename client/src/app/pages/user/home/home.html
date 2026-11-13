@@ -1,37 +1,5 @@
 <div class="layout">
-  <!-- Sol: profil özeti ve dijital kart -->
-  <aside class="stack">
-    <section class="card me">
-      <span class="avatar" style="--size: 72px; --avatar-bg: #d71920">{{ profile.initials }}</span>
-      <h2>{{ profile.fullName }}</h2>
-      <p class="muted">{{ profile.department }} · {{ profile.university }}</p>
-      <div class="me-stats">
-        <div>
-          <strong>{{ stats.connections }}</strong>
-          <span class="muted">Bağlantı</span>
-        </div>
-        <div>
-          <strong>{{ stats.views }}</strong>
-          <span class="muted">Profil görüntüleme</span>
-        </div>
-      </div>
-      <div class="completeness">
-        <div class="muted">Profil doluluğu</div>
-        <nz-progress [nzPercent]="stats.completeness" nzStrokeColor="#d71920" nzSize="small" />
-      </div>
-      <a class="btn btn-block" routerLink="../profile">Profilimi görüntüle</a>
-    </section>
-
-    <section class="card">
-      <header class="card-head">
-        <h2>Dijital Kimliğim</h2>
-        <a class="see-all" routerLink="../services">Detay <nz-icon nzType="right" /></a>
-      </header>
-      <app-graduate-card [card]="card" [compact]="true" />
-    </section>
-  </aside>
-
-  <!-- Orta: akış -->
+  <!-- Sol: akış -->
   <div class="stack">
     <section class="card composer">
       <span class="avatar" style="--avatar-bg: #d71920">{{ profile.initials }}</span>

@@ -24,6 +24,32 @@
   </dl>
 </section>
 
+<div class="pair">
+  <section class="card">
+    <header class="card-head"><h2>Profil Görünürlüğü</h2></header>
+    <div class="stats">
+      <div>
+        <strong>{{ stats.connections }}</strong>
+        <span class="muted">Bağlantı</span>
+      </div>
+      <div>
+        <strong>{{ stats.views }}</strong>
+        <span class="muted">Profil görüntüleme</span>
+      </div>
+    </div>
+    <div class="muted">Profil doluluğu</div>
+    <nz-progress [nzPercent]="stats.completeness" nzStrokeColor="#d71920" nzSize="small" />
+  </section>
+
+  <section class="card">
+    <header class="card-head">
+      <h2>Dijital Kimliğim</h2>
+      <a class="see-all" routerLink="../services">Detay <nz-icon nzType="right" /></a>
+    </header>
+    <app-graduate-card [card]="card" [compact]="true" />
+  </section>
+</div>
+
 <div class="grid">
   <section class="card">
     <header class="card-head"><h2>Profil Özeti</h2></header>

@@ -17,6 +17,9 @@ import { MOCK_PROFILE } from '../portal.mock';
 /** Portal grubunun kök menüsü (backend V006_PortalMenus, route'u V007_RoleAreaRoutes ile /user). */
 const PORTAL_ROUTE = '/user';
 
+/** Üst menünün kurumsal sayfaları bu adresin altındadır; breadcrumb kökü buna göre seçilir. */
+const SITE_ROUTE = '/user/site';
+
 /** Mezun Portalı iskeleti: üstte kurumsal bar, solda portal menüsü (DB'den), ortada sayfa. */
 @Component({
   selector: 'app-portal-layout',
@@ -41,6 +44,10 @@ export class PortalLayout {
   /** Dar ekranda sol menü üstte açılır; sayfa değişince kapanır. */
   protected readonly menuOpen = signal(false);
 
+  /** Açık adres; breadcrumb kökü (Mezun Kart ya da Mezun Portalı) buna göre belirlenir. */
+  private readonly url = signal(this.router.url);
+  protected readonly isSitePage = computed(() => this.url().startsWith(SITE_ROUTE));
+
   constructor() {
     this.titleKey.set(deepestTitle(this.router.routerState.snapshot.root));
     this.router.events
@@ -50,6 +57,7 @@ export class PortalLayout {
       )
       .subscribe(() => {
         this.titleKey.set(deepestTitle(this.router.routerState.snapshot.root));
+        this.url.set(this.router.url);
         this.menuOpen.set(false);
       });
   }

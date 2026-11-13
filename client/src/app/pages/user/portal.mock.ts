@@ -44,8 +44,8 @@ export interface GraduateProfile {
 }
 
 export const MOCK_PROFILE: GraduateProfile = {
-  fullName: 'Jennet Hojamova',
-  initials: 'JH',
+  fullName: 'Oğuzhan Demircioğlu',
+  initials: 'OD',
   department: 'Uluslararası İlişkiler',
   university: 'Gazi Üniversitesi',
   graduation: '2024 Mezunu',
@@ -59,10 +59,10 @@ export const MOCK_PROFILE: GraduateProfile = {
   contacts: [
     { icon: 'read', label: 'Mezuniyet Yılı', value: '2024' },
     { icon: 'solution', label: 'Çalışma Durumu', value: 'Çalışmıyorum' },
-    { icon: 'mail', label: 'E-posta', value: 'jennet.hojamova@mail.com' },
+    { icon: 'mail', label: 'E-posta', value: 'oguzhanturgut611@gmail.com' },
     { icon: 'phone', label: 'Telefon', value: '+90 555 123 45 67' },
     { icon: 'environment', label: 'Konum', value: 'Ankara, Türkiye' },
-    { icon: 'link', label: 'LinkedIn', value: 'linkedin.com/in/jennet-hojamova' },
+    { icon: 'link', label: 'LinkedIn', value: 'linkedin.com/in/oguzhan-demircioglu' },
   ],
   experiences: [
     {
@@ -92,7 +92,7 @@ export const MOCK_PROFILE: GraduateProfile = {
 
 export const MOCK_CARD: GraduateCard = {
   cardNo: 'MK-2024-000184',
-  holder: 'Jennet Hojamova',
+  holder: 'Oğuzhan Demircioğlu',
   nationality: 'Türkmenistan',
   degree: 'Lisans – Gazi Üniversitesi',
   group: 2,

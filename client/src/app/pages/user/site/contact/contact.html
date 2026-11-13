@@ -1,0 +1,96 @@
+<div class="channels">
+  @for (c of channels; track c.title) {
+    <article class="card channel">
+      <span class="bubble"><nz-icon [nzType]="c.icon" /></span>
+      <div>
+        <h3>{{ c.title }}</h3>
+        @if (c.route) {
+          <a class="value" [routerLink]="c.route">{{ c.value }}</a>
+        } @else {
+          <a class="value" [href]="c.href">{{ c.value }}</a>
+        }
+        <p class="muted">{{ c.note }}</p>
+      </div>
+    </article>
+  }
+</div>
+
+<div class="with-side">
+  <section class="card">
+    <header class="card-head">
+      <div>
+        <h2>Bize Yazın</h2>
+        <p>Sorunuzu iletin; ilgili kurum birimi e-posta ile yanıtlasın</p>
+      </div>
+    </header>
+    <form nz-form nzLayout="vertical" class="form" [formGroup]="form" (ngSubmit)="submit()">
+      <nz-form-item>
+        <nz-form-label nzRequired>Ad Soyad</nz-form-label>
+        <nz-form-control nzErrorTip="Ad soyad girin.">
+          <input nz-input formControlName="fullName" />
+        </nz-form-control>
+      </nz-form-item>
+      <nz-form-item>
+        <nz-form-label nzRequired>E-posta</nz-form-label>
+        <nz-form-control nzErrorTip="Geçerli bir e-posta adresi girin.">
+          <input nz-input type="email" formControlName="email" />
+        </nz-form-control>
+      </nz-form-item>
+      <nz-form-item class="wide">
+        <nz-form-label nzRequired>Konu</nz-form-label>
+        <nz-form-control>
+          <nz-select formControlName="topic">
+            @for (t of topics; track t) {
+              <nz-option [nzValue]="t" [nzLabel]="t" />
+            }
+          </nz-select>
+        </nz-form-control>
+      </nz-form-item>
+      <nz-form-item class="wide">
+        <nz-form-label nzRequired>Mesajınız</nz-form-label>
+        <nz-form-control nzErrorTip="Mesajınız en az 20 karakter olmalı.">
+          <textarea nz-input rows="5" formControlName="text"></textarea>
+        </nz-form-control>
+      </nz-form-item>
+      <div class="wide form-foot">
+        <span class="muted">Kişisel verileriniz yalnızca talebinizi yanıtlamak için kullanılır.</span>
+        <button class="btn btn-primary" type="submit"><nz-icon nzType="send" /> Gönder</button>
+      </div>
+    </form>
+  </section>
+
+  <aside class="stack">
+    <section class="card">
+      <header class="card-head"><h2>Merkez Adres</h2></header>
+      <h3 class="office">{{ office.name }}</h3>
+      <ul class="facts">
+        <li><nz-icon nzType="environment" /> {{ office.address }}</li>
+        <li><nz-icon nzType="phone" /> <a [href]="office.phoneHref">{{ office.phone }}</a></li>
+        <li>
+          <nz-icon nzType="global" />
+          <a [href]="office.web" target="_blank" rel="noopener noreferrer">{{ office.web.replace('https://', '') }}</a>
+        </li>
+      </ul>
+      <a class="btn btn-block" [href]="office.map" target="_blank" rel="noopener noreferrer">
+        <nz-icon nzType="environment" /> Haritada göster
+      </a>
+    </section>
+
+    <section class="card">
+      <header class="card-head"><h2>Yüz Yüze İşlemler</h2></header>
+      <p class="text">
+        İkamet izni ve kart teslimi gibi yüz yüze işlemler, 81 ildeki İl Göç İdaresi Müdürlüklerinde randevu ile yapılır.
+      </p>
+    </section>
+
+    <section class="card">
+      <header class="card-head"><h2>YİMER Hizmet Dilleri</h2></header>
+      <div class="langs">
+        @for (l of languages; track l) {
+          <span class="tag">{{ l }}</span>
+        }
+      </div>
+      <a class="see-all help" routerLink="/user/help">Sık sorulan sorular <nz-icon nzType="right" /></a>
+    </section>
+  </aside>
+</div>

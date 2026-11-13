@@ -8,8 +8,8 @@
   </a>
 
   <nav class="site-links">
-    @for (link of siteLinks; track link) {
-      <span class="site-link" [class.active]="link === 'Dijital Platform'">{{ link }}</span>
+    @for (link of siteLinks; track link.route) {
+      <a class="site-link" [routerLink]="link.route" routerLinkActive="active">{{ link.label }}</a>
     }
   </nav>
 
@@ -58,7 +58,7 @@
     <app-banner />
     @if (titleKey(); as key) {
       <div class="page-title">
-        <span class="crumb">{{ 'menu_portal' | translate }} <nz-icon nzType="right" /> {{ key | translate }}</span>
+        <span class="crumb">{{ (isSitePage() ? 'menu_site' : 'menu_portal') | translate }} <nz-icon nzType="right" /> {{ key | translate }}</span>
         <h1>{{ key | translate }}</h1>
       </div>
     }

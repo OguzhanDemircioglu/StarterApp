@@ -60,6 +60,12 @@
   "menu_portal_messages": "Mesajlar",
   "menu_portal_settings": "Ayarlar",
   "menu_portal_help": "Yardım",
+  "menu_site": "Mezun Kart",
+  "menu_site_platform": "Dijital Platform",
+  "menu_site_institutions": "Kurumlar",
+  "menu_site_services": "Hizmetler",
+  "menu_site_announcements": "Duyurular",
+  "menu_site_contact": "İletişim",
 
   "app_name": "StarterApp",
   "common_network_error": "Sunucuya ulaşılamıyor. Bağlantınızı kontrol edin.",

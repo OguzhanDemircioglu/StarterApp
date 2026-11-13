@@ -51,7 +51,7 @@ export default class Settings {
 
   protected readonly account = {
     fullName: MOCK_PROFILE.fullName,
-    email: 'jennet.hojamova@mail.com',
+    email: 'oguzhanturgut611@gmail.com',
     phone: '+90 555 123 45 67',
     nationality: 'Türkmenistan',
     city: 'Ankara',

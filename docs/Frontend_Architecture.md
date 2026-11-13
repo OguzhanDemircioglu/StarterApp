@@ -63,6 +63,10 @@ Uygulamada üç arayüz vardır; her biri URL'nin ilk parçası ve `pages/` alt�
 | Mezun Portalı (`menu_portal`) | `/user` | `pages/user/` |
 | └ Ana Sayfa, Profilim, Hizmetler, Staj / Kariyer, Etkinlikler, Duyurular, Mesajlar, Ayarlar, Yardım (`menu_portal_*`) | `/user/home`, `/user/profile` … | `pages/user/home/`, `pages/user/profile/` … |
 
+- **İstisna, portalın üst menüsü:** Kurumlar, Hizmetler, Duyurular, Dijital Platform ve İletişim kurumsal sayfalardır, DB
+  menüsünde değildir. Bağlantıları sabittir (`shared/program/program.mock.ts` → `SITE_LINKS`), sayfaları `/user/site/...`
+  altında `pages/user/site/` klasöründedir ve portal iskeletinin içinde açılır. Portalın ana sayfasına (`/user/home`) sol
+  menüden gidilir; üst menüde Ana Sayfa yoktur.
 - Menü kayıtları backend'de migration class'larıyla tutulur (`V005_HierarchicalMenuRoutes`, `V006_PortalMenus`, `V007_RoleAreaRoutes`); `route` değerleri bu tabloya uyar. Yönetim menüleri `admin_only`'dir; USER'ın oturumuna sadece portal grubu gelir.
 - Yeni bir sayfa eklenirken üçü birlikte eklenir: klasör, route ve menü kaydı.
 
@@ -123,8 +127,10 @@ client/
 │           ├─ user.routes.ts          sayfalar; path ve data.title backend menüleriyle aynı (V006, V007)
 │           ├─ portal-layout/          üst bar + sol menü (oturumdaki menu_portal grubunun çocukları) + banner başlığı
 │           ├─ portal.mock.ts          mezunun profil ve kart verisi (geçici)
-│           └─ home/ profile/ services/ career/ events/ announcements/ messages/ settings/ help/
-│                                      her sayfa: component + kendi *.mock.ts verisi (API gelince servis + model ile değişir)
+│           ├─ home/ profile/ services/ career/ events/ announcements/ messages/ settings/ help/
+│           │                          her sayfa: component + kendi *.mock.ts verisi (API gelince servis + model ile değişir)
+│           └─ site/                   /user/site  üst menünün kurumsal sayfaları (sabit): platform/ institutions/ services/
+│                                      announcements/ contact/
 ├─ proxy.conf.json                     dev: /api → http://localhost:8080
 ├─ nginx.conf                          Docker: SPA + /api yönlendirmesi (§14)
 ├─ Dockerfile

@@ -25,8 +25,6 @@ export interface Suggestion {
   mutual: number;
 }
 
-export const PROFILE_STATS = { completeness: 80, connections: 248, views: 56 };
-
 export const FEED: FeedPost[] = [
   {
     id: 1,

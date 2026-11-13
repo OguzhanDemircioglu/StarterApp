@@ -25,6 +25,8 @@ export default [
       { path: 'messages', data: { title: 'menu_portal_messages' }, loadComponent: () => import('./messages/messages') },
       { path: 'settings', data: { title: 'menu_portal_settings' }, loadComponent: () => import('./settings/settings') },
       { path: 'help', data: { title: 'menu_portal_help' }, loadComponent: () => import('./help/help') },
+      // Üst menünün kurumsal sayfaları (sabit; DB menüsünde değildir).
+      { path: 'site', loadChildren: () => import('./site/site.routes') },
       { path: '**', redirectTo: 'home' },
     ],
   },

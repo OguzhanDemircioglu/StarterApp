@@ -1,0 +1,103 @@
+<section class="card hero">
+  <div class="hero-text">
+    <span class="eyebrow">{{ intro.eyebrow }}</span>
+    <h2>{{ intro.title }}</h2>
+    <p>{{ intro.text }}</p>
+    <div class="hero-actions">
+      <a class="btn btn-primary" routerLink="/user/home"><nz-icon nzType="laptop" /> Mezun Portalı’na Git</a>
+      <a class="btn" routerLink="../services">Hak ve Hizmetler</a>
+    </div>
+  </div>
+  <dl class="stats">
+    @for (s of stats; track s.label) {
+      <div>
+        <dt>{{ s.value }}</dt>
+        <dd>{{ s.label }}</dd>
+      </div>
+    }
+  </dl>
+</section>
+
+<div class="quick">
+  @for (q of quickLinks; track q.route) {
+    <a class="card tile" [routerLink]="q.route">
+      <span class="bubble"><nz-icon [nzType]="q.icon" /></span>
+      <div>
+        <h3>{{ q.title }}</h3>
+        <p class="muted">{{ q.text }}</p>
+      </div>
+      <nz-icon class="arrow" nzType="right" />
+    </a>
+  }
+</div>
+
+<div class="with-side">
+  <div class="stack">
+    <section class="card">
+      <header class="card-head">
+        <div>
+          <h2>Program Hakkında</h2>
+          <p>Amaç ve gerekçe</p>
+        </div>
+      </header>
+      <ul class="checks">
+        @for (p of about.purpose; track p) {
+          <li><nz-icon nzType="check-circle" nzTheme="fill" /> {{ p }}</li>
+        }
+      </ul>
+      <p class="rationale">{{ about.rationale }}</p>
+    </section>
+
+    <section class="card">
+      <header class="card-head">
+        <div>
+          <h2>Öngörülen Çıktılar</h2>
+          <p>Programın dört alanda hedeflediği etki</p>
+        </div>
+      </header>
+      <div class="outcomes">
+        @for (o of outcomes; track o.title) {
+          <article>
+            <span class="bubble"><nz-icon [nzType]="o.icon" /></span>
+            <h3>{{ o.title }}</h3>
+            <ul>
+              @for (i of o.items; track i) {
+                <li class="muted">{{ i }}</li>
+              }
+            </ul>
+          </article>
+        }
+      </div>
+    </section>
+  </div>
+
+  <aside class="stack">
+    <section class="card">
+      <header class="card-head">
+        <h2>Son Duyurular</h2>
+        <a class="see-all" routerLink="../announcements">Tümü <nz-icon nzType="right" /></a>
+      </header>
+      <ul class="rows">
+        @for (a of latest; track a.id) {
+          <li class="news">
+            <span class="tag">{{ a.category }}</span>
+            <a routerLink="../announcements">{{ a.title }}</a>
+            <p class="muted">{{ a.institution }} · {{ a.date | trDate: 'dayMonth' }}</p>
+          </li>
+        }
+      </ul>
+    </section>
+
+    <section class="card">
+      <header class="card-head"><h2>Yol Haritası</h2></header>
+      <ol class="roadmap">
+        @for (r of roadmap; track r.title) {
+          <li [class.done]="r.done">
+            <nz-icon [nzType]="r.done ? 'check-circle' : 'clock-circle'" />
+            <span>{{ r.title }}</span>
+          </li>
+        }
+      </ol>
+    </section>
+  </aside>
+</div>

@@ -2,26 +2,25 @@ import { Component, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { NzIconModule } from 'ng-zorro-antd/icon';
-import { NzProgressModule } from 'ng-zorro-antd/progress';
 import { TrDatePipe, TrNumberPipe } from '../../../shared/format/tr-pipes';
 import { ANNOUNCEMENTS } from '../../../shared/program/announcements.mock';
 import { EVENTS } from '../../../shared/program/events.mock';
-import { GraduateCard } from '../../../shared/theme/graduate-card';
-import { MOCK_CARD, MOCK_PROFILE } from '../portal.mock';
-import { FEED, FeedPost, PROFILE_STATS, SUGGESTIONS } from './home.mock';
+import { MOCK_PROFILE } from '../portal.mock';
+import { FEED, FeedPost, SUGGESTIONS } from './home.mock';
 
-/** /user/home: mezunun akışı (LinkedIn tarzı). Paylaşım ve beğeni şimdilik sadece tarayıcıda tutulur. */
+/**
+ * /user/home: mezunun akışı (LinkedIn tarzı). Paylaşım ve beğeni şimdilik sadece tarayıcıda tutulur.
+ * Profil istatistikleri ve dijital kimlik Profilim sayfasındadır.
+ */
 @Component({
   selector: 'app-portal-home',
-  imports: [TrDatePipe, TrNumberPipe, FormsModule, RouterLink, NzIconModule, NzProgressModule, GraduateCard],
+  imports: [TrDatePipe, TrNumberPipe, FormsModule, RouterLink, NzIconModule],
   templateUrl: './home.html',
   host: { class: 'mk-page' },
   styleUrl: './home.css',
 })
 export default class Home {
   protected readonly profile = MOCK_PROFILE;
-  protected readonly card = MOCK_CARD;
-  protected readonly stats = PROFILE_STATS;
   protected readonly suggestions = SUGGESTIONS;
   protected readonly upcoming = EVENTS.slice(0, 3);
   protected readonly announcements = ANNOUNCEMENTS.slice(0, 3);

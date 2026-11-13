@@ -32,6 +32,9 @@ app:
   dev-login:
     # Yerelde login ekranını atlar (DevLoginController). Compose bunu kapatır.
     enabled: ${DEV_LOGIN_ENABLED:true}
+    # Portalı denemek için açılan USER hesabı (DevUserSeeder); bayrak kapalıysa oluşturulmaz.
+    user-email: ${DEV_USER_EMAIL:1}
+    user-password: ${DEV_USER_PASSWORD:1}
   jwt:
     key-id: ${JWT_KEY_ID:dev-key}
     private-key-path: ${JWT_PRIVATE_KEY_PATH:keys/private.pem}

@@ -1,0 +1,105 @@
+.channels {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.channel {
+  display: flex;
+  gap: 14px;
+}
+
+.channel h3 {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--mk-muted);
+}
+
+.value {
+  display: block;
+  margin: 2px 0 4px;
+  font-size: 17px;
+  font-weight: 700;
+  word-break: break-word;
+}
+
+.value:hover,
+.facts a:hover {
+  color: var(--mk-red);
+}
+
+.form {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: 20px;
+}
+
+.form .wide {
+  grid-column: 1 / -1;
+}
+
+.form-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding-top: 8px;
+  border-top: 1px solid #f0f0f0;
+}
+
+.office {
+  margin-bottom: 10px;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.facts {
+  margin-bottom: 16px !important;
+}
+
+.facts li {
+  display: flex;
+  gap: 10px;
+  padding: 5px 0;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.facts nz-icon {
+  margin-top: 3px;
+  color: var(--mk-red);
+}
+
+.text {
+  font-size: 13px;
+  line-height: 1.7;
+  color: var(--mk-muted);
+}
+
+.langs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.help {
+  margin-top: 16px;
+}
+
+@media (max-width: 1200px) {
+  .channels {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 600px) {
+  .channels,
+  .form {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .form-foot {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}

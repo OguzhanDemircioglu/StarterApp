@@ -1,0 +1,85 @@
+<section class="card">
+  <header class="card-head">
+    <div>
+      <h2>Kart Grupları ve Haklar</h2>
+      <p>Haklar mezuniyet düzeyine göre üç grupta tanımlanır</p>
+    </div>
+  </header>
+  <div class="groups">
+    @for (g of groups; track g.group) {
+      <article class="group">
+        <header>GRUP {{ g.group }}</header>
+        <ul class="who">
+          @for (w of g.who; track w) {
+            <li class="tag">{{ w }}</li>
+          }
+        </ul>
+        <ul class="rights">
+          @for (r of g.rights; track r) {
+            <li><nz-icon nzType="check" /> {{ r }}</li>
+          }
+        </ul>
+      </article>
+    }
+  </div>
+</section>
+
+<section class="card">
+  <header class="card-head">
+    <div>
+      <h2>Hizmet Kataloğu</h2>
+      <p>Paydaş kurumların Mezun Kart sahiplerine sunduğu hizmetler</p>
+    </div>
+    <div class="chips">
+      @for (f of filters; track f) {
+        <button class="chip" [class.active]="filter() === f" (click)="filter.set(f)">
+          {{ f === 'Tümü' ? f : 'Grup ' + f }}
+        </button>
+      }
+    </div>
+  </header>
+  <div class="catalog">
+    @for (s of services(); track s.id) {
+      <article class="service">
+        <span class="bubble"><nz-icon [nzType]="s.icon" /></span>
+        <div>
+          <h3>{{ s.title }}</h3>
+          <p class="muted">{{ s.institution }}</p>
+          <p class="desc">{{ s.description }}</p>
+          <div class="service-groups">
+            @for (g of s.groups; track g) {
+              <span class="tag">Grup {{ g }}</span>
+            }
+          </div>
+        </div>
+      </article>
+    }
+  </div>
+</section>
+
+<div class="with-side">
+  <section class="card">
+    <header class="card-head"><h2>Başvuru Süreci</h2></header>
+    <ol class="steps">
+      @for (s of steps; track s.title; let i = $index) {
+        <li>
+          <span class="num">{{ i + 1 }}</span>
+          <div>
+            <h3>{{ s.title }}</h3>
+            <p class="muted">{{ s.text }}</p>
+          </div>
+        </li>
+      }
+    </ol>
+    <a class="btn btn-primary" routerLink="/user/services"><nz-icon nzType="laptop" /> Dijital Platform’da başvur</a>
+  </section>
+
+  <section class="card">
+    <header class="card-head"><h2>Gerekli Belgeler</h2></header>
+    <ul class="docs">
+      @for (d of documents; track d) {
+        <li><nz-icon nzType="file-text" /> {{ d }}</li>
+      }
+    </ul>
+  </section>
+</div>

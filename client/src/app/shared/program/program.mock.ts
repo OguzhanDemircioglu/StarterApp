@@ -9,8 +9,17 @@ export interface Institution {
   emblem: 'goc' | 'ministry';
 }
 
-/** Üst menü: kurumsal sitenin bağlantıları. Şimdilik bir yere gitmez; "Dijital Platform" bu portaldır. */
-export const SITE_LINKS = ['Ana Sayfa', 'Kurumlar', 'Hizmetler', 'Duyurular', 'Dijital Platform', 'İletişim'];
+/**
+ * Üst menü: kurumsal sitenin bağlantıları (sabit, DB menüsü değildir). Sayfaları pages/user/site/ altındadır;
+ * portalın ana sayfasına sol menüden gidilir.
+ */
+export const SITE_LINKS: { label: string; route: string }[] = [
+  { label: 'Kurumlar', route: '/user/site/institutions' },
+  { label: 'Hizmetler', route: '/user/site/services' },
+  { label: 'Duyurular', route: '/user/site/announcements' },
+  { label: 'Dijital Platform', route: '/user/site/platform' },
+  { label: 'İletişim', route: '/user/site/contact' },
+];
 
 /** Sunumdaki paydaş kurum ve kuruluşlar. */
 export const INSTITUTIONS: Institution[] = [

@@ -1,0 +1,44 @@
+<article class="card featured">
+  <div class="meta">
+    <span class="tag tag-red"><nz-icon nzType="pushpin" /> Öne çıkan</span>
+    <span class="tag">{{ featured.category }}</span>
+    <span class="muted">{{ featured.date | trDate: 'long' }}</span>
+  </div>
+  <h2>{{ featured.title }}</h2>
+  <p class="source"><nz-icon nzType="bank" /> {{ featured.institution }}</p>
+  <p class="lead">{{ featured.excerpt }}</p>
+  @for (p of featured.body; track $index) {
+    <p class="body">{{ p }}</p>
+  }
+</article>
+
+<div class="chips">
+  @for (c of categories; track c) {
+    <button class="chip" [class.active]="category() === c" (click)="category.set(c)">{{ c }}</button>
+  }
+</div>
+
+<div class="grid">
+  @for (a of items(); track a.id) {
+    <article class="card item">
+      <div class="meta">
+        <span class="tag">{{ a.category }}</span>
+        <span class="muted">{{ a.date | trDate: 'long' }}</span>
+      </div>
+      <h3>{{ a.title }}</h3>
+      <p class="source"><nz-icon nzType="bank" /> {{ a.institution }}</p>
+      <p class="excerpt">{{ a.excerpt }}</p>
+      @if (expanded().has(a.id)) {
+        @for (p of a.body; track $index) {
+          <p class="body">{{ p }}</p>
+        }
+      }
+      <button class="see-all more" (click)="toggle(a.id)">
+        {{ expanded().has(a.id) ? 'Daha az göster' : 'Devamını oku' }}
+        <nz-icon [nzType]="expanded().has(a.id) ? 'up' : 'down'" />
+      </button>
+    </article>
+  } @empty {
+    <p class="empty">Bu kategoride duyuru yok.</p>
+  }
+</div>

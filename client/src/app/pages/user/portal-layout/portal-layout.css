@@ -49,10 +49,12 @@ button {
 .site-link {
   position: relative;
   font-size: 14px;
+  color: var(--mk-text);
   white-space: nowrap;
-  cursor: default;
+  text-decoration: none;
 }
 
+.site-link:hover,
 .site-link.active {
   color: var(--mk-red);
 }

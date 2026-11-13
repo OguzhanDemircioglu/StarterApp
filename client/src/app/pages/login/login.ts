@@ -31,7 +31,9 @@ export default class Login {
   protected readonly canRegister = SURFACE !== 'internal';
 
   protected readonly form = this.formBuilder.group({
-    email: ['', [Validators.required, Validators.email]],
+    // Giriş formunda e-posta biçimi aranmaz: geliştirmedeki kısa hesap (1 / 1, DevUserSeeder) da girebilsin.
+    // Yanlış bilgi zaten backend'den "e-posta veya şifre hatalı" olarak döner; kayıt formu biçimi denetlemeye devam eder.
+    email: ['', Validators.required],
     password: ['', Validators.required],
   });
 

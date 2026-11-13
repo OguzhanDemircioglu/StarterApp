@@ -63,6 +63,7 @@ import {
   ToolOutline,
   TranslationOutline,
   UploadOutline,
+  UpOutline,
   UserOutline,
   UsergroupAddOutline,
 } from '@ant-design/icons-angular/icons';
@@ -141,5 +142,6 @@ export const APP_ICONS = [
   ToolOutline,
   TranslationOutline,
   UploadOutline,
+  UpOutline,
   UsergroupAddOutline,
 ];
