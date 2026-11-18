@@ -2,9 +2,11 @@
 
 Bu rehber, StarterApp (`mezun-portal` dalı) projesinde tanıtım sayfasına ve Mezun Portalı'na uygulanan premium cam görünümü başka bir projeye taşımak içindir. Hedef okuyucu, bu görünümü yeni projeye uygulayacak geliştirici ya da Claude'dur. Rehber tek başına yeterlidir; gereken bütün kod aşağıda tam olarak yer alır.
 
-- **Referans tasarım:** `Reel_50-main` (Apple tarzı "liquid glass" navigasyon çubuğu: `index53.html`, `style53.css`, `script53.js`).
+- **Referans tasarımlar:**
+  - `Reel_50-main`: Apple tarzı "liquid glass" navigasyon çubuğu (`index53.html`, `style53.css`, `script53.js`).
+  - `airpod animation web`: yazıların yukarıdan, bulanık ve saydam başlayıp sırayla yerine oturduğu yumuşak giriş (`style.css` içindeki `showContent` anahtar karesi).
 - **Kaynak proje:** Angular 22 + NG-ZORRO. Kod Angular bileşenleridir; başka framework'e taşıma notları [7. bölümdedir](#7-başka-frameworke-taşıma).
-- **Örnek dosyalar (StarterApp):** `client/src/app/shared/theme/liquid-nav.ts`, `client/src/app/shared/theme/ambient-bg.ts`, `client/src/theme.css` (`mk-premium` bölümü), `client/src/app/pages/user/portal-layout/portal-layout.css`, `client/src/app/pages/public/public-header/public-header.ts`.
+- **Örnek dosyalar (StarterApp):** `client/src/app/shared/theme/liquid-nav.ts`, `client/src/app/shared/theme/ambient-bg.ts`, `client/src/app/shared/theme/reveal.ts`, `client/src/app/pages/public/public.ts`, `client/src/theme.css` (`mk-premium` bölümü), `client/src/app/pages/user/portal-layout/portal-layout.css`, `client/src/app/pages/public/public-header/public-header.ts`.
 
 ---
 
@@ -22,6 +24,7 @@ Bu rehber, StarterApp (`mezun-portal` dalı) projesinde tanıtım sayfasına ve 
 | Arka plan | Sabit, yavaşça süzülen 3 bulanık renk lekesi (kırmızı, mavi, amber) |
 | Yan menü | Yüzen, yuvarlatılmış lacivert panel; etkin öğe kırmızı degrade hap |
 | Hareket | 150–500ms; yaylı eğri `cubic-bezier(0.34, 1.2, 0.64, 1)`; basınca `scale(0.94–0.97)` |
+| Yumuşak giriş | Öğe 30px yukarıdan, 10px bulanık ve saydam başlayıp 0.6s'de yerine oturur; aynı anda ekrana girenler 120ms arayla sırayla gelir. Tanıtım sayfasında kaydırdıkça, portalda her sayfa açılışında oynar |
 | Erişilebilirlik | Tıklama alanı ≥ 44px, görünür odak halkası, `prefers-reduced-motion` desteği |
 
 Renkler kurum kimliğinden gelir. StarterApp'te `--mk-red: #d71920`, `--mk-navy: #1b222b`. Yeni projede bu iki rengi kurumun ana ve koyu rengiyle değiştirmek yeterlidir; degradelerdeki `#ec3a42` (açık ton) ve `#b9141a` (koyu ton) da ana rengin açık/koyu tonlarıyla değiştirilmelidir.
@@ -49,7 +52,8 @@ Uygulama adımları:
 4. Kök bileşenin ve bölümlerin **arka planlarını saydam yap** (`background: var(--bg)` / `#fff` / degrade satırlarını kaldır). Aksi halde arka plan lekeleri görünmez.
 5. Header/üst barı cam yap, düz bağlantı menüsünü `<app-liquid-nav>` ile sar ([5. bölüm](#5-yerleşim-parçaları)).
 6. Bölüm bazında yazı boyutlarını büyüt (hero, bölüm başlıkları, kart içi metinler).
-7. [Doğrulama listesini](#8-doğrulama-listesi) uygula.
+7. Yumuşak girişi bağla: `revealOnScroll` yardımcı fonksiyonunu ekle ([3.3](#33-revealonscroll--yumuşak-giriş)) ve tanıtım sayfasından bir kez, uygulama iskeletinden her sayfa geçişinde çağır ([5.4](#54-yumuşak-girişin-bağlanması)).
+8. [Doğrulama listesini](#8-doğrulama-listesi) uygula.
 
 ---
 
@@ -321,6 +325,62 @@ export class AmbientBg {}
 
 Leke renkleri serbesttir; kurum renginin açık tonu + bir soğuk + bir sıcak ton iyi sonuç verir. Opaklığı 0.35'in üzerine çıkarmayın; metin kontrastı düşer.
 
+### 3.3 `revealOnScroll` — yumuşak giriş
+
+Framework'ten bağımsız, saf TypeScript bir fonksiyondur (StarterApp'te `shared/theme/reveal.ts`). Şablonlara tek tek dokunmadan, verilen **seçicilere** uyan öğeleri yumuşak girişle gösterir:
+
+- Öğeler önce `mk-reveal` sınıfıyla gizlenir (`opacity: 0`).
+- Bir `IntersectionObserver` öğe ekrana girdiğinde `mk-in` sınıfını ekler ve animasyon başlar.
+- Aynı anda ekrana giren öğeler (aynı gözlemci çağrısında gelenler) sırayla `0, 120, 240 … 720ms` gecikme alır; böylece hem açılışta hem kaydırırken çağlayan etkisi oluşur.
+- İç içe eşleşmede yalnız dıştaki öğe canlanır (bulanıklığın iki kez uygulanmaması için).
+- Aynı öğe yeniden izlenirse (`mk-in` kaldırılıp yeniden eklenir) animasyon baştan oynar; sayfa geçişinde kalıcı başlık gibi öğeler için gereklidir.
+- Dönen fonksiyon gözlemciyi kapatır; bileşen yok edilirken ya da yeni sayfaya geçerken çağrılmalıdır.
+
+```ts
+/**
+ * Yumuşak giriş animasyonu (airpod animation web referansı): öğe yukarıdan, bulanık ve saydam başlayıp yerine oturur.
+ * Seçiciye uyan öğeler ekrana girdikleri anda görünür; aynı anda girenler sırayla (120 ms arayla) gelir.
+ * Stiller theme.css'tedir (.mk-reveal / .mk-in). Dönen fonksiyon izlemeyi bırakır.
+ */
+export function revealOnScroll(root: ParentNode, selector: string): () => void {
+  const all = Array.from(root.querySelectorAll<HTMLElement>(selector));
+  // İç içe eşleşmede yalnız dıştaki canlanır; aksi halde bulanıklık iki kez uygulanır.
+  const targets = all.filter((el) => !all.some((other) => other !== el && other.contains(el)));
+  if (!targets.length) {
+    return () => {};
+  }
+
+  const observer = new IntersectionObserver(
+    (entries) => {
+      entries
+        .filter((e) => e.isIntersecting)
+        .forEach((e, i) => {
+          const el = e.target as HTMLElement;
+          el.style.setProperty('--mk-delay', `${Math.min(i, 6) * 120}ms`);
+          el.classList.add('mk-in');
+          observer.unobserve(el);
+        });
+    },
+    { rootMargin: '0px 0px -8% 0px' },
+  );
+
+  for (const el of targets) {
+    // Aynı öğe yeniden izlenirse (sayfa geçişi) animasyon baştan oynar.
+    el.classList.remove('mk-in');
+    el.classList.add('mk-reveal');
+    observer.observe(el);
+  }
+  return () => observer.disconnect();
+}
+```
+
+**Gereksinimler:**
+
+- Tarayıcıda `IntersectionObserver` (bütün güncel tarayıcılarda var). Ek kütüphane gerekmez.
+- [4. bölümdeki](#4-ortak-tema-css) `.mk-reveal`, `.mk-in`, `@keyframes mk-show` ve `mk-fade` stilleri global CSS'te olmalıdır.
+- Fonksiyon, hedef öğeler DOM'a çizildikten **sonra** çağrılmalıdır (Angular'da `ngAfterViewInit` ya da `afterNextRender`, React'te `useEffect`, Vue'da `onMounted` / `nextTick`).
+- Seçiciler, kendi `transform` değeri olan öğeler yerine onların içindeki ya da dışındaki bir kapsayıcıyı hedeflemelidir ([tuzak 9](#6-karşılaşılan-tuzaklar)).
+
 ---
 
 ## 4. Ortak tema CSS
@@ -519,7 +579,48 @@ Global stil dosyasına (StarterApp'te `src/theme.css`) eklenir. Projede `.btn`, 
     grid-template-columns: minmax(0, 1fr) 360px;
   }
 }
+
+/*
+ * Yumuşak giriş (revealOnScroll): yukarıdan, bulanık ve saydam başlayıp yerine oturur.
+ * 'backwards' dolgu yalnız gecikme ve oynatma süresince geçerlidir; bitince öğenin kendi transform'u (hover, döndürme) geri gelir.
+ */
+.mk-reveal:not(.mk-in) {
+  opacity: 0;
+}
+
+.mk-reveal.mk-in {
+  animation: mk-show 0.6s ease-in-out var(--mk-delay, 0ms) backwards;
+}
+
+@keyframes mk-show {
+  from {
+    opacity: 0;
+    transform: translateY(-30px);
+    filter: blur(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+    filter: blur(0);
+  }
+}
+
+/* Hareketi azalt tercihinde kayma ve bulanıklık olmaz; öğe yalnızca yumuşakça belirir. */
+@media (prefers-reduced-motion: reduce) {
+  .mk-reveal.mk-in {
+    animation-name: mk-fade;
+  }
+}
+
+@keyframes mk-fade {
+  from {
+    opacity: 0;
+  }
+}
 ```
+
+Referanstaki değerlerle karşılaştırma: referans `0.5s`, `translateY(-30px)`, `blur(10px)`, `ease-in-out` ve 0.2s aralık kullanır. Burada süre 0.6s'e, aralık 120ms'ye çekildi; kart ızgaralarında 0.2s aralık son kartı fazla geciktiriyordu. Referanstaki 1s başlangıç gecikmesi kaldırıldı (orada atlıkarınca geçişini beklemek içindi).
 
 ---
 
@@ -691,6 +792,79 @@ Diğer iskelet kuralları:
 - Grup kartları: başlık şeridi degrade (`linear-gradient(135deg, açık ton, ana renk)`).
 - Özellik kartları hover'da `translateY(-4px)` ve gölge büyür (yalnız transform/gölge; layout kaymaz).
 
+### 5.4 Yumuşak girişin bağlanması
+
+**Tanıtım sayfası (tek seferlik, kaydırmayla):** Sayfa bileşeni çizildikten sonra bir kez çağrılır. Hero parçaları belge sırasında seçildiği için açılışta etiket → başlık → paragraf → düğmeler → kart sırasıyla gelir; aşağıdaki bölümler kaydırdıkça belirir.
+
+```ts
+/** Sırayla, yumuşakça beliren parçalar: hero metni ve kartı, bölüm başlıkları, kartlar. */
+const REVEAL = [
+  'app-public-hero .tag',
+  'app-public-hero h1',
+  'app-public-hero .text > p',
+  'app-public-hero .actions',
+  'app-graduate-card > *',     // kart host'u inline; transform onun çocuğuna uygulanır
+  'app-public-hero .stats > li',
+  '.mk-section > h2',
+  '.mk-section > .lead',
+  '.mk-section .card',
+  '.steps > li',
+  '.group',
+  '.institution',
+  '.roadmap > li',
+  '.cta > *',
+].join(', ');
+
+export default class Public implements AfterViewInit {
+  private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
+  private readonly destroyRef = inject(DestroyRef);
+
+  ngAfterViewInit(): void {
+    this.destroyRef.onDestroy(revealOnScroll(this.host.nativeElement, REVEAL));
+  }
+}
+```
+
+**Uygulama/portal iskeleti (her sayfa geçişinde):** İskelet bileşeni kalıcıdır, içerik router ile değişir. Her `NavigationEnd` sonrasında yeni sayfa çizilince önceki gözlemci kapatılır, yenisi başlatılır. Sayfa başlığı ve açılan sayfanın kartları hedeflenir; yeni eklenen sayfalar şablon değişikliği gerekmeden otomatik canlanır.
+
+```ts
+/** Her sayfa açılışında sırayla, yumuşakça beliren parçalar: sayfa başlığı ve açılan sayfanın kartları. */
+const REVEAL = '.page-title > *, .content > :not(app-banner, .page-title, router-outlet) :is(.card, .chips)';
+
+export class PortalLayout {
+  private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
+  private readonly injector = inject(Injector);
+
+  /** Önceki sayfanın giriş animasyonu izlemesini bırakır. */
+  private stopReveal = (): void => {};
+
+  constructor() {
+    inject(DestroyRef).onDestroy(() => this.stopReveal());
+    this.router.events
+      .pipe(filter((e) => e instanceof NavigationEnd), takeUntilDestroyed())
+      .subscribe(() => {
+        // ... başlık, menü vb. güncellemeleri
+        this.revealPage();
+      });
+  }
+
+  /** Yeni sayfa çizildikten sonra başlığı ve kartları sırayla getirir. */
+  private revealPage(): void {
+    afterNextRender(
+      () => {
+        this.stopReveal();
+        this.stopReveal = revealOnScroll(this.host.nativeElement, REVEAL);
+      },
+      { injector: this.injector },
+    );
+  }
+}
+```
+
+İskelet, ilk sayfanın `NavigationEnd` olayından önce oluşturulduğu için ilk açılış da bu abonelikle yakalanır; ayrıca ilk çizim için çağrı gerekmez.
+
+Yeni projede seçiciler o projenin sınıflarına göre yazılır. Kural: başlıklar, açıklama paragrafları, kartlar ve kart ızgarası öğeleri hedeflenir; satır içi küçük öğeler (ikon, etiket) tek tek hedeflenmez.
+
 ---
 
 ## 6. Karşılaşılan tuzaklar
@@ -703,12 +877,18 @@ Diğer iskelet kuralları:
 6. **Performans.** `backdrop-filter` pahalıdır. Yalnızca üst bar, kapsül menü ve birkaç vurgu bloğunda kullanın; listelerdeki onlarca kartta kullanmayın (kartlar `rgba(255,255,255,.78)` ile yeterince "cam" görünür).
 7. **Hap ilk yüklemede kayıyor.** İlk konumlandırma animasyonsuz yapılmalıdır (`place(false)`); aksi halde sayfa açılışında hap soldan kayarak gelir.
 8. **Satır sonları.** Windows'ta CRLF dosyalarda betikle metin değiştirmek sessizce başarısız olabilir; düzenleyici aracı ya da CRLF'e duyarlı değiştirme kullanın.
+9. **Giriş animasyonu öğenin kendi transform'unu ezer.** Animasyon süresince `transform` anahtar kareden gelir. Kendi `transform`'u olan öğeleri (ör. `rotate(-4deg)` ile döndürülmüş kart) doğrudan hedeflemeyin; içindeki öğeyi hedefleyin. `backwards` dolgu sayesinde animasyon bitince hover gibi kendi dönüşümleri geri gelir; `forwards` ya da `both` kullanmayın, yoksa hover efektleri kalıcı olarak ezilir.
+10. **Inline öğelerde transform çalışmaz.** Angular bileşen host'ları varsayılan olarak `display: inline`'dır; `app-graduate-card` yerine `app-graduate-card > *` hedeflendi.
+11. **"Hareketi azalt" tercihi.** Windows'ta *Ayarlar → Erişilebilirlik → Görsel efektler → Animasyon efektleri* kapalıysa tarayıcı `prefers-reduced-motion: reduce` bildirir. İlk sürüm bu durumda animasyonu tamamen atlıyordu ve kullanıcı hiçbir şey görmüyordu. Şimdiki çözüm: animasyon her zaman çalışır, bu tercihte yalnızca kayma ve bulanıklık kalkar, öğe solarak gelir. Tam efekti görmek için Windows'ta animasyon efektlerinin açık olması gerekir.
+12. **Gizli sekmede içerik görünmez kalır.** Arka plandaki ya da gizli bir sekmede tarayıcı çizim yapmaz; `IntersectionObserver` tetiklenmez ve animasyonlar ilerlemez, içerik `opacity: 0` kalır. Sekme öne gelince düzelir. Test ederken sayfanın görünür olduğundan emin olun; otomatik testlerde ekran görüntüsünden önce sayfayı ön plana alın.
+13. **İç içe hedefler.** Hem kart hem kartın içindeki başlık seçiciye uyarsa ikisi de bulanıklaşır ve çift efekt oluşur. Fonksiyon iç içe eşleşmelerde yalnız dıştakini canlandırır; yine de seçicileri aynı seviyede tutmak en temizidir.
 
 ---
 
 ## 7. Başka framework'e taşıma
 
 - **React/Vue/Svelte:** `LiquidNav` mantığı framework'ten bağımsızdır: bir kapsayıcıda `.active` öğeyi bul, hapın `width` ve `translateX` değerini `offsetWidth`/`offsetLeft` ile ver; `MutationObserver` (sınıf değişimi) + `ResizeObserver` (boyut) ile güncelle; `pointermove` ile `--x`/`--y` CSS değişkenlerini ayarla. Bağlantılar `children`/slot olarak verilir.
+- **Yumuşak giriş:** `revealOnScroll` saf TypeScript'tir, olduğu gibi kopyalanır. React'te `useEffect(() => revealOnScroll(ref.current!, REVEAL), [location.pathname])` (dönen fonksiyon temizleyicidir); Vue'da `onMounted` + `watch(route)` içinde `nextTick` sonrası çağrılır. CSS kısmı framework'ten bağımsızdır.
 - **Tailwind:** `.mk-premium` kapsamı yerine `@layer components` içinde aynı kuralları yazın ya da kök elemana `font-[Verdana]` ve özel bileşen sınıfları verin. `backdrop-blur-xl`, `rounded-full`, `shadow-[...]` karşılıkları doğrudan kullanılabilir.
 - **NG-ZORRO/Ant Design kullanan alanlar:** `.ant-btn` için aynı ölçüleri `.mk-premium .ant-btn` altında verin; `.ant-btn-primary` için degrade ve gölgeyi ekleyin.
 - **Saf HTML:** Referans `Reel_50-main` dosyaları zaten saf HTML/CSS/JS'tir; 3. ve 4. bölümdeki değerler onların kurumsal ve büyütülmüş sürümüdür.
@@ -724,6 +904,11 @@ Diğer iskelet kuralları:
 - [ ] Etkin çip, seçili sekme gibi durumların renkleri doğru (tuzak 2).
 - [ ] 1440px, 1024px, 768px ve 375px'te yatay kaydırma yok (`document.documentElement.scrollWidth > innerWidth` → `false`).
 - [ ] Mobilde header'daki öğeler taşmıyor; yan menü açılıp kapanıyor.
+- [ ] Tanıtım sayfası açılışta boş başlıyor, hero parçaları sırayla (etiket → başlık → paragraf → düğmeler → görsel) beliriyor.
+- [ ] Aşağı kaydırınca bölüm başlıkları ve kartlar ekrana girdikçe sırayla beliriyor (`--mk-delay` değerleri `0ms, 120ms, 240ms…`).
+- [ ] Portalda her menü geçişinde sayfa başlığı ve kartlar yeniden oynuyor; sayfa altındaki kartlar kaydırınca geliyor.
+- [ ] Animasyon bittikten sonra hover efektleri (kart kalkması vb.) çalışıyor; döndürülmüş öğeler yerinde.
+- [ ] "Hareketi azalt" açıkken öğeler kaymadan yalnızca solarak geliyor ve **hiçbir içerik görünmez kalmıyor**.
 - [ ] Premium kapsamı dışındaki alanlar (ör. yönetim paneli) değişmedi.
 - [ ] Production derlemesi bileşen stil bütçesi uyarısı vermiyor.
 - [ ] Konsolda yeni hata yok.

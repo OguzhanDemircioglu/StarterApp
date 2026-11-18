@@ -1,4 +1,4 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, DestroyRef, ElementRef, Injector, afterNextRender, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRouteSnapshot, NavigationEnd, Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { Store } from '@ngrx/store';
@@ -13,6 +13,7 @@ import { AmbientBg } from '../../../shared/theme/ambient-bg';
 import { Banner } from '../../../shared/theme/banner';
 import { BrandLogo } from '../../../shared/theme/brand-logo';
 import { LiquidNav } from '../../../shared/theme/liquid-nav';
+import { revealOnScroll } from '../../../shared/theme/reveal';
 import { SITE_LINKS } from '../../../shared/program/program.mock';
 import { MOCK_PROFILE } from '../portal.mock';
 
@@ -21,6 +22,9 @@ const PORTAL_ROUTE = '/user';
 
 /** Üst menünün kurumsal sayfaları bu adresin altındadır; breadcrumb kökü buna göre seçilir. */
 const SITE_ROUTE = '/user/site';
+
+/** Her sayfa açılışında sırayla, yumuşakça beliren parçalar: sayfa başlığı ve açılan sayfanın kartları. */
+const REVEAL = '.page-title > *, .content > :not(app-banner, .page-title, router-outlet) :is(.card, .chips)';
 
 /** Mezun Portalı iskeleti: üstte kurumsal bar, solda portal menüsü (DB'den), ortada sayfa. */
 @Component({
@@ -33,6 +37,11 @@ const SITE_ROUTE = '/user/site';
 export class PortalLayout {
   private readonly store = inject(Store);
   private readonly router = inject(Router);
+  private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
+  private readonly injector = inject(Injector);
+
+  /** Önceki sayfanın giriş animasyonu izlemesini bırakır. */
+  private stopReveal = (): void => {};
 
   protected readonly siteLinks = SITE_LINKS;
   protected readonly profile = MOCK_PROFILE;
@@ -52,6 +61,7 @@ export class PortalLayout {
   protected readonly isSitePage = computed(() => this.url().startsWith(SITE_ROUTE));
 
   constructor() {
+    inject(DestroyRef).onDestroy(() => this.stopReveal());
     this.titleKey.set(deepestTitle(this.router.routerState.snapshot.root));
     this.router.events
       .pipe(
@@ -62,7 +72,19 @@ export class PortalLayout {
         this.titleKey.set(deepestTitle(this.router.routerState.snapshot.root));
         this.url.set(this.router.url);
         this.menuOpen.set(false);
+        this.revealPage();
       });
+  }
+
+  /** Yeni sayfa çizildikten sonra başlığı ve kartları sırayla getirir. */
+  private revealPage(): void {
+    afterNextRender(
+      () => {
+        this.stopReveal();
+        this.stopReveal = revealOnScroll(this.host.nativeElement, REVEAL);
+      },
+      { injector: this.injector },
+    );
   }
 
   protected logout(): void {

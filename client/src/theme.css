@@ -551,3 +551,42 @@ a:hover {
     grid-template-columns: minmax(0, 1fr) 360px;
   }
 }
+
+/*
+ * Yumuşak giriş (shared/theme/reveal.ts): yukarıdan, bulanık ve saydam başlayıp yerine oturur.
+ * 'backwards' dolgu yalnız gecikme ve oynatma süresince geçerlidir; bitince öğenin kendi transform'u (hover, döndürme) geri gelir.
+ */
+.mk-reveal:not(.mk-in) {
+  opacity: 0;
+}
+
+.mk-reveal.mk-in {
+  animation: mk-show 0.6s ease-in-out var(--mk-delay, 0ms) backwards;
+}
+
+@keyframes mk-show {
+  from {
+    opacity: 0;
+    transform: translateY(-30px);
+    filter: blur(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+    filter: blur(0);
+  }
+}
+
+/* Hareketi azalt tercihinde kayma ve bulanıklık olmaz; öğe yalnızca yumuşakça belirir. */
+@media (prefers-reduced-motion: reduce) {
+  .mk-reveal.mk-in {
+    animation-name: mk-fade;
+  }
+}
+
+@keyframes mk-fade {
+  from {
+    opacity: 0;
+  }
+}
