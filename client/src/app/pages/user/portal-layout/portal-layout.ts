@@ -9,8 +9,10 @@ import { NzMenuModule } from 'ng-zorro-antd/menu';
 import { filter } from 'rxjs';
 import { SessionActions } from '../../../core/auth/session.actions';
 import { sessionFeature } from '../../../core/auth/session.state';
+import { AmbientBg } from '../../../shared/theme/ambient-bg';
 import { Banner } from '../../../shared/theme/banner';
 import { BrandLogo } from '../../../shared/theme/brand-logo';
+import { LiquidNav } from '../../../shared/theme/liquid-nav';
 import { SITE_LINKS } from '../../../shared/program/program.mock';
 import { MOCK_PROFILE } from '../portal.mock';
 
@@ -23,7 +25,8 @@ const SITE_ROUTE = '/user/site';
 /** Mezun Portalı iskeleti: üstte kurumsal bar, solda portal menüsü (DB'den), ortada sayfa. */
 @Component({
   selector: 'app-portal-layout',
-  imports: [RouterOutlet, RouterLink, RouterLinkActive, TranslatePipe, NzDropdownModule, NzIconModule, NzMenuModule, Banner, BrandLogo],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, TranslatePipe, NzDropdownModule, NzIconModule, NzMenuModule, AmbientBg, Banner, BrandLogo, LiquidNav],
+  host: { class: 'mk-premium' },
   templateUrl: './portal-layout.html',
   styleUrl: './portal-layout.css',
 })

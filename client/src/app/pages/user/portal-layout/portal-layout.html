@@ -1,3 +1,5 @@
+<app-ambient-bg />
+
 <header class="topbar">
   <button class="menu-toggle" aria-label="Menüyü aç/kapat" (click)="menuOpen.set(!menuOpen())">
     <nz-icon nzType="menu" />
@@ -7,11 +9,11 @@
     <app-brand-logo />
   </a>
 
-  <nav class="site-links">
+  <app-liquid-nav class="site-links">
     @for (link of siteLinks; track link.route) {
-      <a class="site-link" [routerLink]="link.route" routerLinkActive="active">{{ link.label }}</a>
+      <a [routerLink]="link.route" routerLinkActive="active">{{ link.label }}</a>
     }
-  </nav>
+  </app-liquid-nav>
 
   <div class="top-actions">
     <button class="icon-btn" aria-label="Ara"><nz-icon nzType="search" /></button>

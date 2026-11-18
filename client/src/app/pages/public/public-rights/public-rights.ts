@@ -52,29 +52,31 @@ import { InstitutionEmblem } from '../../../shared/theme/institution-emblem';
     .groups {
       display: grid;
       grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 20px;
+      gap: 24px;
     }
     .group {
       overflow: hidden;
-      background: #fff;
-      border: 1px solid var(--mk-border);
-      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.8);
+      border: 1px solid rgba(255, 255, 255, 0.9);
+      border-radius: 22px;
+      box-shadow: 0 20px 44px -26px rgba(27, 34, 43, 0.3);
     }
     .group header {
-      padding: 12px 18px;
+      padding: 16px 24px;
+      font-size: 17px;
       font-weight: 700;
       letter-spacing: 1px;
       color: #fff;
-      background: var(--mk-teal);
+      background: linear-gradient(135deg, #12708a, var(--mk-teal));
     }
     .group.featured header {
-      background: var(--mk-red);
+      background: linear-gradient(135deg, #ec3a42, #b9141a);
     }
     .who {
-      padding: 14px 18px;
-      font-size: 14px;
+      padding: 16px 24px;
+      font-size: 15px;
       font-weight: 600;
-      background: #f5f8fa;
+      background: rgba(13, 92, 115, 0.06);
     }
     .who li::before {
       content: '◆ ';
@@ -83,9 +85,9 @@ import { InstitutionEmblem } from '../../../shared/theme/institution-emblem';
     .rights {
       display: flex;
       flex-direction: column;
-      gap: 10px;
-      padding: 16px 18px 20px;
-      font-size: 14px;
+      gap: 12px;
+      padding: 20px 24px 26px;
+      font-size: 16px;
     }
     .rights li {
       display: flex;
@@ -97,20 +99,21 @@ import { InstitutionEmblem } from '../../../shared/theme/institution-emblem';
     }
     .institutions {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
-      gap: 14px;
+      grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+      gap: 18px;
     }
     .institution {
       display: flex;
       flex-direction: column;
       align-items: center;
       gap: 10px;
-      padding: 18px 12px;
-      font-size: 13px;
+      padding: 24px 14px;
+      font-size: 14px;
       text-align: center;
-      background: #fff;
-      border: 1px solid var(--mk-border);
-      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.78);
+      border: 1px solid rgba(255, 255, 255, 0.9);
+      border-radius: 20px;
+      box-shadow: 0 16px 36px -26px rgba(27, 34, 43, 0.35);
     }
     @media (max-width: 900px) {
       .groups {

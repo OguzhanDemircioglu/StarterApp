@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { NzIconModule } from 'ng-zorro-antd/icon';
 import { OUTCOMES, ROADMAP } from '../../shared/program/program.mock';
+import { AmbientBg } from '../../shared/theme/ambient-bg';
 import { PublicFooter } from './public-footer/public-footer';
 import { PublicHeader } from './public-header/public-header';
 import { PublicHero } from './public-hero/public-hero';
@@ -14,7 +15,8 @@ import { ABOUT, FEATURES, PUBLIC_NAV, STEPS } from './public.mock';
  */
 @Component({
   selector: 'app-public',
-  imports: [NzIconModule, PublicHeader, PublicHero, PublicRights, PublicNews, PublicFooter],
+  host: { class: 'mk-premium' },
+  imports: [NzIconModule, AmbientBg, PublicHeader, PublicHero, PublicRights, PublicNews, PublicFooter],
   templateUrl: './public.html',
   styleUrl: './public.css',
 })

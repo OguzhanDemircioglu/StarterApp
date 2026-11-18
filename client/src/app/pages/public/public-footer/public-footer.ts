@@ -37,7 +37,7 @@ import { BrandLogo } from '../../../shared/theme/brand-logo';
   styles: `
     :host {
       display: block;
-      padding: 48px 24px 24px;
+      padding: 64px 24px 32px;
       color: rgba(255, 255, 255, 0.75);
       background: var(--mk-navy);
     }
@@ -50,19 +50,19 @@ import { BrandLogo } from '../../../shared/theme/brand-logo';
     }
     .about p {
       margin: 16px 0 0;
-      font-size: 13px;
-      line-height: 22px;
+      font-size: 15px;
+      line-height: 1.7;
     }
     h4 {
-      margin: 0 0 12px;
-      font-size: 14px;
+      margin: 0 0 16px;
+      font-size: 16px;
       color: #fff;
     }
     a,
     span {
       display: block;
-      margin-bottom: 8px;
-      font-size: 13px;
+      margin-bottom: 10px;
+      font-size: 15px;
       color: rgba(255, 255, 255, 0.75);
     }
     a:hover {
@@ -72,7 +72,7 @@ import { BrandLogo } from '../../../shared/theme/brand-logo';
       max-width: 1192px;
       margin: 32px auto 0;
       padding-top: 18px;
-      font-size: 12px;
+      font-size: 13px;
       border-top: 1px solid rgba(255, 255, 255, 0.12);
     }
     @media (max-width: 900px) {

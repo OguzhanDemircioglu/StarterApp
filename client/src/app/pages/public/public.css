@@ -1,17 +1,17 @@
 :host {
   display: block;
-  background: var(--mk-bg);
 }
 
 h3 {
-  margin: 12px 0 8px;
-  font-size: 16px;
+  margin: 18px 0 10px;
+  font-size: 19px;
+  color: var(--mk-navy);
 }
 
 p {
   margin: 0;
-  font-size: 14px;
-  line-height: 22px;
+  font-size: 16px;
+  line-height: 1.7;
   color: #444;
 }
 
@@ -25,7 +25,7 @@ ol {
 .about,
 .outcomes {
   display: grid;
-  gap: 20px;
+  gap: 24px;
 }
 
 .about {
@@ -39,8 +39,8 @@ ol {
 .checks {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  font-size: 14px;
+  gap: 10px;
+  font-size: 16px;
 }
 
 .checks li {
@@ -60,34 +60,43 @@ blockquote {
   color: var(--mk-navy);
   background: var(--mk-red-soft);
   border-left: 3px solid var(--mk-red);
-  border-radius: 6px;
+  border-radius: 14px;
 }
 
 .features {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 20px;
+  gap: 24px;
+}
+
+.feature {
+  transition:
+    transform 0.3s ease,
+    box-shadow 0.3s ease;
 }
 
 .feature:hover {
-  border-color: #f3b8bb;
+  transform: translateY(-4px);
+  box-shadow: 0 28px 50px -26px rgba(27, 34, 43, 0.4);
 }
 
 .steps {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 20px;
+  gap: 24px;
 }
 
 .num {
   display: grid;
   place-items: center;
-  width: 40px;
-  height: 40px;
+  width: 56px;
+  height: 56px;
+  font-size: 22px;
   font-weight: 700;
   color: #fff;
-  background: var(--mk-red);
+  background: linear-gradient(180deg, #ec3a42, #b9141a);
   border-radius: 50%;
+  box-shadow: 0 12px 24px -10px rgba(215, 25, 32, 0.6);
 }
 
 .roadmap {
@@ -98,12 +107,12 @@ blockquote {
 }
 
 .roadmap li {
-  padding: 6px 12px;
-  font-size: 12px;
+  padding: 10px 18px;
+  font-size: 14px;
   color: var(--mk-muted);
-  background: #fff;
+  background: rgba(255, 255, 255, 0.78);
   border: 1px solid var(--mk-border);
-  border-radius: 16px;
+  border-radius: 999px;
 }
 
 .roadmap li.done {

@@ -368,3 +368,186 @@ a:hover {
     padding: 40px 16px 0;
   }
 }
+
+/*
+ * Premium cam görünüm (Reel_50 referansı): tanıtım sayfası ve Mezun Portalı host'una 'mk-premium' sınıfı verilir.
+ * Verdana, büyük yazı ve büyük hap düğmeler yalnız bu kapsamda geçerlidir; yönetim paneli etkilenmez.
+ */
+.mk-premium {
+  font-family: Verdana, Geneva, Tahoma, sans-serif;
+  font-size: 16px;
+  line-height: 1.6;
+  color: var(--mk-text);
+  -webkit-font-smoothing: antialiased;
+}
+
+.mk-premium .btn {
+  min-height: 48px;
+  padding: 12px 26px;
+  font-size: 16px;
+  line-height: 22px;
+  background: rgba(255, 255, 255, 0.75);
+  border-color: rgba(27, 34, 43, 0.12);
+  border-radius: 999px;
+  box-shadow:
+    0 1px 2px rgba(27, 34, 43, 0.06),
+    inset 0 1px 0 #fff;
+  transition:
+    transform 0.2s cubic-bezier(0.32, 0.72, 0, 1),
+    box-shadow 0.25s ease,
+    background 0.25s ease,
+    border-color 0.25s ease,
+    color 0.25s ease;
+}
+
+.mk-premium .btn:hover {
+  color: var(--mk-red);
+  border-color: rgba(215, 25, 32, 0.35);
+  box-shadow: 0 10px 24px -12px rgba(27, 34, 43, 0.35);
+}
+
+.mk-premium .btn:active {
+  transform: scale(0.97);
+}
+
+.mk-premium .btn:focus-visible {
+  outline: 3px solid rgba(215, 25, 32, 0.35);
+  outline-offset: 2px;
+}
+
+.mk-premium .btn-primary {
+  color: #fff;
+  background: linear-gradient(180deg, #ec3a42 0%, var(--mk-red) 55%, #b9141a 100%);
+  border-color: transparent;
+  box-shadow:
+    0 14px 30px -12px rgba(215, 25, 32, 0.65),
+    inset 0 1px 0 rgba(255, 255, 255, 0.35);
+}
+
+.mk-premium .btn-primary:hover {
+  color: #fff;
+  border-color: transparent;
+  background: linear-gradient(180deg, #e0262e 0%, #c3161d 55%, #a51117 100%);
+  box-shadow:
+    0 18px 36px -12px rgba(215, 25, 32, 0.75),
+    inset 0 1px 0 rgba(255, 255, 255, 0.35);
+}
+
+.mk-premium .btn-ghost {
+  background: transparent;
+  border-color: transparent;
+  box-shadow: none;
+}
+
+.mk-premium .btn-sm {
+  min-height: 40px;
+  padding: 8px 18px;
+  font-size: 14px;
+}
+
+.mk-premium .btn-lg {
+  min-height: 58px;
+  padding: 16px 34px;
+  font-size: 17px;
+}
+
+.mk-premium .btn:disabled {
+  color: #999;
+  background: #eee;
+  border-color: #e3e3e3;
+  box-shadow: none;
+  transform: none;
+}
+
+.mk-premium .card {
+  padding: 28px;
+  background: rgba(255, 255, 255, 0.78);
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  border-radius: 22px;
+  box-shadow:
+    0 1px 2px rgba(27, 34, 43, 0.04),
+    0 20px 44px -26px rgba(27, 34, 43, 0.3);
+}
+
+.mk-premium .card-head h2 {
+  font-size: 20px;
+}
+
+.mk-premium .card-head p,
+.mk-premium .muted {
+  font-size: 14px;
+}
+
+.mk-premium .see-all {
+  font-size: 15px;
+}
+
+.mk-premium .tag {
+  padding: 4px 14px;
+  font-size: 13px;
+  line-height: 20px;
+  border-radius: 999px;
+}
+
+.mk-premium .chip {
+  min-height: 44px;
+  padding: 10px 20px;
+  font-size: 15px;
+  background: rgba(255, 255, 255, 0.75);
+  border-radius: 999px;
+}
+
+.mk-premium .chip.active {
+  background: linear-gradient(180deg, #ec3a42, #b9141a);
+  border-color: transparent;
+  box-shadow: 0 10px 22px -12px rgba(215, 25, 32, 0.7);
+}
+
+.mk-premium .bubble {
+  flex-basis: 56px;
+  width: 56px;
+  height: 56px;
+  font-size: 24px;
+  background: linear-gradient(140deg, #fff 0%, var(--mk-red-soft) 100%);
+  box-shadow:
+    0 8px 18px -10px rgba(215, 25, 32, 0.45),
+    inset 0 1px 0 #fff;
+}
+
+.mk-premium .empty {
+  font-size: 15px;
+}
+
+.mk-premium .mk-section {
+  padding-top: 96px;
+  scroll-margin-top: 96px;
+}
+
+.mk-premium .mk-section > h2 {
+  margin-bottom: 12px;
+  font-size: 36px;
+  line-height: 1.2;
+  letter-spacing: -0.5px;
+}
+
+.mk-premium .mk-section > .lead {
+  margin-bottom: 36px;
+  font-size: 18px;
+}
+
+@media (max-width: 900px) {
+  .mk-premium .mk-section {
+    padding-top: 56px;
+  }
+
+  .mk-premium .mk-section > h2 {
+    font-size: 28px;
+  }
+}
+
+/* Verdana geniş bir yazı; sağ sütun başlıkları tek satıra sığsın. */
+@media (min-width: 1201px) {
+  .mk-premium .with-side {
+    grid-template-columns: minmax(0, 1fr) 360px;
+  }
+}

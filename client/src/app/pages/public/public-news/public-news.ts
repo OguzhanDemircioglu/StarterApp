@@ -52,7 +52,7 @@ import { EVENTS } from '../../../shared/program/events.mock';
         <h2>Mezun Portalı’na katılın</h2>
         <p>Dijital kartınızı alın, haklarınızı ve başvurularınızı tek yerden izleyin.</p>
       </div>
-      <a class="btn" routerLink="/login">Giriş yap veya kayıt ol <nz-icon nzType="right" /></a>
+      <a class="btn btn-lg" routerLink="/login">Giriş yap veya kayıt ol <nz-icon nzType="right" /></a>
     </section>
   `,
   styles: `
@@ -61,14 +61,14 @@ import { EVENTS } from '../../../shared/program/events.mock';
     }
     .news {
       display: grid;
-      grid-template-columns: minmax(0, 1fr) 340px;
-      gap: 20px;
+      grid-template-columns: minmax(0, 1fr) 380px;
+      gap: 24px;
       align-items: start;
     }
     .list {
       display: flex;
       flex-direction: column;
-      gap: 14px;
+      gap: 18px;
     }
     .meta {
       display: flex;
@@ -76,13 +76,14 @@ import { EVENTS } from '../../../shared/program/events.mock';
       align-items: center;
     }
     h3 {
-      margin: 10px 0 6px;
-      font-size: 16px;
+      margin: 14px 0 8px;
+      font-size: 19px;
+      color: var(--mk-navy);
     }
     .item p {
-      margin: 0 0 8px;
-      font-size: 14px;
-      line-height: 22px;
+      margin: 0 0 12px;
+      font-size: 16px;
+      line-height: 1.7;
       color: #444;
     }
     .events ul {
@@ -92,28 +93,28 @@ import { EVENTS } from '../../../shared/program/events.mock';
     }
     .events li {
       display: flex;
-      gap: 12px;
-      padding: 12px 0;
-      border-top: 1px solid #f0f0f0;
-      font-size: 13px;
+      gap: 14px;
+      padding: 16px 0;
+      border-top: 1px solid rgba(27, 34, 43, 0.08);
+      font-size: 15px;
     }
     .events p {
       margin: 2px 0 0;
     }
     .date {
       display: flex;
-      flex: 0 0 48px;
+      flex: 0 0 58px;
       flex-direction: column;
       align-items: center;
-      padding: 6px 0;
-      font-size: 11px;
+      padding: 8px 0;
+      font-size: 12px;
       text-transform: uppercase;
       color: var(--mk-red);
       background: var(--mk-red-soft);
-      border-radius: 8px;
+      border-radius: 16px;
     }
     .date strong {
-      font-size: 18px;
+      font-size: 22px;
     }
     .cta {
       display: flex;
@@ -121,19 +122,24 @@ import { EVENTS } from '../../../shared/program/events.mock';
       justify-content: space-between;
       gap: 24px;
       max-width: 1192px;
-      margin: 0 auto 64px;
-      padding: 32px 40px;
+      margin: 96px auto;
+      padding: 48px 56px;
       color: #fff;
-      background: linear-gradient(120deg, var(--mk-red-dark), var(--mk-red));
-      border-radius: 16px;
+      background:
+        radial-gradient(circle at 85% 0%, rgba(255, 255, 255, 0.22), transparent 45%),
+        linear-gradient(120deg, #a51117, var(--mk-red) 60%, #ec3a42);
+      border-radius: 32px;
+      box-shadow: 0 36px 70px -34px rgba(215, 25, 32, 0.7);
     }
     .cta h2 {
-      margin: 0 0 6px;
-      font-size: 24px;
+      margin: 0 0 10px;
+      font-size: 32px;
+      letter-spacing: -0.5px;
     }
     .cta p {
       margin: 0;
-      opacity: 0.9;
+      font-size: 18px;
+      opacity: 0.92;
     }
     @media (max-width: 900px) {
       .news {
@@ -142,8 +148,8 @@ import { EVENTS } from '../../../shared/program/events.mock';
       .cta {
         flex-direction: column;
         align-items: flex-start;
-        margin: 0 16px 40px;
-        padding: 24px;
+        margin: 56px 16px;
+        padding: 32px 24px;
       }
     }
   `,

@@ -1,20 +1,23 @@
-import { Component, input } from '@angular/core';
+import { AfterViewInit, Component, DestroyRef, inject, input, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { BrandLogo } from '../../../shared/theme/brand-logo';
+import { LiquidNav } from '../../../shared/theme/liquid-nav';
 
-/** Public sayfanın üst barı: logo, sayfa içi bağlantılar ve giriş düğmesi. */
+/** Public sayfanın üst barı: logo, sayfa içi bağlantılar (cam kapsül menü) ve giriş düğmesi. */
 @Component({
   selector: 'app-public-header',
-  imports: [RouterLink, BrandLogo],
+  imports: [RouterLink, BrandLogo, LiquidNav],
   template: `
     <header class="bar">
       <a routerLink="/" class="logo"><app-brand-logo /></a>
-      <nav>
+      <app-liquid-nav>
         @for (item of nav(); track item.anchor) {
-          <a [href]="'#' + item.anchor">{{ item.label }}</a>
+          <a [href]="'#' + item.anchor" [class.active]="active() === item.anchor" (click)="active.set(item.anchor)">{{
+            item.label
+          }}</a>
         }
-      </nav>
-      <a class="btn btn-primary" routerLink="/login">Mezun Portalı’na Giriş</a>
+      </app-liquid-nav>
+      <a class="btn btn-primary" routerLink="/login"><span class="long">Mezun Portalı’na </span>Giriş</a>
     </header>
   `,
   styles: `
@@ -23,44 +26,74 @@ import { BrandLogo } from '../../../shared/theme/brand-logo';
       top: 0;
       z-index: 20;
       display: block;
-      background: #fff;
-      border-bottom: 1px solid var(--mk-border);
+      background: rgba(255, 255, 255, 0.55);
+      backdrop-filter: blur(24px) saturate(180%);
+      -webkit-backdrop-filter: blur(24px) saturate(180%);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.7);
+      box-shadow: 0 12px 32px -24px rgba(27, 34, 43, 0.35);
     }
     .bar {
       display: flex;
       align-items: center;
-      gap: 32px;
-      max-width: 1240px;
-      height: 72px;
+      justify-content: space-between;
+      gap: 24px;
+      max-width: 1320px;
+      height: 88px;
       margin: 0 auto;
       padding: 0 24px;
     }
     .logo {
       color: inherit;
     }
-    nav {
-      display: flex;
-      gap: 28px;
-      margin-right: auto;
-    }
-    nav a {
-      font-size: 14px;
-      color: var(--mk-text);
-    }
-    nav a:hover {
-      color: var(--mk-red);
-    }
-    @media (max-width: 900px) {
-      nav {
+    @media (max-width: 1180px) {
+      app-liquid-nav {
         display: none;
       }
+    }
+    @media (max-width: 900px) {
       .bar {
-        justify-content: space-between;
+        height: 72px;
         padding: 0 16px;
+      }
+      .btn {
+        min-height: 44px;
+        padding: 10px 18px;
+        font-size: 14px;
+      }
+    }
+    @media (max-width: 520px) {
+      .long {
+        display: none;
       }
     }
   `,
 })
-export class PublicHeader {
+export class PublicHeader implements AfterViewInit {
   readonly nav = input.required<{ label: string; anchor: string }[]>();
+
+  /** Ekranda okunan bölüm; menüdeki hap onun bağlantısına kayar. */
+  protected readonly active = signal<string | null>(null);
+
+  private readonly destroyRef = inject(DestroyRef);
+
+  ngAfterViewInit(): void {
+    // Ekranın üst-orta bandına giren bölüm etkin sayılır.
+    const spy = new IntersectionObserver(
+      (entries) => {
+        for (const e of entries) {
+          if (e.isIntersecting) {
+            this.active.set(e.target.id);
+          }
+        }
+      },
+      { rootMargin: '-35% 0px -60% 0px' },
+    );
+    for (const item of this.nav()) {
+      const section = document.getElementById(item.anchor);
+      if (section) {
+        spy.observe(section);
+      }
+    }
+    this.destroyRef.onDestroy(() => spy.disconnect());
+  }
 }
